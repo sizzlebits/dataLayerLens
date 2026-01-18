@@ -20,13 +20,6 @@ const currentDomain = getCurrentDomain();
 
 let currentSettings: Settings = DEFAULT_SETTINGS;
 
-// Debug logging helper - only logs when debugLogging is enabled
-function debugLog(...args: unknown[]): void {
-  if (currentSettings.debugLogging) {
-    console.log('[DataLayer Lens]', ...args);
-  }
-}
-
 function debugError(...args: unknown[]): void {
   if (currentSettings.debugLogging) {
     console.error('[DataLayer Lens]', ...args);
@@ -40,7 +33,8 @@ let overlayInteractionTime = 0;
 const INTERACTION_DEBOUNCE_MS = 100; // Ignore events within 100ms of overlay interaction
 
 // Flag to track if we're currently blocking events from our overlay
-let blockingOverlayEvents = false;
+let _blockingOverlayEvents = false;
+void _blockingOverlayEvents; // Reserved for future use
 
 // Track whether we've detected any dataLayer activity
 let hasDataLayerActivity = false;
@@ -107,8 +101,7 @@ let currentFilter = '';
 let currentPage = 0;
 let eventsPerPage = 50;
 
-// Filter modal state
-let filterModalOpen = false;
+// Filter modal search state
 let filterModalSearch = '';
 
 // Render optimization
@@ -321,7 +314,7 @@ function createOverlayContainer(): void {
 
   // Track when user interacts with overlay so we can filter out resulting dataLayer events
   ['click', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'pointerdown', 'pointerup'].forEach(eventType => {
-    overlayRoot.addEventListener(eventType, () => {
+    overlayRoot!.addEventListener(eventType, () => {
       overlayInteractionTime = Date.now();
     });
   });
@@ -1862,7 +1855,6 @@ function updateFilterModalSuggestions(): void {
 function openFilterModal(): void {
   if (!shadowRoot) return;
 
-  filterModalOpen = true;
   filterModalSearch = '';
 
   const backdrop = shadowRoot.getElementById('filter-modal-backdrop');
@@ -1891,8 +1883,6 @@ function openFilterModal(): void {
 // Close filter modal
 function closeFilterModal(): void {
   if (!shadowRoot) return;
-
-  filterModalOpen = false;
 
   const backdrop = shadowRoot.getElementById('filter-modal-backdrop');
   if (backdrop) {
@@ -2201,38 +2191,6 @@ function renderGroupedEvents(container: HTMLElement): void {
   container.innerHTML = htmlParts.join('');
 }
 
-// Create a group element
-function createGroupElement(group: EventGroup): HTMLElement {
-  const isCollapsed = expandedGroupIds.has(group.id) ? false : group.collapsed;
-  const startTime = new Date(group.startTime).toLocaleTimeString();
-
-  const div = document.createElement('div');
-  div.className = `event-group${isCollapsed ? ' collapsed' : ''}`;
-  div.dataset.groupId = group.id;
-
-  const triggerInfo = group.triggerEvent
-    ? `<span class="group-trigger">triggered by ${escapeHtml(group.triggerEvent)}</span>`
-    : '';
-
-  div.innerHTML = `
-    <div class="group-header" data-action="toggle-group">
-      <svg class="group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="6 9 12 15 18 9"/>
-      </svg>
-      <div class="group-info">
-        <span class="group-count">${group.events.length} events</span>
-        ${triggerInfo}
-      </div>
-      <span class="group-time">${startTime}</span>
-    </div>
-    <div class="group-events">
-      ${group.events.map((event, i) => createEventElement(event, i === 0, true).outerHTML).join('')}
-    </div>
-  `;
-
-  return div;
-}
-
 // Add a single new event to the top (no full re-render)
 function addEventToList(event: DataLayerEvent): void {
   if (!shadowRoot) return;
@@ -2241,7 +2199,7 @@ function addEventToList(event: DataLayerEvent): void {
   if (!container) return;
 
   // Check if event passes filters
-  const { eventFilters, filterMode, maxEvents, grouping } = currentSettings;
+  const { eventFilters, filterMode, grouping } = currentSettings;
   let passesFilter = true;
 
   if (eventFilters.length > 0) {
@@ -3073,7 +3031,7 @@ window.addEventListener('message', (event) => {
 });
 
 // Handle messages from popup/background
-browserAPI.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+browserAPI.runtime.onMessage.addListener((message: { type: string; payload?: unknown }, _sender: chrome.runtime.MessageSender, sendResponse: (response?: unknown) => void) => {
   switch (message.type) {
     case 'GET_EVENTS':
       sendResponse({ events });
@@ -3089,8 +3047,9 @@ browserAPI.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       updateEventsList();
       sendResponse({ success: true });
       break;
-    case 'TOGGLE_OVERLAY':
-      currentSettings.overlayEnabled = message.payload?.enabled ?? !currentSettings.overlayEnabled;
+    case 'TOGGLE_OVERLAY': {
+      const togglePayload = message.payload as { enabled?: boolean } | undefined;
+      currentSettings.overlayEnabled = togglePayload?.enabled ?? !currentSettings.overlayEnabled;
       // Save to domain-specific settings so visibility is per-domain
       saveDomainOverlayEnabled(currentSettings.overlayEnabled);
       if (currentSettings.overlayEnabled) {
@@ -3102,19 +3061,21 @@ browserAPI.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       }
       sendResponse({ enabled: currentSettings.overlayEnabled });
       break;
-    case 'UPDATE_SETTINGS':
-      currentSettings = { ...currentSettings, ...message.payload };
+    }
+    case 'UPDATE_SETTINGS': {
+      const settingsPayload = message.payload as Partial<Settings>;
+      currentSettings = { ...currentSettings, ...settingsPayload };
       // Merge grouping settings properly
-      if (message.payload.grouping) {
-        currentSettings.grouping = { ...currentSettings.grouping, ...message.payload.grouping };
+      if (settingsPayload.grouping) {
+        currentSettings.grouping = { ...currentSettings.grouping, ...settingsPayload.grouping };
       }
       // Merge anchor settings properly
-      if (message.payload.overlayAnchor) {
-        currentSettings.overlayAnchor = { ...currentSettings.overlayAnchor, ...message.payload.overlayAnchor };
+      if (settingsPayload.overlayAnchor) {
+        currentSettings.overlayAnchor = { ...currentSettings.overlayAnchor, ...settingsPayload.overlayAnchor };
         applyPositionAnchor();
       }
       updateMonitoringConfig();
-      if (message.payload.grouping?.enabled !== undefined) {
+      if (settingsPayload.grouping?.enabled !== undefined) {
         rebuildEventGroups();
         // Sync grouping button state
         const groupingBtn = shadowRoot?.getElementById('grouping-btn');
@@ -3125,11 +3086,12 @@ browserAPI.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       // Always re-render to pick up settings changes like showTimestamps
       updateEventsList();
       // Update persist toggle if needed
-      if (message.payload.persistEvents !== undefined) {
+      if (settingsPayload.persistEvents !== undefined) {
         updatePersistToggle();
       }
       sendResponse({ success: true });
       break;
+    }
     case 'GET_SETTINGS':
       sendResponse({ settings: currentSettings });
       break;
@@ -3205,7 +3167,7 @@ function checkDataLayerActivity(): void {
 
   // Check if any of the configured dataLayer arrays exist on the page
   const dataLayerExists = currentSettings.dataLayerNames.some(name => {
-    const dl = (window as Record<string, unknown>)[name];
+    const dl = (window as unknown as Record<string, unknown>)[name];
     return Array.isArray(dl) && dl.length > 0;
   });
 

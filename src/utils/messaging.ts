@@ -5,7 +5,7 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
 export function sendMessage(message: Message): Promise<unknown> {
   return new Promise((resolve, reject) => {
-    browserAPI.runtime.sendMessage(message, (response) => {
+    browserAPI.runtime.sendMessage(message, (response: unknown) => {
       if (browserAPI.runtime.lastError) {
         reject(browserAPI.runtime.lastError);
       } else {
@@ -17,7 +17,7 @@ export function sendMessage(message: Message): Promise<unknown> {
 
 export function sendToTab(tabId: number, message: Message): Promise<unknown> {
   return new Promise((resolve, reject) => {
-    browserAPI.tabs.sendMessage(tabId, message, (response) => {
+    browserAPI.tabs.sendMessage(tabId, message, (response: unknown) => {
       if (browserAPI.runtime.lastError) {
         reject(browserAPI.runtime.lastError);
       } else {

@@ -1,10 +1,10 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { ReactNode } from 'react';
 import {
   Layers,
   Search,
   Trash2,
-  ChevronDown,
   ChevronRight,
   Copy,
   Check,
@@ -314,7 +314,7 @@ export function DevToolsPanel() {
                       style={{
                         backgroundColor: `${category.color}20`,
                         color: category.color,
-                        ringColor: isSelected ? category.color : 'transparent',
+                        ['--ring-color' as string]: isSelected ? category.color : 'transparent',
                       }}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -472,7 +472,7 @@ function EventRow({ event, index, isExpanded, isCopied, onToggle, onCopy }: Even
 }
 
 function JsonHighlight({ data }: { data: unknown }) {
-  const renderValue = (value: unknown, depth = 0): JSX.Element => {
+  const renderValue = (value: unknown, depth = 0): ReactNode => {
     if (value === null) {
       return <span className="text-slate-500">null</span>;
     }

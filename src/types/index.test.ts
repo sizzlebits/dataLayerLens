@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { getEventCategory, EVENT_CATEGORIES, DEFAULT_SETTINGS, getCurrentDomain, mergeSettingsWithDomain, DEFAULT_GROUPING } from './index';
 import type { Settings } from './index';
 
@@ -110,7 +110,7 @@ describe('EVENT_CATEGORIES', () => {
   });
 
   it('has emoji icons for all categories', () => {
-    Object.entries(EVENT_CATEGORIES).forEach(([name, category]) => {
+    Object.entries(EVENT_CATEGORIES).forEach(([_name, category]) => {
       expect(category.icon).toBeTruthy();
       expect(category.icon.length).toBeGreaterThan(0);
       // Check that icon is an emoji (covers common emoji ranges including miscellaneous symbols)
@@ -121,24 +121,23 @@ describe('EVENT_CATEGORIES', () => {
 });
 
 describe('getCurrentDomain', () => {
-  const originalWindow = global.window;
+  const originalWindow = globalThis.window;
 
   afterEach(() => {
-    global.window = originalWindow;
+    (globalThis as unknown as { window: typeof window }).window = originalWindow;
   });
 
   it('returns empty string when window is undefined', () => {
-    // @ts-expect-error - Intentionally setting window to undefined for testing
-    global.window = undefined;
+    (globalThis as unknown as { window: undefined }).window = undefined;
     expect(getCurrentDomain()).toBe('');
   });
 
   it('returns hostname from window.location', () => {
-    global.window = {
+    (globalThis as unknown as { window: { location: { hostname: string } } }).window = {
       location: {
         hostname: 'example.com',
       },
-    } as unknown as Window & typeof globalThis;
+    };
     expect(getCurrentDomain()).toBe('example.com');
   });
 });

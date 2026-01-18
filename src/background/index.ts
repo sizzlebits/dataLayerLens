@@ -83,7 +83,7 @@ async function getAllDomainSettings(): Promise<Record<string, DomainSettings>> {
 }
 
 // Handle messages
-browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browserAPI.runtime.onMessage.addListener((message: { type: string; payload?: unknown; domain?: string; saveGlobal?: boolean }, sender: chrome.runtime.MessageSender, sendResponse: (response?: unknown) => void) => {
   const tabId = sender.tab?.id;
   const tabUrl = sender.tab?.url;
   const domain = tabUrl ? new URL(tabUrl).hostname : undefined;
@@ -92,7 +92,7 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case 'DATALAYER_EVENT':
       if (tabId) {
         const events = tabEvents.get(tabId) || [];
-        events.unshift(message.payload);
+        events.unshift(message.payload as DataLayerEvent);
         if (events.length > 1000) events.length = 1000; // Limit storage
         tabEvents.set(tabId, events);
 
@@ -133,14 +133,15 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       if (targetDomain && !saveGlobal) {
         // Save to domain-specific settings
-        saveDomainSettings(targetDomain, message.payload).then(() => {
+        saveDomainSettings(targetDomain, message.payload as Partial<Settings>).then(() => {
           sendResponse({ success: true, domain: targetDomain });
         });
       } else {
         // Save to global settings
-        browserAPI.storage.local.get(GLOBAL_SETTINGS_KEY).then((result) => {
-          const current = { ...DEFAULT_SETTINGS, ...result[GLOBAL_SETTINGS_KEY] } as Settings;
-          const updated = { ...current, ...message.payload };
+        browserAPI.storage.local.get(GLOBAL_SETTINGS_KEY).then((result: { [key: string]: unknown }) => {
+          const stored = result[GLOBAL_SETTINGS_KEY] as Partial<Settings> | undefined;
+          const current: Settings = { ...DEFAULT_SETTINGS, ...stored };
+          const updated = { ...current, ...(message.payload as Partial<Settings>) };
           return browserAPI.storage.local.set({ [GLOBAL_SETTINGS_KEY]: updated });
         }).then(() => {
           sendResponse({ success: true });
@@ -181,7 +182,7 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case 'IMPORT_ALL_SETTINGS':
       if (message.payload) {
-        const { globalSettings, domainSettings } = message.payload;
+        const { globalSettings, domainSettings } = message.payload as { globalSettings?: Settings; domainSettings?: Record<string, DomainSettings> };
         Promise.all([
           globalSettings ? browserAPI.storage.local.set({ [GLOBAL_SETTINGS_KEY]: globalSettings }) : Promise.resolve(),
           domainSettings ? browserAPI.storage.local.set({ [DOMAIN_SETTINGS_KEY]: domainSettings }) : Promise.resolve(),
@@ -200,12 +201,12 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 // Clean up when tab is closed
-browserAPI.tabs.onRemoved.addListener((tabId) => {
+browserAPI.tabs.onRemoved.addListener((tabId: number) => {
   tabEvents.delete(tabId);
 });
 
 // Handle extension icon click
-browserAPI.action?.onClicked?.addListener(async (tab) => {
+browserAPI.action?.onClicked?.addListener(async (tab: chrome.tabs.Tab) => {
   if (!tab.id) return;
 
   // Toggle overlay
@@ -223,10 +224,8 @@ browserAPI.action?.onClicked?.addListener(async (tab) => {
 });
 
 // Firefox compatibility for browser_action
-// @ts-expect-error - Firefox uses browserAction
-if (browserAPI.browserAction) {
-  // @ts-expect-error - Firefox uses browserAction
-  browserAPI.browserAction.onClicked.addListener(async (tab: chrome.tabs.Tab) => {
+if ((browserAPI as unknown as { browserAction?: typeof chrome.action }).browserAction) {
+  (browserAPI as unknown as { browserAction: typeof chrome.action }).browserAction.onClicked.addListener(async (tab: chrome.tabs.Tab) => {
     if (!tab.id) return;
 
     try {

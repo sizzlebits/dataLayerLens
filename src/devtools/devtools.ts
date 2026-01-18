@@ -6,7 +6,7 @@ browserAPI.devtools.panels.create(
   'DataLayer',
   '../icons/icon-32.png',
   'src/devtools/panel.html',
-  (panel) => {
+  (panel: chrome.devtools.panels.ExtensionPanel) => {
     console.log('[DataLayer Monitor] DevTools panel created', panel);
   }
 );

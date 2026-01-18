@@ -114,7 +114,7 @@ export const useStore = create<StoreState>((set, get) => ({
 }));
 
 // Listen for settings changes
-browserAPI.storage.onChanged.addListener((changes, areaName) => {
+browserAPI.storage.onChanged.addListener((changes: { [key: string]: chrome.storage.StorageChange }, areaName: string) => {
   if (areaName === 'local' && changes.datalayer_monitor_settings) {
     useStore.setState({
       settings: changes.datalayer_monitor_settings.newValue as Settings,
@@ -123,8 +123,8 @@ browserAPI.storage.onChanged.addListener((changes, areaName) => {
 });
 
 // Listen for new events from content script
-browserAPI.runtime.onMessage.addListener((message) => {
-  if (message.type === 'EVENT_ADDED' || message.type === 'DATALAYER_EVENT') {
+browserAPI.runtime.onMessage.addListener((message: { type: string; payload?: DataLayerEvent }) => {
+  if ((message.type === 'EVENT_ADDED' || message.type === 'DATALAYER_EVENT') && message.payload) {
     useStore.getState().addEvent(message.payload);
   }
 });

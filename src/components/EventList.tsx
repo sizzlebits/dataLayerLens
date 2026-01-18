@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Copy, Check, Clock, Tag, Database } from 'lucide-react';
 import { DataLayerEvent, getEventCategory } from '@/types';
@@ -156,7 +156,7 @@ function EventRow({ event, isNew, isExpanded, isCopied, onToggle, onCopy }: Even
 }
 
 function JsonHighlight({ data }: { data: unknown }) {
-  const renderValue = (value: unknown, depth = 0): JSX.Element => {
+  const renderValue = (value: unknown, depth = 0): ReactNode => {
     if (value === null) {
       return <span className="text-slate-500">null</span>;
     }
