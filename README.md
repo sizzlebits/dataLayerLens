@@ -10,8 +10,17 @@ A powerful, beautiful tool for monitoring GTM dataLayer events in real-time.
   <a href="#features">Features</a> •
   <a href="#installation">Installation</a> •
   <a href="#usage">Usage</a> •
+  <a href="#privacy">Privacy</a> •
   <a href="#development">Development</a>
 </p>
+
+---
+
+## Privacy
+
+Your privacy is important to us. DataLayer Lens stores all data **locally on your device** — nothing is transmitted to remote servers or shared with third parties. We collect no personal information and use no tracking or analytics.
+
+📖 **[Read our full Privacy Statement](PRIVACY-STATEMENT.md)**
 
 ---
 
