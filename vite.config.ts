@@ -1,0 +1,116 @@
+import { defineConfig, Plugin, build } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
+import { copyFileSync, mkdirSync, existsSync } from 'fs';
+
+const browser = process.env.BROWSER || 'chrome';
+
+// Plugin to copy manifest and icons, then build standalone scripts
+function copyExtensionFiles(): Plugin {
+  return {
+    name: 'copy-extension-files',
+    async writeBundle() {
+      const outDir = `dist/${browser}`;
+
+      // Copy manifest
+      const manifestSrc = `public/manifest.${browser}.json`;
+      const manifestDest = `${outDir}/manifest.json`;
+      if (existsSync(manifestSrc)) {
+        copyFileSync(manifestSrc, manifestDest);
+      }
+
+      // Copy icons
+      const iconsDir = `${outDir}/icons`;
+      if (!existsSync(iconsDir)) {
+        mkdirSync(iconsDir, { recursive: true });
+      }
+
+      // Copy all icon files
+      const iconFiles = ['icon.svg', 'icon-16.png', 'icon-32.png', 'icon-48.png', 'icon-128.png'];
+      for (const iconFile of iconFiles) {
+        const iconSrc = `public/icons/${iconFile}`;
+        if (existsSync(iconSrc)) {
+          copyFileSync(iconSrc, `${iconsDir}/${iconFile}`);
+        }
+      }
+    },
+  };
+}
+
+// Build standalone scripts (content, background, injected) as IIFE
+async function buildStandaloneScripts(): Promise<Plugin> {
+  return {
+    name: 'build-standalone-scripts',
+    async closeBundle() {
+      const outDir = `dist/${browser}`;
+
+      // Scripts that need to be built as IIFE (no ES modules)
+      const standaloneScripts = [
+        { name: 'content', entry: 'src/content/index.ts' },
+        { name: 'background', entry: 'src/background/index.ts' },
+        { name: 'injected', entry: 'src/injected/index.ts' },
+      ];
+
+      for (const script of standaloneScripts) {
+        await build({
+          configFile: false,
+          resolve: {
+            alias: {
+              '@': resolve(__dirname, 'src'),
+            },
+          },
+          define: {
+            'process.env.BROWSER': JSON.stringify(browser),
+          },
+          build: {
+            outDir,
+            emptyOutDir: false,
+            lib: {
+              entry: resolve(__dirname, script.entry),
+              name: script.name,
+              formats: ['iife'],
+              fileName: () => `${script.name}.js`,
+            },
+            rollupOptions: {
+              output: {
+                extend: true,
+              },
+            },
+            minify: true,
+            sourcemap: false,
+          },
+          logLevel: 'warn',
+        });
+      }
+    },
+  };
+}
+
+export default defineConfig(async () => ({
+  plugins: [react(), copyExtensionFiles(), await buildStandaloneScripts()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
+  define: {
+    'process.env.BROWSER': JSON.stringify(browser),
+  },
+  build: {
+    outDir: `dist/${browser}`,
+    emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        popup: resolve(__dirname, 'src/popup/index.html'),
+        devtools: resolve(__dirname, 'src/devtools/index.html'),
+        'devtools-panel': resolve(__dirname, 'src/devtools/panel.html'),
+      },
+      output: {
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+      },
+    },
+    sourcemap: process.env.NODE_ENV === 'development',
+  },
+}));

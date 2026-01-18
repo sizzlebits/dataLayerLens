@@ -1,0 +1,76 @@
+{
+  "name": "datalayerlens",
+  "version": "1.0.0",
+  "description": "A powerful, beautiful browser extension for monitoring GTM dataLayer events in real-time",
+  "type": "module",
+  "author": "Simon Seddon",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sizzlebits/dataLayerLens.git"
+  },
+  "homepage": "https://github.com/sizzlebits/dataLayerLens",
+  "bugs": {
+    "url": "https://github.com/sizzlebits/dataLayerLens/issues"
+  },
+  "keywords": [
+    "gtm",
+    "google-tag-manager",
+    "datalayer",
+    "analytics",
+    "debugging",
+    "browser-extension",
+    "chrome-extension",
+    "firefox-addon",
+    "devtools"
+  ],
+  "scripts": {
+    "dev": "vite build --watch --mode development",
+    "build": "vite build",
+    "build:firefox": "cross-env BROWSER=firefox vite build",
+    "build:chrome": "cross-env BROWSER=chrome vite build",
+    "build:all": "npm run build:chrome && npm run build:firefox",
+    "package": "npm run build:all && npm run package:chrome && npm run package:firefox",
+    "package:chrome": "cd dist/chrome && zip -r dataLayerLens.zip . -x '*.zip'",
+    "package:firefox": "cd dist/firefox && zip -r dataLayerLens.zip . -x '*.zip'",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "serve:test": "npx serve . -p 3000"
+  },
+  "dependencies": {
+    "framer-motion": "^11.15.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/chrome": "^0.0.287",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^2.1.8",
+    "autoprefixer": "^10.4.20",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "jsdom": "^25.0.1",
+    "postcss": "^8.4.49",
+    "sharp": "^0.34.5",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

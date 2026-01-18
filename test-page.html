@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataLayer Monitor - Test Page</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #f5f5f5;
+      color: #333;
+    }
+    h1 {
+      color: #6366f1;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #1a1a2e;
+    }
+    button {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 4px;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    button.secondary {
+      background: #64748b;
+    }
+    button.success {
+      background: linear-gradient(135deg, #10b981, #22c55e);
+    }
+    button.warning {
+      background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    }
+    button.danger {
+      background: linear-gradient(135deg, #ef4444, #f87171);
+    }
+    .event-log {
+      background: #1a1a2e;
+      color: #22d3ee;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 16px;
+    }
+    .event-log:empty::before {
+      content: 'Events will appear here...';
+      color: #64748b;
+    }
+    .event-log div {
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    input, select {
+      padding: 10px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      margin: 4px;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: #6366f1;
+    }
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    code {
+      background: #e2e8f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .info {
+      background: #e0f2fe;
+      border-left: 4px solid #0ea5e9;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔬 DataLayer Monitor Test Page</h1>
+
+  <p>Use this page to test the DataLayer Monitor extension. Open the extension popup or DevTools panel to see captured events.</p>
+
+  <div class="info">
+    <strong>Tip:</strong> Open the browser console to see the styled event logs from the extension.
+  </div>
+
+  <div class="card">
+    <h2>📊 Quick Event Buttons</h2>
+    <p>Click these buttons to push common GTM events:</p>
+
+    <button onclick="pushPageView()">Page View</button>
+    <button onclick="pushClick()">Click Event</button>
+    <button onclick="pushFormSubmit()">Form Submit</button>
+    <button onclick="pushScroll()">Scroll Depth</button>
+    <button onclick="pushVideo()">Video Event</button>
+
+    <h3 style="margin-top: 20px;">E-commerce Events</h3>
+    <button class="success" onclick="pushViewItem()">View Item</button>
+    <button class="success" onclick="pushAddToCart()">Add to Cart</button>
+    <button class="success" onclick="pushBeginCheckout()">Begin Checkout</button>
+    <button class="success" onclick="pushPurchase()">Purchase</button>
+
+    <h3 style="margin-top: 20px;">User Events</h3>
+    <button class="warning" onclick="pushLogin()">Login</button>
+    <button class="warning" onclick="pushSignUp()">Sign Up</button>
+    <button class="warning" onclick="pushSearch()">Search</button>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Custom Event</h2>
+    <p>Push a custom event with your own name and data:</p>
+
+    <div class="input-group">
+      <input type="text" id="customEventName" placeholder="Event name" value="custom_event">
+      <input type="text" id="customEventKey" placeholder="Key" value="custom_key">
+      <input type="text" id="customEventValue" placeholder="Value" value="custom_value">
+      <button onclick="pushCustomEvent()">Push Custom Event</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔄 Bulk Events</h2>
+    <p>Push multiple events at once for stress testing:</p>
+
+    <div class="input-group">
+      <input type="number" id="bulkCount" value="10" min="1" max="100" style="width: 80px;">
+      <button class="secondary" onclick="pushBulkEvents()">Push Events</button>
+      <button class="danger" onclick="clearLog()">Clear Log</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📝 Event Log</h2>
+    <p>Local log of events pushed from this page:</p>
+    <div id="eventLog" class="event-log"></div>
+  </div>
+
+  <div class="card">
+    <h2>🔧 Alternative DataLayer</h2>
+    <p>Test monitoring a different dataLayer array name:</p>
+
+    <div class="input-group">
+      <input type="text" id="altDataLayerName" placeholder="Array name" value="dataLayer_v2">
+      <button class="secondary" onclick="pushToAltDataLayer()">Push to Alt DataLayer</button>
+    </div>
+
+    <p style="margin-top: 12px; font-size: 13px; color: #64748b;">
+      Remember to add this array name in the extension settings first!
+    </p>
+  </div>
+
+  <script>
+    // Initialise dataLayer
+    window.dataLayer = window.dataLayer || [];
+
+    // Log element
+    const eventLog = document.getElementById('eventLog');
+
+    function logEvent(event) {
+      const time = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      div.textContent = `[${time}] ${event.event}: ${JSON.stringify(event).slice(0, 80)}...`;
+      eventLog.insertBefore(div, eventLog.firstChild);
+
+      // Limit log entries
+      while (eventLog.children.length > 50) {
+        eventLog.removeChild(eventLog.lastChild);
+      }
+    }
+
+    function pushEvent(event) {
+      dataLayer.push(event);
+      logEvent(event);
+    }
+
+    // GTM Events
+    function pushPageView() {
+      pushEvent({
+        event: 'page_view',
+        page_title: document.title,
+        page_location: window.location.href,
+        page_path: window.location.pathname
+      });
+    }
+
+    function pushClick() {
+      pushEvent({
+        event: 'gtm.click',
+        'gtm.element': 'button',
+        'gtm.elementClasses': 'btn-primary',
+        'gtm.elementId': 'test-button'
+      });
+    }
+
+    function pushFormSubmit() {
+      pushEvent({
+        event: 'gtm.formSubmit',
+        'gtm.elementId': 'contact-form',
+        'gtm.elementClasses': 'form-horizontal'
+      });
+    }
+
+    function pushScroll() {
+      pushEvent({
+        event: 'gtm.scrollDepth',
+        'gtm.scrollThreshold': 50,
+        'gtm.scrollUnits': 'percent',
+        'gtm.scrollDirection': 'vertical'
+      });
+    }
+
+    function pushVideo() {
+      pushEvent({
+        event: 'gtm.video',
+        'gtm.videoStatus': 'play',
+        'gtm.videoTitle': 'Product Demo',
+        'gtm.videoPercent': 25,
+        'gtm.videoDuration': 120
+      });
+    }
+
+    // E-commerce Events
+    function pushViewItem() {
+      pushEvent({
+        event: 'view_item',
+        ecommerce: {
+          currency: 'GBP',
+          value: 29.99,
+          items: [{
+            item_id: 'SKU_12345',
+            item_name: 'Premium Widget',
+            item_brand: 'WidgetCo',
+            item_category: 'Widgets',
+            price: 29.99,
+            quantity: 1
+          }]
+        }
+      });
+    }
+
+    function pushAddToCart() {
+      pushEvent({
+        event: 'add_to_cart',
+        ecommerce: {
+          currency: 'GBP',
+          value: 29.99,
+          items: [{
+            item_id: 'SKU_12345',
+            item_name: 'Premium Widget',
+            price: 29.99,
+            quantity: 1
+          }]
+        }
+      });
+    }
+
+    function pushBeginCheckout() {
+      pushEvent({
+        event: 'begin_checkout',
+        ecommerce: {
+          currency: 'GBP',
+          value: 59.98,
+          coupon: 'SUMMER20',
+          items: [
+            { item_id: 'SKU_12345', item_name: 'Premium Widget', price: 29.99, quantity: 2 }
+          ]
+        }
+      });
+    }
+
+    function pushPurchase() {
+      pushEvent({
+        event: 'purchase',
+        ecommerce: {
+          transaction_id: 'T_' + Date.now(),
+          currency: 'GBP',
+          value: 59.98,
+          tax: 9.99,
+          shipping: 4.99,
+          coupon: 'SUMMER20',
+          items: [
+            { item_id: 'SKU_12345', item_name: 'Premium Widget', price: 29.99, quantity: 2 }
+          ]
+        }
+      });
+    }
+
+    // User Events
+    function pushLogin() {
+      pushEvent({
+        event: 'login',
+        method: 'email'
+      });
+    }
+
+    function pushSignUp() {
+      pushEvent({
+        event: 'sign_up',
+        method: 'email'
+      });
+    }
+
+    function pushSearch() {
+      pushEvent({
+        event: 'search',
+        search_term: 'premium widgets'
+      });
+    }
+
+    // Custom Event
+    function pushCustomEvent() {
+      const name = document.getElementById('customEventName').value || 'custom_event';
+      const key = document.getElementById('customEventKey').value || 'data';
+      const value = document.getElementById('customEventValue').value || 'value';
+
+      const event = { event: name };
+      event[key] = value;
+      event.timestamp = Date.now();
+
+      pushEvent(event);
+    }
+
+    // Bulk Events
+    function pushBulkEvents() {
+      const count = parseInt(document.getElementById('bulkCount').value) || 10;
+      const eventTypes = ['page_view', 'click', 'scroll', 'view_item', 'add_to_cart', 'custom_event'];
+
+      for (let i = 0; i < count; i++) {
+        const eventType = eventTypes[i % eventTypes.length];
+        pushEvent({
+          event: eventType,
+          index: i + 1,
+          timestamp: Date.now()
+        });
+      }
+    }
+
+    // Alternative DataLayer
+    function pushToAltDataLayer() {
+      const name = document.getElementById('altDataLayerName').value || 'dataLayer_v2';
+
+      // Ensure the array exists
+      window[name] = window[name] || [];
+
+      const event = {
+        event: 'alt_datalayer_event',
+        source: name,
+        timestamp: Date.now()
+      };
+
+      window[name].push(event);
+      logEvent({ ...event, _note: `Pushed to ${name}` });
+    }
+
+    // Clear Log
+    function clearLog() {
+      eventLog.innerHTML = '';
+    }
+
+    // Push initial page view
+    pushPageView();
+  </script>
+</body>
+</html>
