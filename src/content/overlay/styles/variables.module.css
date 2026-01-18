@@ -1,0 +1,95 @@
+/**
+ * Design tokens for DataLayer Lens overlay.
+ * These CSS custom properties provide consistent theming across all components.
+ */
+
+:host {
+  /* Colors - Primary */
+  --dl-primary: #6366f1;
+  --dl-primary-light: #818cf8;
+  --dl-primary-dark: #4f46e5;
+
+  /* Colors - Background */
+  --dl-bg-dark: rgba(15, 15, 35, 0.98);
+  --dl-bg-darker: rgba(10, 10, 25, 0.95);
+  --dl-bg-light: rgba(255, 255, 255, 0.05);
+  --dl-bg-lighter: rgba(255, 255, 255, 0.08);
+  --dl-bg-hover: rgba(255, 255, 255, 0.1);
+
+  /* Colors - Text */
+  --dl-text-primary: #e2e8f0;
+  --dl-text-secondary: #94a3b8;
+  --dl-text-muted: #64748b;
+
+  /* Colors - Borders */
+  --dl-border-light: rgba(255, 255, 255, 0.08);
+  --dl-border-medium: rgba(255, 255, 255, 0.1);
+  --dl-border-focus: rgba(99, 102, 241, 0.5);
+
+  /* Colors - Status */
+  --dl-success: #22c55e;
+  --dl-success-light: #4ade80;
+  --dl-success-bg: rgba(34, 197, 94, 0.2);
+  --dl-success-border: rgba(34, 197, 94, 0.3);
+
+  --dl-error: #ef4444;
+  --dl-error-light: #f87171;
+  --dl-error-bg: rgba(239, 68, 68, 0.2);
+  --dl-error-border: rgba(239, 68, 68, 0.3);
+
+  --dl-warning: #f59e0b;
+  --dl-warning-light: #fbbf24;
+
+  /* JSON Syntax Colors */
+  --dl-json-key: #9cdcfe;
+  --dl-json-string: #ce9178;
+  --dl-json-number: #b5cea8;
+  --dl-json-boolean: #569cd6;
+  --dl-json-null: #569cd6;
+  --dl-json-bracket: #ffd700;
+  --dl-json-punctuation: #808080;
+
+  /* Spacing */
+  --dl-space-xs: 4px;
+  --dl-space-sm: 8px;
+  --dl-space-md: 12px;
+  --dl-space-lg: 16px;
+  --dl-space-xl: 24px;
+
+  /* Border Radius */
+  --dl-radius-sm: 4px;
+  --dl-radius-md: 6px;
+  --dl-radius-lg: 8px;
+  --dl-radius-xl: 12px;
+  --dl-radius-full: 9999px;
+
+  /* Typography */
+  --dl-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --dl-font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+
+  --dl-text-xs: 10px;
+  --dl-text-sm: 11px;
+  --dl-text-base: 12px;
+  --dl-text-lg: 13px;
+  --dl-text-xl: 14px;
+
+  --dl-line-height: 1.5;
+  --dl-line-height-tight: 1.3;
+
+  /* Shadows */
+  --dl-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --dl-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --dl-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
+  --dl-shadow-overlay: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+  /* Transitions */
+  --dl-transition-fast: 0.15s ease;
+  --dl-transition-base: 0.2s ease;
+  --dl-transition-slow: 0.3s ease;
+
+  /* Z-Index */
+  --dl-z-base: 1;
+  --dl-z-dropdown: 10;
+  --dl-z-modal: 100;
+  --dl-z-overlay: 2147483646;
+}

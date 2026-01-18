@@ -1,0 +1,128 @@
+/**
+ * JSON viewer component styles for syntax highlighting.
+ */
+
+.jsonViewer {
+  font-family: var(--dl-font-mono, 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace);
+  font-size: var(--dl-text-sm, 11px);
+  line-height: var(--dl-line-height, 1.5);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Syntax highlighting */
+.key {
+  color: var(--dl-json-key, #9cdcfe);
+}
+
+.string {
+  color: var(--dl-json-string, #ce9178);
+}
+
+.number {
+  color: var(--dl-json-number, #b5cea8);
+}
+
+.boolean {
+  color: var(--dl-json-boolean, #569cd6);
+}
+
+.null {
+  color: var(--dl-json-null, #569cd6);
+  font-style: italic;
+}
+
+.bracket {
+  color: var(--dl-json-bracket, #ffd700);
+}
+
+.comma,
+.colon {
+  color: var(--dl-json-punctuation, #808080);
+}
+
+/* Line indentation */
+.line {
+  padding-left: calc(var(--indent, 0) * 12px);
+}
+
+/* Collapsible sections */
+.collapsible {
+  cursor: pointer;
+  user-select: none;
+}
+
+.collapsible:hover {
+  background: var(--dl-bg-light, rgba(255, 255, 255, 0.05));
+}
+
+.collapseIndicator {
+  display: inline-block;
+  width: 12px;
+  text-align: center;
+  color: var(--dl-text-muted, #64748b);
+  margin-right: var(--dl-space-xs, 4px);
+  transition: transform var(--dl-transition-fast, 0.15s ease);
+}
+
+.collapsible.expanded .collapseIndicator {
+  transform: rotate(90deg);
+}
+
+.collapsedContent {
+  display: none;
+}
+
+.collapsedPreview {
+  color: var(--dl-text-muted, #64748b);
+  font-style: italic;
+}
+
+/* Copy button */
+.copyWrapper {
+  position: relative;
+}
+
+.copyBtn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--dl-bg-light, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--dl-border-medium, rgba(255, 255, 255, 0.1));
+  border-radius: var(--dl-radius-sm, 4px);
+  color: var(--dl-text-muted, #64748b);
+  cursor: pointer;
+  padding: var(--dl-space-xs, 4px);
+  opacity: 0;
+  transition: all var(--dl-transition-fast, 0.15s ease);
+}
+
+.copyWrapper:hover .copyBtn {
+  opacity: 1;
+}
+
+.copyBtn:hover {
+  background: var(--dl-bg-lighter, rgba(255, 255, 255, 0.08));
+  color: var(--dl-text-primary, #e2e8f0);
+}
+
+.copyBtn.copied {
+  color: var(--dl-success-light, #4ade80);
+}
+
+.copyBtn svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Max depth warning */
+.maxDepthWarning {
+  color: var(--dl-warning-light, #fbbf24);
+  font-style: italic;
+  font-size: var(--dl-text-xs, 10px);
+}
+
+/* Empty object/array */
+.empty {
+  color: var(--dl-text-muted, #64748b);
+}

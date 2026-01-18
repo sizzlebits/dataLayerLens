@@ -33,24 +33,94 @@ function isValidEvent(data: unknown): data is Record<string, unknown> {
   );
 }
 
+// Safely clone an object, replacing non-cloneable values
+function safeClone(obj: unknown, seen = new WeakSet()): unknown {
+  // Handle primitives
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean') return obj;
+
+  // Handle functions - convert to string representation
+  if (typeof obj === 'function') {
+    return `[Function: ${obj.name || 'anonymous'}]`;
+  }
+
+  // Handle DOM elements
+  if (obj instanceof Element) {
+    return `[${obj.tagName.toLowerCase()}${obj.id ? '#' + obj.id : ''}${obj.className ? '.' + obj.className.split(' ').join('.') : ''}]`;
+  }
+
+  // Handle other non-cloneable objects
+  if (obj instanceof Window || obj instanceof Document) {
+    return '[Window/Document]';
+  }
+
+  // Handle arrays
+  if (Array.isArray(obj)) {
+    return obj.map(item => safeClone(item, seen));
+  }
+
+  // Handle objects
+  if (typeof obj === 'object') {
+    // Avoid circular references
+    if (seen.has(obj as object)) {
+      return '[Circular]';
+    }
+    seen.add(obj as object);
+
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      try {
+        result[key] = safeClone(value, seen);
+      } catch {
+        result[key] = '[Non-cloneable]';
+      }
+    }
+    return result;
+  }
+
+  return String(obj);
+}
+
 // Send event to content script
 function emitEvent(event: Record<string, unknown>, source: string): void {
+  // Safely clone the event data to avoid DataCloneError
+  const safeData = safeClone(event) as Record<string, unknown>;
+
   const payload = {
     id: generateId(),
     timestamp: Date.now(),
     event: event.event as string,
-    data: event,
+    data: safeData,
     source,
-    raw: event,
+    raw: safeData,
   };
 
-  window.postMessage(
-    {
-      type: 'DATALAYER_MONITOR_EVENT',
-      payload,
-    },
-    '*'
-  );
+  try {
+    window.postMessage(
+      {
+        type: 'DATALAYER_MONITOR_EVENT',
+        payload,
+      },
+      '*'
+    );
+  } catch (e) {
+    // If still failing, try with minimal data
+    console.warn('[DataLayer Monitor] Failed to send event, using minimal data:', e);
+    window.postMessage(
+      {
+        type: 'DATALAYER_MONITOR_EVENT',
+        payload: {
+          id: payload.id,
+          timestamp: payload.timestamp,
+          event: payload.event,
+          data: { event: payload.event, _error: 'Data could not be cloned' },
+          source,
+          raw: { event: payload.event },
+        },
+      },
+      '*'
+    );
+  }
 
   // Also log to console with style
   const eventName = event.event as string;

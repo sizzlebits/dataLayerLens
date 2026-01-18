@@ -1,0 +1,263 @@
+/**
+ * Filter modal styles.
+ */
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--dl-z-modal, 100);
+  animation: fadeIn var(--dl-transition-fast, 0.15s ease) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: var(--dl-bg-dark, rgba(15, 15, 35, 0.98));
+  border-radius: var(--dl-radius-lg, 8px);
+  border: 1px solid var(--dl-border-light, rgba(255, 255, 255, 0.08));
+  box-shadow: var(--dl-shadow-lg, 0 10px 25px rgba(0, 0, 0, 0.4));
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: scaleIn var(--dl-transition-base, 0.2s ease) forwards;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Modal header */
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--dl-space-md, 12px) var(--dl-space-lg, 16px);
+  border-bottom: 1px solid var(--dl-border-light, rgba(255, 255, 255, 0.08));
+}
+
+.modalTitle {
+  font-weight: 600;
+  font-size: var(--dl-text-lg, 13px);
+  color: var(--dl-text-primary, #e2e8f0);
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: var(--dl-text-muted, #64748b);
+  cursor: pointer;
+  padding: var(--dl-space-xs, 4px);
+  border-radius: var(--dl-radius-sm, 4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--dl-transition-fast, 0.15s ease);
+}
+
+.closeBtn:hover {
+  background: var(--dl-bg-hover, rgba(255, 255, 255, 0.1));
+  color: var(--dl-text-primary, #e2e8f0);
+}
+
+.closeBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Modal body */
+.modalBody {
+  padding: var(--dl-space-lg, 16px);
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Filter mode toggle */
+.filterModeToggle {
+  display: flex;
+  background: var(--dl-bg-light, rgba(255, 255, 255, 0.05));
+  border-radius: var(--dl-radius-md, 6px);
+  padding: 2px;
+  margin-bottom: var(--dl-space-lg, 16px);
+}
+
+.modeBtn {
+  flex: 1;
+  padding: var(--dl-space-sm, 8px);
+  background: transparent;
+  border: none;
+  color: var(--dl-text-secondary, #94a3b8);
+  font-size: var(--dl-text-sm, 11px);
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--dl-radius-sm, 4px);
+  transition: all var(--dl-transition-fast, 0.15s ease);
+}
+
+.modeBtn:hover {
+  color: var(--dl-text-primary, #e2e8f0);
+}
+
+.modeBtn.active {
+  background: var(--dl-primary, #6366f1);
+  color: white;
+}
+
+/* Filter input */
+.filterInputGroup {
+  margin-bottom: var(--dl-space-lg, 16px);
+}
+
+.filterLabel {
+  display: block;
+  font-size: var(--dl-text-sm, 11px);
+  color: var(--dl-text-secondary, #94a3b8);
+  margin-bottom: var(--dl-space-sm, 8px);
+}
+
+.filterInput {
+  width: 100%;
+  padding: var(--dl-space-sm, 8px) var(--dl-space-md, 12px);
+  background: var(--dl-bg-light, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--dl-border-medium, rgba(255, 255, 255, 0.1));
+  border-radius: var(--dl-radius-md, 6px);
+  color: var(--dl-text-primary, #e2e8f0);
+  font-size: var(--dl-text-base, 12px);
+  outline: none;
+  transition: all var(--dl-transition-fast, 0.15s ease);
+}
+
+.filterInput::placeholder {
+  color: var(--dl-text-muted, #64748b);
+}
+
+.filterInput:focus {
+  border-color: var(--dl-border-focus, rgba(99, 102, 241, 0.5));
+  background: var(--dl-bg-lighter, rgba(255, 255, 255, 0.08));
+}
+
+/* Suggestions list */
+.suggestionsList {
+  margin-top: var(--dl-space-sm, 8px);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.suggestionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--dl-space-sm, 8px) var(--dl-space-md, 12px);
+  background: var(--dl-bg-light, rgba(255, 255, 255, 0.05));
+  border-radius: var(--dl-radius-sm, 4px);
+  margin-bottom: var(--dl-space-xs, 4px);
+  cursor: pointer;
+  transition: background var(--dl-transition-fast, 0.15s ease);
+}
+
+.suggestionItem:hover {
+  background: var(--dl-bg-lighter, rgba(255, 255, 255, 0.08));
+}
+
+.suggestionItem:last-child {
+  margin-bottom: 0;
+}
+
+.suggestionName {
+  font-size: var(--dl-text-base, 12px);
+  color: var(--dl-text-primary, #e2e8f0);
+}
+
+.suggestionCount {
+  font-size: var(--dl-text-xs, 10px);
+  color: var(--dl-text-muted, #64748b);
+}
+
+/* Active filters section */
+.activeFilters {
+  margin-top: var(--dl-space-lg, 16px);
+  padding-top: var(--dl-space-lg, 16px);
+  border-top: 1px solid var(--dl-border-light, rgba(255, 255, 255, 0.08));
+}
+
+.activeFiltersTitle {
+  font-size: var(--dl-text-sm, 11px);
+  color: var(--dl-text-secondary, #94a3b8);
+  margin-bottom: var(--dl-space-sm, 8px);
+}
+
+.activeFiltersList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dl-space-xs, 4px);
+}
+
+.activeFilterTag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dl-space-xs, 4px);
+  padding: var(--dl-space-xs, 4px) var(--dl-space-sm, 8px);
+  border-radius: var(--dl-radius-full, 9999px);
+  font-size: var(--dl-text-xs, 10px);
+  font-weight: 500;
+}
+
+.activeFilterTag.include {
+  background: var(--dl-success-bg, rgba(34, 197, 94, 0.2));
+  color: var(--dl-success-light, #4ade80);
+  border: 1px solid var(--dl-success-border, rgba(34, 197, 94, 0.3));
+}
+
+.activeFilterTag.exclude {
+  background: var(--dl-error-bg, rgba(239, 68, 68, 0.2));
+  color: var(--dl-error-light, #f87171);
+  border: 1px solid var(--dl-error-border, rgba(239, 68, 68, 0.3));
+}
+
+.removeFilterBtn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+}
+
+.removeFilterBtn:hover {
+  opacity: 1;
+}
+
+.removeFilterBtn svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* Empty state */
+.emptyState {
+  text-align: center;
+  padding: var(--dl-space-lg, 16px);
+  color: var(--dl-text-muted, #64748b);
+  font-size: var(--dl-text-sm, 11px);
+}

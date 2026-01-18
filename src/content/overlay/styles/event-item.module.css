@@ -1,0 +1,173 @@
+/**
+ * Individual event item styles.
+ */
+
+.eventItem {
+  background: var(--dl-bg-light, rgba(255, 255, 255, 0.05));
+  border-radius: var(--dl-radius-md, 6px);
+  border: 1px solid transparent;
+  overflow: hidden;
+  transition: all var(--dl-transition-fast, 0.15s ease);
+}
+
+.eventItem:hover {
+  background: var(--dl-bg-lighter, rgba(255, 255, 255, 0.08));
+  border-color: var(--dl-border-medium, rgba(255, 255, 255, 0.1));
+}
+
+.eventItem.new {
+  animation: slideIn var(--dl-transition-base, 0.2s ease) forwards;
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Event header */
+.eventHeader {
+  display: flex;
+  align-items: center;
+  padding: var(--dl-space-sm, 8px) var(--dl-space-md, 12px);
+  cursor: pointer;
+  user-select: none;
+}
+
+.expandIcon {
+  color: var(--dl-text-muted, #64748b);
+  margin-right: var(--dl-space-sm, 8px);
+  transition: transform var(--dl-transition-fast, 0.15s ease);
+  flex-shrink: 0;
+}
+
+.expandIcon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.eventItem.expanded .expandIcon {
+  transform: rotate(90deg);
+}
+
+.eventName {
+  flex: 1;
+  font-weight: 500;
+  font-size: var(--dl-text-base, 12px);
+  color: var(--dl-text-primary, #e2e8f0);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timestamp {
+  font-size: var(--dl-text-xs, 10px);
+  color: var(--dl-text-muted, #64748b);
+  margin-left: var(--dl-space-sm, 8px);
+  flex-shrink: 0;
+}
+
+.sourceBadge {
+  font-size: var(--dl-text-xs, 10px);
+  padding: 2px 6px;
+  border-radius: var(--dl-radius-sm, 4px);
+  margin-left: var(--dl-space-sm, 8px);
+  flex-shrink: 0;
+}
+
+.sourceBadge.dataLayer {
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--dl-primary-light, #818cf8);
+}
+
+.sourceBadge.gtm {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--dl-success-light, #4ade80);
+}
+
+.sourceBadge.gtag {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+/* Event actions */
+.eventActions {
+  display: flex;
+  gap: var(--dl-space-xs, 4px);
+  margin-left: var(--dl-space-sm, 8px);
+  opacity: 0;
+  transition: opacity var(--dl-transition-fast, 0.15s ease);
+}
+
+.eventHeader:hover .eventActions {
+  opacity: 1;
+}
+
+.actionBtn {
+  background: transparent;
+  border: none;
+  color: var(--dl-text-muted, #64748b);
+  cursor: pointer;
+  padding: var(--dl-space-xs, 4px);
+  border-radius: var(--dl-radius-sm, 4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--dl-transition-fast, 0.15s ease);
+}
+
+.actionBtn:hover {
+  background: var(--dl-bg-hover, rgba(255, 255, 255, 0.1));
+  color: var(--dl-text-primary, #e2e8f0);
+}
+
+.actionBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Filter action button */
+.actionBtn.filter:hover {
+  color: var(--dl-error-light, #f87171);
+}
+
+/* Copy action button */
+.actionBtn.copy.copied {
+  color: var(--dl-success-light, #4ade80);
+}
+
+/* Event body (expanded content) */
+.eventBody {
+  display: none;
+  padding: 0 var(--dl-space-md, 12px) var(--dl-space-md, 12px);
+  border-top: 1px solid var(--dl-border-light, rgba(255, 255, 255, 0.08));
+  background: var(--dl-bg-darker, rgba(10, 10, 25, 0.95));
+}
+
+.eventItem.expanded .eventBody {
+  display: block;
+}
+
+/* Compact mode */
+.eventItem.compact .eventHeader {
+  padding: var(--dl-space-xs, 4px) var(--dl-space-sm, 8px);
+}
+
+.eventItem.compact .eventName {
+  font-size: var(--dl-text-sm, 11px);
+}
+
+.eventItem.compact .timestamp,
+.eventItem.compact .sourceBadge {
+  display: none;
+}
+
+.eventItem.compact .eventBody {
+  padding: 0 var(--dl-space-sm, 8px) var(--dl-space-sm, 8px);
+}

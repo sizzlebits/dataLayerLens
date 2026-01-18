@@ -97,7 +97,7 @@ let currentFilter = '';
 let currentPage = 0;
 let eventsPerPage = 50;
 
-// Filter modal search state
+// Filter modal state
 let filterModalSearch = '';
 
 // Render optimization
@@ -309,8 +309,9 @@ function createOverlayContainer(): void {
   shadowRoot = overlayRoot.attachShadow({ mode: 'open' });
 
   // Track when user interacts with overlay so we can filter out resulting dataLayer events
+  const root = overlayRoot;
   ['click', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'pointerdown', 'pointerup'].forEach(eventType => {
-    overlayRoot!.addEventListener(eventType, () => {
+    root.addEventListener(eventType, () => {
       overlayInteractionTime = Date.now();
     });
   });
@@ -362,6 +363,10 @@ function getOverlayStyles(): string {
 
     .overlay-container .overlay {
       pointer-events: auto; /* Only the actual overlay captures clicks */
+    }
+
+    .overlay-container .filter-modal-backdrop {
+      pointer-events: auto; /* Modal backdrop needs to capture clicks */
     }
 
     .overlay-container.collapsed {
@@ -3027,7 +3032,7 @@ window.addEventListener('message', (event) => {
 });
 
 // Handle messages from popup/background
-browserAPI.runtime.onMessage.addListener((message: { type: string; payload?: unknown }, _sender: chrome.runtime.MessageSender, sendResponse: (response?: unknown) => void) => {
+browserAPI.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   switch (message.type) {
     case 'GET_EVENTS':
       sendResponse({ events });
@@ -3043,9 +3048,8 @@ browserAPI.runtime.onMessage.addListener((message: { type: string; payload?: unk
       updateEventsList();
       sendResponse({ success: true });
       break;
-    case 'TOGGLE_OVERLAY': {
-      const togglePayload = message.payload as { enabled?: boolean } | undefined;
-      currentSettings.overlayEnabled = togglePayload?.enabled ?? !currentSettings.overlayEnabled;
+    case 'TOGGLE_OVERLAY':
+      currentSettings.overlayEnabled = message.payload?.enabled ?? !currentSettings.overlayEnabled;
       // Save to domain-specific settings so visibility is per-domain
       saveDomainOverlayEnabled(currentSettings.overlayEnabled);
       if (currentSettings.overlayEnabled) {
@@ -3057,21 +3061,19 @@ browserAPI.runtime.onMessage.addListener((message: { type: string; payload?: unk
       }
       sendResponse({ enabled: currentSettings.overlayEnabled });
       break;
-    }
-    case 'UPDATE_SETTINGS': {
-      const settingsPayload = message.payload as Partial<Settings>;
-      currentSettings = { ...currentSettings, ...settingsPayload };
+    case 'UPDATE_SETTINGS':
+      currentSettings = { ...currentSettings, ...message.payload };
       // Merge grouping settings properly
-      if (settingsPayload.grouping) {
-        currentSettings.grouping = { ...currentSettings.grouping, ...settingsPayload.grouping };
+      if (message.payload.grouping) {
+        currentSettings.grouping = { ...currentSettings.grouping, ...message.payload.grouping };
       }
       // Merge anchor settings properly
-      if (settingsPayload.overlayAnchor) {
-        currentSettings.overlayAnchor = { ...currentSettings.overlayAnchor, ...settingsPayload.overlayAnchor };
+      if (message.payload.overlayAnchor) {
+        currentSettings.overlayAnchor = { ...currentSettings.overlayAnchor, ...message.payload.overlayAnchor };
         applyPositionAnchor();
       }
       updateMonitoringConfig();
-      if (settingsPayload.grouping?.enabled !== undefined) {
+      if (message.payload.grouping?.enabled !== undefined) {
         rebuildEventGroups();
         // Sync grouping button state
         const groupingBtn = shadowRoot?.getElementById('grouping-btn');
@@ -3082,12 +3084,11 @@ browserAPI.runtime.onMessage.addListener((message: { type: string; payload?: unk
       // Always re-render to pick up settings changes like showTimestamps
       updateEventsList();
       // Update persist toggle if needed
-      if (settingsPayload.persistEvents !== undefined) {
+      if (message.payload.persistEvents !== undefined) {
         updatePersistToggle();
       }
       sendResponse({ success: true });
       break;
-    }
     case 'GET_SETTINGS':
       sendResponse({ settings: currentSettings });
       break;

@@ -1,0 +1,164 @@
+/**
+ * Overlay toolbar component styles (search and filters).
+ */
+
+.toolbar {
+  padding: var(--dl-space-sm, 8px) var(--dl-space-md, 12px);
+  border-bottom: 1px solid var(--dl-border-light, rgba(255, 255, 255, 0.08));
+  background: rgba(15, 15, 35, 0.3);
+}
+
+/* Search container */
+.searchContainer {
+  position: relative;
+  margin-bottom: var(--dl-space-sm, 8px);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dl-text-muted, #64748b);
+  pointer-events: none;
+}
+
+.searchIcon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: var(--dl-space-sm, 8px) 10px var(--dl-space-sm, 8px) 32px;
+  background: var(--dl-bg-light, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--dl-border-medium, rgba(255, 255, 255, 0.1));
+  border-radius: var(--dl-radius-md, 6px);
+  color: var(--dl-text-primary, #e2e8f0);
+  font-size: var(--dl-text-base, 12px);
+  outline: none;
+  transition: all var(--dl-transition-fast, 0.15s ease);
+}
+
+.searchInput::placeholder {
+  color: var(--dl-text-muted, #64748b);
+}
+
+.searchInput:focus {
+  border-color: var(--dl-border-focus, rgba(99, 102, 241, 0.5));
+  background: var(--dl-bg-lighter, rgba(255, 255, 255, 0.08));
+}
+
+.clearSearch {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--dl-text-muted, #64748b);
+  cursor: pointer;
+  padding: 2px;
+  display: none;
+}
+
+.searchInput:not(:placeholder-shown) ~ .clearSearch {
+  display: block;
+}
+
+.clearSearch:hover {
+  color: var(--dl-text-primary, #e2e8f0);
+}
+
+/* Filter container */
+.filterContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--dl-space-sm, 8px);
+  flex-wrap: wrap;
+}
+
+.filterTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dl-space-xs, 4px);
+  flex: 1;
+}
+
+.filterTag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dl-space-xs, 4px);
+  padding: 3px var(--dl-space-sm, 8px);
+  border-radius: var(--dl-radius-xl, 12px);
+  font-size: var(--dl-text-xs, 10px);
+  font-weight: 500;
+}
+
+.filterTag.include {
+  background: var(--dl-success-bg, rgba(34, 197, 94, 0.2));
+  color: var(--dl-success-light, #4ade80);
+  border: 1px solid var(--dl-success-border, rgba(34, 197, 94, 0.3));
+}
+
+.filterTag.exclude {
+  background: var(--dl-error-bg, rgba(239, 68, 68, 0.2));
+  color: var(--dl-error-light, #f87171);
+  border: 1px solid var(--dl-error-border, rgba(239, 68, 68, 0.3));
+}
+
+.filterTagRemove {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+}
+
+.filterTagRemove:hover {
+  opacity: 1;
+}
+
+.filterTagRemove svg {
+  width: 10px;
+  height: 10px;
+}
+
+.filterCount {
+  opacity: 0.7;
+  margin-left: 2px;
+}
+
+.addFilterBtn {
+  background: var(--dl-bg-hover, rgba(255, 255, 255, 0.1));
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: var(--dl-radius-xl, 12px);
+  padding: 3px 10px;
+  color: var(--dl-text-secondary, #94a3b8);
+  cursor: pointer;
+  font-size: var(--dl-text-xs, 10px);
+  display: flex;
+  align-items: center;
+  gap: var(--dl-space-xs, 4px);
+  transition: all var(--dl-transition-fast, 0.15s ease);
+}
+
+.addFilterBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--dl-text-primary, #e2e8f0);
+}
+
+.addFilterBtn svg {
+  width: 10px;
+  height: 10px;
+}
+
+.emptyFilters {
+  color: var(--dl-text-muted, #64748b);
+  font-size: var(--dl-text-xs, 10px);
+  font-style: italic;
+}

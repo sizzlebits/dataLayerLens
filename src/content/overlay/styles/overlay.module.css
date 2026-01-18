@@ -1,0 +1,99 @@
+/**
+ * Main overlay container styles.
+ */
+
+.overlay {
+  position: fixed;
+  z-index: var(--dl-z-overlay, 2147483646);
+  background: var(--dl-bg-dark, rgba(15, 15, 35, 0.98));
+  border-radius: var(--dl-radius-lg, 8px);
+  box-shadow: var(--dl-shadow-overlay, 0 25px 50px -12px rgba(0, 0, 0, 0.5));
+  border: 1px solid var(--dl-border-light, rgba(255, 255, 255, 0.08));
+  font-family: var(--dl-font-sans, 'Inter', sans-serif);
+  font-size: var(--dl-text-base, 12px);
+  color: var(--dl-text-primary, #e2e8f0);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all var(--dl-transition-base, 0.2s ease);
+}
+
+/* Positioning anchor classes */
+.overlay.anchor-bottom-right {
+  bottom: 16px;
+  right: 16px;
+}
+
+.overlay.anchor-bottom-left {
+  bottom: 16px;
+  left: 16px;
+}
+
+.overlay.anchor-top-right {
+  top: 16px;
+  right: 16px;
+}
+
+.overlay.anchor-top-left {
+  top: 16px;
+  left: 16px;
+}
+
+/* Default size */
+.overlay {
+  width: 420px;
+  max-width: calc(100vw - 32px);
+}
+
+/* Height is controlled via inline style */
+
+/* Collapsed state */
+.overlay.collapsed {
+  height: auto !important;
+}
+
+.overlay.collapsed .content {
+  display: none;
+}
+
+/* Content wrapper */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Resize handle */
+.resize-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  cursor: ns-resize;
+  background: transparent;
+  z-index: 10;
+}
+
+.resize-handle:hover,
+.resize-handle.active {
+  background: linear-gradient(
+    180deg,
+    var(--dl-primary, #6366f1) 0%,
+    transparent 100%
+  );
+}
+
+/* Bottom resize handle for top-anchored overlay */
+.overlay.anchor-top-right .resize-handle,
+.overlay.anchor-top-left .resize-handle {
+  top: auto;
+  bottom: 0;
+  background: linear-gradient(
+    0deg,
+    var(--dl-primary, #6366f1) 0%,
+    transparent 100%
+  );
+}

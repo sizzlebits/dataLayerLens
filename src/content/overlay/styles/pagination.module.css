@@ -1,0 +1,105 @@
+/**
+ * Pagination component styles.
+ */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--dl-space-sm, 8px) var(--dl-space-md, 12px);
+  border-top: 1px solid var(--dl-border-light, rgba(255, 255, 255, 0.08));
+  background: rgba(15, 15, 35, 0.3);
+  gap: var(--dl-space-sm, 8px);
+}
+
+.pageBtn {
+  background: var(--dl-bg-light, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--dl-border-medium, rgba(255, 255, 255, 0.1));
+  border-radius: var(--dl-radius-sm, 4px);
+  color: var(--dl-text-secondary, #94a3b8);
+  cursor: pointer;
+  padding: var(--dl-space-xs, 4px) var(--dl-space-sm, 8px);
+  font-size: var(--dl-text-sm, 11px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--dl-transition-fast, 0.15s ease);
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: var(--dl-bg-lighter, rgba(255, 255, 255, 0.08));
+  border-color: var(--dl-border-focus, rgba(99, 102, 241, 0.5));
+  color: var(--dl-text-primary, #e2e8f0);
+}
+
+.pageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.pageInfo {
+  font-size: var(--dl-text-sm, 11px);
+  color: var(--dl-text-muted, #64748b);
+  padding: 0 var(--dl-space-sm, 8px);
+}
+
+.pageNumber {
+  color: var(--dl-text-primary, #e2e8f0);
+  font-weight: 500;
+}
+
+/* Per page selector */
+.perPageSelector {
+  display: flex;
+  align-items: center;
+  gap: var(--dl-space-xs, 4px);
+  margin-left: auto;
+}
+
+.perPageLabel {
+  font-size: var(--dl-text-xs, 10px);
+  color: var(--dl-text-muted, #64748b);
+}
+
+.perPageSelect {
+  background: var(--dl-bg-light, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--dl-border-medium, rgba(255, 255, 255, 0.1));
+  border-radius: var(--dl-radius-sm, 4px);
+  color: var(--dl-text-primary, #e2e8f0);
+  font-size: var(--dl-text-xs, 10px);
+  padding: 2px var(--dl-space-xs, 4px);
+  cursor: pointer;
+  outline: none;
+}
+
+.perPageSelect:hover {
+  border-color: var(--dl-border-focus, rgba(99, 102, 241, 0.5));
+}
+
+.perPageSelect option {
+  background: var(--dl-bg-dark, rgba(15, 15, 35, 0.98));
+  color: var(--dl-text-primary, #e2e8f0);
+}
+
+/* Compact mode */
+.pagination.compact {
+  padding: var(--dl-space-xs, 4px) var(--dl-space-sm, 8px);
+  gap: var(--dl-space-xs, 4px);
+}
+
+.pagination.compact .pageBtn {
+  padding: 2px var(--dl-space-xs, 4px);
+}
+
+.pagination.compact .pageInfo {
+  font-size: var(--dl-text-xs, 10px);
+}
+
+.pagination.compact .perPageSelector {
+  display: none;
+}

@@ -22,6 +22,9 @@ coverage/
 *.swo
 *~
 
+# AI \ LLM
+.claude/
+
 # OS
 .DS_Store
 .AppleDouble
