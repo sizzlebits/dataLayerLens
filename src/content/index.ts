@@ -32,10 +32,6 @@ let shadowRoot: ShadowRoot | null = null;
 let overlayInteractionTime = 0;
 const INTERACTION_DEBOUNCE_MS = 100; // Ignore events within 100ms of overlay interaction
 
-// Flag to track if we're currently blocking events from our overlay
-let _blockingOverlayEvents = false;
-void _blockingOverlayEvents; // Reserved for future use
-
 // Track whether we've detected any dataLayer activity
 let hasDataLayerActivity = false;
 
