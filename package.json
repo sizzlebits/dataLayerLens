@@ -1,6 +1,6 @@
 {
   "name": "datalayerlens",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A powerful, beautiful browser extension for monitoring GTM dataLayer events in real-time",
   "type": "module",
   "author": "Simon Seddon",
