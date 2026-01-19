@@ -62,12 +62,23 @@ export function EventRow({
       {/* Event Header */}
       <div
         onClick={onToggle}
-        className={`flex items-center gap-2 cursor-pointer ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        aria-label={`${event.event} event from ${cleanSource}. Press Enter to ${isExpanded ? 'collapse' : 'expand'}`}
+        className={`flex items-center gap-2 cursor-pointer ${compact ? 'px-3 py-2' : 'px-4 py-3'} focus:outline-none focus-visible:ring-2 focus-visible:ring-dl-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dl-darker`}
       >
         <motion.div
           className="p-0.5 hover:bg-dl-border rounded transition-colors"
           animate={{ rotate: isExpanded ? 90 : 0 }}
           transition={{ duration: 0.15 }}
+          aria-hidden="true"
         >
           <ChevronRight className={compact ? 'w-3.5 h-3.5 text-slate-500' : 'w-4 h-4 text-slate-500'} />
         </motion.div>
@@ -108,7 +119,7 @@ export function EventRow({
           </div>
         </div>
 
-        <div className="relative flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="relative flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
           {showFilterActions && (
             <>
               <motion.button
@@ -116,12 +127,14 @@ export function EventRow({
                   e.stopPropagation();
                   onToggleFilterMenu?.();
                 }}
-                className="p-1.5 hover:bg-dl-border rounded transition-all text-slate-400 hover:text-dl-primary"
+                className="p-1.5 hover:bg-dl-border rounded transition-all text-slate-400 hover:text-dl-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-dl-primary"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                title="Add to filters"
+                aria-label="Add to filters"
+                aria-haspopup="menu"
+                aria-expanded={showFilterMenu}
               >
-                <Filter className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
+                <Filter className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4'} aria-hidden="true" />
               </motion.button>
 
               {/* Filter dropdown menu */}
@@ -134,19 +147,23 @@ export function EventRow({
                     transition={{ duration: 0.1 }}
                     className="absolute right-0 top-full mt-1 z-50 bg-dl-card border border-dl-border rounded-lg shadow-xl overflow-hidden min-w-[140px]"
                     onClick={(e) => e.stopPropagation()}
+                    role="menu"
+                    aria-label="Filter options"
                   >
                     <button
                       onClick={onAddFilterInclude}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-dl-success/20 hover:text-dl-success transition-colors"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-dl-success/20 hover:text-dl-success transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-dl-success"
+                      role="menuitem"
                     >
-                      <ListPlus className="w-3.5 h-3.5" />
+                      <ListPlus className="w-3.5 h-3.5" aria-hidden="true" />
                       <span>Whitelist</span>
                     </button>
                     <button
                       onClick={onAddFilterExclude}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-dl-error/20 hover:text-dl-error transition-colors"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-dl-error/20 hover:text-dl-error transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-dl-error"
+                      role="menuitem"
                     >
-                      <ListMinus className="w-3.5 h-3.5" />
+                      <ListMinus className="w-3.5 h-3.5" aria-hidden="true" />
                       <span>Blacklist</span>
                     </button>
                   </motion.div>
@@ -161,15 +178,15 @@ export function EventRow({
                 e.stopPropagation();
                 onCopy?.();
               }}
-              className={`hover:bg-dl-border rounded-lg transition-all ${compact ? 'p-1.5' : 'p-2'}`}
+              className={`hover:bg-dl-border rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-dl-primary ${compact ? 'p-1.5' : 'p-2'}`}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              title="Copy event data"
+              aria-label={isCopied ? 'Copied!' : 'Copy event data'}
             >
               {isCopied ? (
-                <Check className={`text-dl-success ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+                <Check className={`text-dl-success ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} aria-hidden="true" />
               ) : (
-                <Copy className={`text-slate-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+                <Copy className={`text-slate-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} aria-hidden="true" />
               )}
             </motion.button>
           )}

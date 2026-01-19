@@ -1,9 +1,7 @@
 /**
  * Shared popup components index.
+ * Re-exports from the main shared components for backward compatibility.
  */
 
-export { Toggle } from './Toggle';
-export type { ToggleProps } from './Toggle';
-
-export { SearchInput } from './SearchInput';
-export type { SearchInputProps } from './SearchInput';
+export { Toggle, SearchInput } from '@/components/shared';
+export type { ToggleProps, SearchInputProps } from '@/components/shared';

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { DataLayerEvent, EventGroup, getEventCategory, Settings as SettingsType, DEFAULT_SETTINGS } from '@/types';
 import { EventRow, SettingsDrawer } from '@/components/shared';
+import { copyToClipboard } from '@/utils/clipboard';
 
 // Browser API abstraction
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
@@ -323,26 +324,13 @@ export function SidePanel() {
 
   const copyEvent = useCallback(async (event: DataLayerEvent) => {
     const text = JSON.stringify(event.data, null, 2);
-    try {
-      // Try modern clipboard API first
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        throw new Error('Clipboard API not available');
-      }
-    } catch {
-      // Fallback for contexts where clipboard API may be restricted
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
+    const result = await copyToClipboard(text);
+
+    if (result.success) {
+      setCopiedId(event.id);
+      setTimeout(() => setCopiedId(null), 2000);
     }
-    setCopiedId(event.id);
-    setTimeout(() => setCopiedId(null), 2000);
+    // In SidePanel, clipboard should generally work - silently fail if it doesn't
   }, []);
 
   const togglePersist = useCallback(async () => {

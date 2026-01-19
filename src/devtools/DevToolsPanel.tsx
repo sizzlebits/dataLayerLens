@@ -21,7 +21,8 @@ import {
   Settings,
 } from 'lucide-react';
 import { DataLayerEvent, EventGroup, getEventCategory, Settings as SettingsType, DEFAULT_SETTINGS } from '@/types';
-import { EventRow, SettingsDrawer } from '@/components/shared';
+import { EventRow, SettingsDrawer, Toast } from '@/components/shared';
+import { copyToClipboard, isClipboardApiAvailable } from '@/utils/clipboard';
 
 // Browser API abstraction
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
@@ -40,7 +41,11 @@ export function DevToolsPanel() {
   const [filterMenuEvent, setFilterMenuEvent] = useState<string | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [showSettings, setShowSettings] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
   const clearingRef = useRef(false);
+
+  // Feature detection for clipboard (doesn't actually use clipboard)
+  const clipboardAvailable = isClipboardApiAvailable();
 
   // Get tab ID for DevTools
   const tabId = browserAPI.devtools.inspectedWindow.tabId;
@@ -262,26 +267,17 @@ export function DevToolsPanel() {
 
   const copyEvent = useCallback(async (event: DataLayerEvent) => {
     const text = JSON.stringify(event.data, null, 2);
-    try {
-      // Try modern clipboard API first
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        throw new Error('Clipboard API not available');
-      }
-    } catch {
-      // Fallback for DevTools context where clipboard API may be restricted
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
+    const result = await copyToClipboard(text);
+
+    if (result.success) {
+      setCopiedId(event.id);
+      setCopyError(null);
+      setTimeout(() => setCopiedId(null), 2000);
+    } else {
+      // Show error message briefly
+      setCopyError(result.error || 'Copy failed');
+      setTimeout(() => setCopyError(null), 3000);
     }
-    setCopiedId(event.id);
-    setTimeout(() => setCopiedId(null), 2000);
   }, []);
 
   const togglePersist = useCallback(async () => {
@@ -676,7 +672,7 @@ export function DevToolsPanel() {
                               isNew={newEventIds.has(event.id)}
                               showFilterMenu={filterMenuEvent === event.id}
                               onToggle={() => toggleExpanded(event.id)}
-                              onCopy={() => copyEvent(event)}
+                              onCopy={clipboardAvailable ? () => copyEvent(event) : undefined}
                               onAddFilterInclude={() => addFilter(event.event, 'include')}
                               onAddFilterExclude={() => addFilter(event.event, 'exclude')}
                               onToggleFilterMenu={() =>
@@ -704,7 +700,7 @@ export function DevToolsPanel() {
                 isNew={newEventIds.has(event.id)}
                 showFilterMenu={filterMenuEvent === event.id}
                 onToggle={() => toggleExpanded(event.id)}
-                onCopy={() => copyEvent(event)}
+                onCopy={clipboardAvailable ? () => copyEvent(event) : undefined}
                 onAddFilterInclude={() => addFilter(event.event, 'include')}
                 onAddFilterExclude={() => addFilter(event.event, 'exclude')}
                 onToggleFilterMenu={() =>
@@ -757,6 +753,9 @@ export function DevToolsPanel() {
         onUpdateSettings={handleUpdateSettings}
         activeTabId={tabId}
       />
+
+      {/* Copy Error Toast */}
+      <Toast message={copyError} type="error" />
     </div>
   );
 }

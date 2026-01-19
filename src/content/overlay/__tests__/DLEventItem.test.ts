@@ -1,9 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
 import { DLEventItem } from '../components/DLEventItem';
+import { registerComponents } from '../components';
 import type { DataLayerEvent } from '@/types';
 
-// Ensure component is registered
-import '../components/DLEventItem';
+// Register components before running tests
+beforeAll(() => {
+  registerComponents();
+});
 
 function createMockEvent(overrides: Partial<DataLayerEvent> = {}): DataLayerEvent {
   return {
@@ -16,6 +19,9 @@ function createMockEvent(overrides: Partial<DataLayerEvent> = {}): DataLayerEven
     ...overrides,
   };
 }
+
+// Helper to wait for scheduled renders (uses queueMicrotask internally)
+const waitForRender = () => new Promise<void>(resolve => queueMicrotask(() => resolve()));
 
 describe('DLEventItem', () => {
   let component: DLEventItem;
@@ -37,30 +43,34 @@ describe('DLEventItem', () => {
       expect(content?.innerHTML).toBe('');
     });
 
-    it('renders event data when set', () => {
+    it('renders event data when set', async () => {
       component.event = createMockEvent();
+      await waitForRender();
 
       const eventName = component.shadowRoot?.querySelector('.event-name');
       expect(eventName?.textContent).toBe('page_view');
     });
 
-    it('displays event icon based on category', () => {
+    it('displays event icon based on category', async () => {
       component.event = createMockEvent({ event: 'page_view' });
+      await waitForRender();
 
       const icon = component.shadowRoot?.querySelector('.event-icon');
       expect(icon?.textContent?.trim()).toBeTruthy();
     });
 
-    it('displays source', () => {
+    it('displays source', async () => {
       component.event = createMockEvent({ source: 'customDataLayer' });
+      await waitForRender();
 
       const source = component.shadowRoot?.querySelector('.event-source');
       expect(source?.textContent).toContain('customDataLayer');
     });
 
-    it('displays timestamp when show-timestamp is set', () => {
+    it('displays timestamp when show-timestamp is set', async () => {
       component.setAttribute('show-timestamp', '');
       component.event = createMockEvent();
+      await waitForRender();
 
       const timestamp = component.shadowRoot?.querySelector('.event-timestamp');
       expect(timestamp).toBeTruthy();
@@ -68,24 +78,27 @@ describe('DLEventItem', () => {
   });
 
   describe('expansion', () => {
-    it('is collapsed by default', () => {
+    it('is collapsed by default', async () => {
       component.event = createMockEvent();
+      await waitForRender();
 
       const item = component.shadowRoot?.querySelector('.event-item');
       expect(item?.classList.contains('expanded')).toBe(false);
     });
 
-    it('expands when expanded attribute is set', () => {
+    it('expands when expanded attribute is set', async () => {
       component.setAttribute('expanded', '');
       component.event = createMockEvent();
+      await waitForRender();
 
       const item = component.shadowRoot?.querySelector('.event-item');
       expect(item?.classList.contains('expanded')).toBe(true);
     });
 
-    it('shows JSON content when expanded', () => {
+    it('shows JSON content when expanded', async () => {
       component.expanded = true;
       component.event = createMockEvent();
+      await waitForRender();
 
       const content = component.shadowRoot?.querySelector('.event-content');
       expect(content).toBeTruthy();
@@ -94,8 +107,9 @@ describe('DLEventItem', () => {
       expect(json?.innerHTML).toContain('page_view');
     });
 
-    it('toggles expansion on header click', () => {
+    it('toggles expansion on header click', async () => {
       component.event = createMockEvent();
+      await waitForRender();
 
       const header = component.shadowRoot?.querySelector('.event-header') as HTMLElement;
       header?.click();
@@ -105,8 +119,10 @@ describe('DLEventItem', () => {
   });
 
   describe('events', () => {
-    it('emits event-toggle on expansion', () => {
+    it('emits event-toggle on expansion', async () => {
       component.event = createMockEvent();
+      await waitForRender();
+
       const handler = vi.fn();
       component.addEventListener('event-toggle', handler);
 
@@ -119,8 +135,10 @@ describe('DLEventItem', () => {
       expect(detail.expanded).toBe(true);
     });
 
-    it('emits event-copy on copy button click', () => {
+    it('emits event-copy on copy button click', async () => {
       component.event = createMockEvent();
+      await waitForRender();
+
       const handler = vi.fn();
       component.addEventListener('event-copy', handler);
 
@@ -132,12 +150,15 @@ describe('DLEventItem', () => {
       expect(detail.event.id).toBe('test-event-123');
     });
 
-    it('emits filter-add on include button click', () => {
+    it('emits filter-add on include button click', async () => {
       component.event = createMockEvent();
+      await waitForRender();
+
       const handler = vi.fn();
       component.addEventListener('filter-add', handler);
 
       const includeBtn = component.shadowRoot?.querySelector('[data-action="filter-include"]') as HTMLElement;
+      expect(includeBtn).toBeTruthy();
       includeBtn?.click();
 
       expect(handler).toHaveBeenCalled();
@@ -146,12 +167,15 @@ describe('DLEventItem', () => {
       expect(detail.mode).toBe('include');
     });
 
-    it('emits filter-add on exclude button click', () => {
+    it('emits filter-add on exclude button click', async () => {
       component.event = createMockEvent();
+      await waitForRender();
+
       const handler = vi.fn();
       component.addEventListener('filter-add', handler);
 
       const excludeBtn = component.shadowRoot?.querySelector('[data-action="filter-exclude"]') as HTMLElement;
+      expect(excludeBtn).toBeTruthy();
       excludeBtn?.click();
 
       expect(handler).toHaveBeenCalled();
@@ -162,9 +186,10 @@ describe('DLEventItem', () => {
   });
 
   describe('compact mode', () => {
-    it('applies compact-mode attribute', () => {
+    it('applies compact-mode attribute', async () => {
       component.setAttribute('compact-mode', '');
       component.event = createMockEvent();
+      await waitForRender();
 
       expect(component.hasAttribute('compact-mode')).toBe(true);
     });

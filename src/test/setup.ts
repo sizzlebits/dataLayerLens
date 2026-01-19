@@ -1,5 +1,53 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
+import React from 'react';
+
+// Mock Framer Motion to avoid DOM warnings about whileHover, whileTap, etc.
+vi.mock('framer-motion', async () => {
+  const actual = await vi.importActual('framer-motion');
+  return {
+    ...actual,
+    motion: new Proxy(
+      {},
+      {
+        get: (_, tag: string) => {
+          // Return a simple component that filters out Framer Motion specific props
+          return React.forwardRef(({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>, ref) => {
+            // Filter out Framer Motion props that cause React warnings
+            const filteredProps = Object.fromEntries(
+              Object.entries(props).filter(
+                ([key]) =>
+                  ![
+                    'whileHover',
+                    'whileTap',
+                    'whileFocus',
+                    'whileDrag',
+                    'whileInView',
+                    'animate',
+                    'initial',
+                    'exit',
+                    'variants',
+                    'transition',
+                    'layout',
+                    'layoutId',
+                    'drag',
+                    'dragConstraints',
+                    'dragElastic',
+                    'dragMomentum',
+                    'onDragStart',
+                    'onDrag',
+                    'onDragEnd',
+                  ].includes(key)
+              )
+            );
+            return React.createElement(tag, { ...filteredProps, ref }, children);
+          });
+        },
+      }
+    ),
+    AnimatePresence: ({ children }: React.PropsWithChildren) => children,
+  };
+});
 
 // Mock Chrome API
 const mockChrome = {
