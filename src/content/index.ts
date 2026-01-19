@@ -3,6 +3,7 @@
  * Handles overlay rendering, event grouping, persistence, and message passing.
  */
 
+
 import {
   DataLayerEvent,
   EventGroup,
@@ -12,8 +13,48 @@ import {
   getCurrentDomain,
 } from '@/types';
 
+// Feature flag for Web Components overlay
+// When true, uses MAIN world overlay script for Web Components (customElements access)
+// When false, uses legacy inline HTML in ISOLATED world
+// NOTE: Web Components overlay disabled due to CSP/MAIN world injection issues
+// Using sidebar panel instead for a better experience
+const USE_WEB_COMPONENTS_OVERLAY = false;
+
+// Type for the overlay bridge that communicates with MAIN world
+type OverlayBridgeType = import('./modules/overlay').OverlayBridge;
+type OverlayCallbacksType = import('./modules/overlay').OverlayCallbacks;
+
 // Browser API abstraction
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
+// Track if extension context is still valid
+let extensionContextValid = true;
+
+// Check if extension context is still valid
+function isExtensionContextValid(): boolean {
+  try {
+    // Accessing runtime.id will throw if context is invalidated
+    return extensionContextValid && !!browserAPI.runtime?.id;
+  } catch {
+    extensionContextValid = false;
+    return false;
+  }
+}
+
+// Safe wrapper for runtime.sendMessage that handles invalidated context
+function safeSendMessage(message: unknown): Promise<unknown> {
+  if (!isExtensionContextValid()) {
+    return Promise.resolve(undefined);
+  }
+  return browserAPI.runtime.sendMessage(message).catch((error: Error) => {
+    // Check if error is due to invalidated context
+    if (error?.message?.includes('Extension context invalidated')) {
+      extensionContextValid = false;
+      console.debug('[DataLayer Lens] Extension context invalidated - please reload the page');
+    }
+    // Ignore other errors (no listeners, etc.)
+  });
+}
 
 // Current domain for per-domain settings
 const currentDomain = getCurrentDomain();
@@ -25,12 +66,129 @@ function debugError(...args: unknown[]): void {
     console.error('[DataLayer Lens]', ...args);
   }
 }
+
+// Legacy variables - kept for compatibility when not using Web Components
 let overlayRoot: HTMLElement | null = null;
 let shadowRoot: ShadowRoot | null = null;
 
 // Track when user is interacting with our overlay to filter out those events
 let overlayInteractionTime = 0;
 const INTERACTION_DEBOUNCE_MS = 100; // Ignore events within 100ms of overlay interaction
+
+// Web Components overlay bridge (communicates with MAIN world overlay script)
+let overlayBridge: OverlayBridgeType | null = null;
+
+// Create overlay callbacks that wire up to existing state management
+function createOverlayCallbacks(): OverlayCallbacksType {
+  return {
+    onClose: () => {
+      currentSettings.overlayEnabled = false;
+      saveSettingsToStorage();
+      destroyOverlay();
+    },
+    onClearEvents: () => {
+      events.length = 0;
+      eventGroups.length = 0;
+      currentGroupId = null;
+      lastEventTime = 0;
+      expandedEventIds.clear();
+      expandedGroupIds.clear();
+      clearPersistedEvents();
+      updateOverlayEvents();
+      notifyDevTools();
+    },
+    onCollapseToggle: (collapsed: boolean) => {
+      currentSettings.overlayCollapsed = collapsed;
+      saveSettingsToStorage();
+    },
+    onGroupingToggle: (enabled: boolean) => {
+      currentSettings.grouping.enabled = enabled;
+      saveSettingsToStorage();
+      if (enabled) {
+        rebuildEventGroups();
+      }
+      updateOverlayEvents();
+    },
+    onPersistToggle: (enabled: boolean) => {
+      currentSettings.persistEvents = enabled;
+      saveSettingsToStorage();
+      if (enabled) {
+        savePersistedEvents();
+      }
+    },
+    onResize: (height: number) => {
+      currentSettings.overlayHeight = height;
+      saveSettingsToStorage();
+    },
+    onFilterAdd: (filter: string, mode: 'include' | 'exclude') => {
+      if (currentSettings.filterMode !== mode) {
+        currentSettings.eventFilters = [];
+        currentSettings.filterMode = mode;
+      }
+      if (!currentSettings.eventFilters.includes(filter)) {
+        currentSettings.eventFilters.push(filter);
+      }
+      saveSettingsToStorage();
+      updateOverlayEvents();
+      safeSendMessage({
+        type: 'SETTINGS_CHANGED',
+        payload: currentSettings,
+      });
+    },
+    onFilterRemove: (filter: string) => {
+      currentSettings.eventFilters = currentSettings.eventFilters.filter(f => f !== filter);
+      saveSettingsToStorage();
+      updateOverlayEvents();
+      safeSendMessage({
+        type: 'SETTINGS_CHANGED',
+        payload: currentSettings,
+      });
+    },
+    onFilterModeChange: (mode: 'include' | 'exclude', clearFilters: boolean) => {
+      currentSettings.filterMode = mode;
+      if (clearFilters) {
+        currentSettings.eventFilters = [];
+      }
+      saveSettingsToStorage();
+      updateOverlayEvents();
+      safeSendMessage({
+        type: 'SETTINGS_CHANGED',
+        payload: currentSettings,
+      });
+    },
+    onCopyEvent: (event: DataLayerEvent) => {
+      const eventData = {
+        event: event.event,
+        ...event.data,
+      };
+      navigator.clipboard.writeText(JSON.stringify(eventData, null, 2)).catch(() => {
+        debugError('Failed to copy to clipboard');
+      });
+    },
+  };
+}
+
+// Helper to update overlay with current events (Web Components mode)
+function updateOverlayEvents(): void {
+  if (USE_WEB_COMPONENTS_OVERLAY && overlayBridge) {
+    overlayBridge.updateSettings(currentSettings);
+    overlayBridge.updateEvents(getAllFilteredEvents());
+  } else {
+    updateEventsList();
+  }
+}
+
+// Helper to destroy overlay
+function destroyOverlay(): void {
+  if (USE_WEB_COMPONENTS_OVERLAY && overlayBridge) {
+    overlayBridge.destroy();
+    overlayBridge = null;
+  } else if (overlayRoot) {
+    overlayRoot.remove();
+    overlayRoot = null;
+    shadowRoot = null;
+  }
+}
 
 // Track whether we've detected any dataLayer activity
 let hasDataLayerActivity = false;
@@ -294,7 +452,24 @@ function rebuildEventGroups(): void {
 }
 
 // Create shadow DOM container for overlay
-function createOverlayContainer(): void {
+async function createOverlayContainer(): Promise<void> {
+  // Use Web Components via MAIN world bridge if feature flag is enabled
+  if (USE_WEB_COMPONENTS_OVERLAY) {
+    if (overlayBridge) return;
+
+    try {
+      // Import and create the bridge that communicates with MAIN world overlay script
+      const { OverlayBridge } = await import('./modules/overlay');
+      overlayBridge = new OverlayBridge(createOverlayCallbacks());
+      await overlayBridge.create(currentSettings, getAllFilteredEvents());
+      return;
+    } catch (error) {
+      // Fall through to legacy implementation
+      console.warn('[DataLayer Lens] OverlayBridge failed, falling back to legacy:', error);
+    }
+  }
+
+  // Legacy inline HTML implementation below
   if (overlayRoot) return;
 
   overlayRoot = document.createElement('div');
@@ -688,13 +863,12 @@ function getOverlayStyles(): string {
       background: rgba(255, 255, 255, 0.08);
     }
 
-    .persist-toggle-label {
-      font-size: 10px;
+    .persist-icon {
       color: #64748b;
       transition: color 0.15s ease;
     }
 
-    .persist-toggle.active .persist-toggle-label {
+    .persist-toggle.active .persist-icon {
       color: #a5b4fc;
     }
 
@@ -1663,8 +1837,12 @@ function renderOverlayStructure(): void {
           <option value="100">100</option>
           <option value="200">200</option>
         </select>
-        <div class="persist-toggle${currentSettings.persistEvents ? ' active' : ''}" data-action="toggle-persist" id="persist-toggle" title="Persist events across refreshes">
-          <span class="persist-toggle-label">Persist</span>
+        <div class="persist-toggle${currentSettings.persistEvents ? ' active' : ''}" data-action="toggle-persist" id="persist-toggle" title="${currentSettings.persistEvents ? 'Persisting events' : 'Persist events across refreshes'}" aria-label="${currentSettings.persistEvents ? 'Persisting events' : 'Persist events across refreshes'}">
+          <svg class="persist-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
           <div class="persist-toggle-switch">
             <div class="persist-toggle-knob"></div>
           </div>
@@ -1799,6 +1977,9 @@ function updatePersistToggle(): void {
   const toggle = shadowRoot.getElementById('persist-toggle');
   if (toggle) {
     toggle.classList.toggle('active', currentSettings.persistEvents);
+    const label = currentSettings.persistEvents ? 'Persisting events' : 'Persist events across refreshes';
+    toggle.setAttribute('title', label);
+    toggle.setAttribute('aria-label', label);
   }
 }
 
@@ -2194,6 +2375,13 @@ function renderGroupedEvents(container: HTMLElement): void {
 
 // Add a single new event to the top (no full re-render)
 function addEventToList(event: DataLayerEvent): void {
+  // For Web Components mode, just update the overlay with all filtered events
+  if (USE_WEB_COMPONENTS_OVERLAY) {
+    updateOverlayEvents();
+    return;
+  }
+
+  // Legacy implementation below
   if (!shadowRoot) return;
 
   const container = shadowRoot.getElementById('events-container');
@@ -2546,10 +2734,10 @@ function attachOverlayListeners(): void {
             excludeBtn.classList.toggle('active', mode === 'exclude');
           }
 
-          browserAPI.runtime.sendMessage({
+          safeSendMessage({
             type: 'SETTINGS_CHANGED',
             payload: currentSettings,
-          }).catch(() => {});
+          });
         }
         break;
       }
@@ -2562,10 +2750,10 @@ function attachOverlayListeners(): void {
           updateEventsList();
           updateFilterModalSuggestions();
 
-          browserAPI.runtime.sendMessage({
+          safeSendMessage({
             type: 'SETTINGS_CHANGED',
             payload: currentSettings,
-          }).catch(() => {});
+          });
         }
         break;
       }
@@ -2578,10 +2766,10 @@ function attachOverlayListeners(): void {
           updateEventsList();
           updateFilterModalSuggestions();
 
-          browserAPI.runtime.sendMessage({
+          safeSendMessage({
             type: 'SETTINGS_CHANGED',
             payload: currentSettings,
-          }).catch(() => {});
+          });
         }
         break;
       }
@@ -2597,10 +2785,10 @@ function attachOverlayListeners(): void {
             updateFilterModalSuggestions();
             customInput.value = '';
 
-            browserAPI.runtime.sendMessage({
+            safeSendMessage({
               type: 'SETTINGS_CHANGED',
               payload: currentSettings,
-            }).catch(() => {});
+            });
           }
         }
         break;
@@ -2805,10 +2993,10 @@ function addToFilter(eventName: string, mode: 'include' | 'exclude'): void {
   updateEventsList();
 
   // Notify popup/devtools of settings change
-  browserAPI.runtime.sendMessage({
+  safeSendMessage({
     type: 'SETTINGS_CHANGED',
     payload: currentSettings,
-  }).catch(() => {});
+  });
 }
 
 // Remove filter
@@ -2817,10 +3005,10 @@ function removeFromFilter(filter: string): void {
   saveSettingsToStorage();
   updateEventsList();
 
-  browserAPI.runtime.sendMessage({
+  safeSendMessage({
     type: 'SETTINGS_CHANGED',
     payload: currentSettings,
-  }).catch(() => {});
+  });
 }
 
 // Timer for minimized state
@@ -2959,11 +3147,9 @@ async function saveDomainOverlayEnabled(enabled: boolean): Promise<void> {
 
 // Notify DevTools panel of event changes
 function notifyDevTools(): void {
-  browserAPI.runtime.sendMessage({
+  safeSendMessage({
     type: 'EVENTS_UPDATED',
     payload: events,
-  }).catch(() => {
-    // DevTools panel may not be open, ignore
   });
 }
 
@@ -3018,11 +3204,9 @@ window.addEventListener('message', (event) => {
     addEventToList(payload);
 
     // Notify background/devtools
-    browserAPI.runtime.sendMessage({
+    safeSendMessage({
       type: 'DATALAYER_EVENT',
       payload,
-    }).catch(() => {
-      // Ignore if no listeners
     });
   }
 
@@ -3045,7 +3229,7 @@ browserAPI.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       expandedEventIds.clear();
       expandedGroupIds.clear();
       clearPersistedEvents();
-      updateEventsList();
+      updateOverlayEvents();
       sendResponse({ success: true });
       break;
     case 'TOGGLE_OVERLAY':
@@ -3054,10 +3238,8 @@ browserAPI.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       saveDomainOverlayEnabled(currentSettings.overlayEnabled);
       if (currentSettings.overlayEnabled) {
         createOverlayContainer();
-      } else if (overlayRoot) {
-        overlayRoot.remove();
-        overlayRoot = null;
-        shadowRoot = null;
+      } else {
+        destroyOverlay();
       }
       sendResponse({ enabled: currentSettings.overlayEnabled });
       break;
@@ -3072,21 +3254,37 @@ browserAPI.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         currentSettings.overlayAnchor = { ...currentSettings.overlayAnchor, ...message.payload.overlayAnchor };
         applyPositionAnchor();
       }
+      // Save settings to storage so they persist
+      saveSettingsToStorage();
       updateMonitoringConfig();
       if (message.payload.grouping?.enabled !== undefined) {
         rebuildEventGroups();
-        // Sync grouping button state
-        const groupingBtn = shadowRoot?.getElementById('grouping-btn');
-        if (groupingBtn) {
-          groupingBtn.classList.toggle('active', currentSettings.grouping.enabled);
+        // Sync grouping button state (legacy mode only)
+        if (!USE_WEB_COMPONENTS_OVERLAY) {
+          const groupingBtn = shadowRoot?.getElementById('grouping-btn');
+          if (groupingBtn) {
+            groupingBtn.classList.toggle('active', currentSettings.grouping.enabled);
+          }
         }
       }
       // Always re-render to pick up settings changes like showTimestamps
-      updateEventsList();
-      // Update persist toggle if needed
+      updateOverlayEvents();
+      // Handle persist toggle changes
       if (message.payload.persistEvents !== undefined) {
-        updatePersistToggle();
+        // Update persist toggle UI (legacy mode only)
+        if (!USE_WEB_COMPONENTS_OVERLAY) {
+          updatePersistToggle();
+        }
+        // Save current events if enabling persist
+        if (message.payload.persistEvents) {
+          savePersistedEvents();
+        }
       }
+      // Broadcast settings change to other extension parts (sidepanel, devtools)
+      safeSendMessage({
+        type: 'SETTINGS_UPDATED',
+        payload: message.payload,
+      });
       sendResponse({ success: true });
       break;
     case 'GET_SETTINGS':
@@ -3099,6 +3297,10 @@ browserAPI.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 // Load settings and initialize
 async function initialize(): Promise<void> {
   try {
+    // Check if extension context is still valid before making API calls
+    if (!isExtensionContextValid()) {
+      throw new Error('Extension context invalidated');
+    }
     // Request domain-specific settings from background script
     const response = await browserAPI.runtime.sendMessage({
       type: 'GET_SETTINGS',
@@ -3112,19 +3314,26 @@ async function initialize(): Promise<void> {
         grouping: { ...DEFAULT_GROUPING, ...response.settings.grouping },
       };
     }
-  } catch {
+  } catch (error) {
+    // Check if it's an invalidated context error
+    if (error instanceof Error && error.message?.includes('Extension context invalidated')) {
+      extensionContextValid = false;
+      console.debug('[DataLayer Lens] Extension context invalidated - please reload the page');
+    }
     // Fallback to direct storage access if background script isn't ready
     try {
-      const result = await browserAPI.storage.local.get('datalayer_monitor_settings');
-      const savedSettings = result.datalayer_monitor_settings || {};
+      if (isExtensionContextValid()) {
+        const result = await browserAPI.storage.local.get('datalayer_monitor_settings');
+        const savedSettings = result.datalayer_monitor_settings || {};
 
-      currentSettings = {
-        ...DEFAULT_SETTINGS,
-        ...savedSettings,
-        grouping: { ...DEFAULT_GROUPING, ...savedSettings.grouping },
-      };
-    } catch (error) {
-      debugError(' Failed to load settings:', error);
+        currentSettings = {
+          ...DEFAULT_SETTINGS,
+          ...savedSettings,
+          grouping: { ...DEFAULT_GROUPING, ...savedSettings.grouping },
+        };
+      }
+    } catch (storageError) {
+      debugError(' Failed to load settings:', storageError);
     }
   }
 

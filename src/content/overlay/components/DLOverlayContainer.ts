@@ -3,12 +3,11 @@
  * Orchestrates header, toolbar, and event list components.
  */
 
-import { DLBaseComponent, defineComponent } from './DLBaseComponent';
+import { DLBaseComponent } from './DLBaseComponent';
 import type { DataLayerEvent, Settings } from '@/types';
-import './DLOverlayHeader';
-import './DLOverlayToolbar';
-import './DLEventList';
+// Child components are registered by registerComponents() in index.ts
 import type { FilterTag } from './DLOverlayToolbar';
+import type { DLFilterModal } from './DLFilterModal';
 
 export interface OverlayState {
   events: DataLayerEvent[];
@@ -18,6 +17,16 @@ export interface OverlayState {
   filters: FilterTag[];
   expandedEventIds: Set<string>;
 }
+
+// Common GTM event types for filter suggestions
+const COMMON_EVENTS = [
+  'gtm.js', 'gtm.dom', 'gtm.load', 'gtm.click', 'gtm.linkClick', 'gtm.formSubmit',
+  'gtm.historyChange', 'gtm.scrollDepth', 'gtm.timer', 'gtm.video',
+  'page_view', 'view_item', 'view_item_list', 'select_item', 'add_to_cart',
+  'remove_from_cart', 'begin_checkout', 'add_payment_info', 'add_shipping_info',
+  'purchase', 'refund', 'view_promotion', 'select_promotion', 'sign_up', 'login',
+  'search', 'share', 'select_content', 'generate_lead', 'exception',
+];
 
 export class DLOverlayContainer extends DLBaseComponent {
   private _events: DataLayerEvent[] = [];
@@ -31,9 +40,10 @@ export class DLOverlayContainer extends DLBaseComponent {
     horizontal: 'right',
   };
   private _height = 400;
+  private _mode: 'overlay' | 'sidepanel' = 'overlay';
 
   static get observedAttributes(): string[] {
-    return ['collapsed', 'anchor-vertical', 'anchor-horizontal', 'height'];
+    return ['collapsed', 'anchor-vertical', 'anchor-horizontal', 'height', 'mode'];
   }
 
   attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
@@ -50,13 +60,25 @@ export class DLOverlayContainer extends DLBaseComponent {
       case 'height':
         this._height = parseInt(newValue || '400', 10);
         break;
+      case 'mode':
+        this._mode = (newValue as 'overlay' | 'sidepanel') || 'overlay';
+        break;
     }
-    this.render();
+    this.scheduleRender();
+  }
+
+  set mode(value: 'overlay' | 'sidepanel') {
+    this._mode = value;
+    this.scheduleRender();
+  }
+
+  get mode(): 'overlay' | 'sidepanel' {
+    return this._mode;
   }
 
   set events(value: DataLayerEvent[]) {
     this._events = value;
-    this.updateEventList();
+    if (this.isConnected) this.updateEventList();
   }
 
   get events(): DataLayerEvent[] {
@@ -74,7 +96,7 @@ export class DLOverlayContainer extends DLBaseComponent {
         count: this.countEventsMatching(name),
       }));
     }
-    this.render();
+    this.scheduleRender();
   }
 
   get settings(): Settings | null {
@@ -83,7 +105,7 @@ export class DLOverlayContainer extends DLBaseComponent {
 
   set collapsed(value: boolean) {
     this._collapsed = value;
-    this.render();
+    this.scheduleRender();
   }
 
   get collapsed(): boolean {
@@ -106,6 +128,25 @@ export class DLOverlayContainer extends DLBaseComponent {
         font-size: 12px;
       }
 
+      /* Sidepanel mode: fill the container */
+      :host([mode="sidepanel"]) {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        z-index: auto;
+      }
+
+      /* Component content wrapper - must fill available space */
+      .component-content {
+        display: contents;
+      }
+
+      :host([mode="sidepanel"]) .component-content {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
       .overlay {
         width: 400px;
         max-height: calc(100vh - 32px);
@@ -118,6 +159,15 @@ export class DLOverlayContainer extends DLBaseComponent {
         overflow: hidden;
         backdrop-filter: blur(20px);
         transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      /* Sidepanel mode: fill container, no border-radius */
+      :host([mode="sidepanel"]) .overlay {
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        box-shadow: none;
       }
 
       .overlay.collapsed {
@@ -137,6 +187,12 @@ export class DLOverlayContainer extends DLBaseComponent {
         min-height: 200px;
       }
 
+      /* Sidepanel mode: body fills available space */
+      :host([mode="sidepanel"]) .overlay-body {
+        height: 100% !important;
+        min-height: 0;
+      }
+
       /* Positioning based on anchor */
       :host([anchor-vertical="bottom"]) {
         bottom: 16px;
@@ -154,6 +210,14 @@ export class DLOverlayContainer extends DLBaseComponent {
         left: 16px;
       }
 
+      /* Sidepanel mode: no positioning */
+      :host([mode="sidepanel"]) {
+        top: auto;
+        bottom: auto;
+        left: auto;
+        right: auto;
+      }
+
       /* Resize handle */
       .resize-handle {
         position: absolute;
@@ -167,6 +231,11 @@ export class DLOverlayContainer extends DLBaseComponent {
         justify-content: center;
         opacity: 0.5;
         transition: opacity 0.2s ease;
+      }
+
+      /* Hide resize handle in sidepanel mode */
+      :host([mode="sidepanel"]) .resize-handle {
+        display: none;
       }
 
       .resize-handle:hover {
@@ -201,28 +270,32 @@ export class DLOverlayContainer extends DLBaseComponent {
     const filterMode = this._settings?.filterMode ?? 'exclude';
     const showTimestamps = this._settings?.showTimestamps ?? true;
     const compactMode = this._settings?.compactMode ?? false;
+    const isSidepanel = this._mode === 'sidepanel';
 
-    // Update host attributes for CSS positioning
+    // Update host attributes for CSS positioning and mode
+    this.setAttribute('mode', this._mode);
     this.setAttribute('anchor-vertical', this._anchor.vertical);
     this.setAttribute('anchor-horizontal', this._anchor.horizontal);
-    if (this._collapsed) {
+    if (this._collapsed && !isSidepanel) {
       this.setAttribute('collapsed', '');
     } else {
       this.removeAttribute('collapsed');
     }
 
-    const bodyStyle = this._collapsed ? '' : `style="height: ${this._height}px"`;
+    // In sidepanel mode, don't use fixed height - let it fill container
+    const bodyStyle = (this._collapsed && !isSidepanel) ? '' : (isSidepanel ? '' : `style="height: ${this._height}px"`);
 
     const html = `
-      <div class="overlay ${this._collapsed ? 'collapsed' : ''}">
+      <div class="overlay ${(this._collapsed && !isSidepanel) ? 'collapsed' : ''}">
         <div class="resize-handle" data-action="resize">
           <div class="resize-handle-line"></div>
         </div>
         <dl-overlay-header
           event-count="${eventCount}"
-          ${this._collapsed ? 'collapsed' : ''}
+          ${(this._collapsed && !isSidepanel) ? 'collapsed' : ''}
           ${groupingEnabled ? 'grouping-enabled' : ''}
           ${persistEnabled ? 'persist-enabled' : ''}
+          ${isSidepanel ? 'sidepanel' : ''}
         ></dl-overlay-header>
         <div class="overlay-body" ${bodyStyle}>
           <dl-overlay-toolbar
@@ -235,6 +308,7 @@ export class DLOverlayContainer extends DLBaseComponent {
           ></dl-event-list>
         </div>
       </div>
+      <dl-filter-modal filter-mode="${filterMode}"></dl-filter-modal>
     `;
 
     this.setContent(html);
@@ -242,6 +316,38 @@ export class DLOverlayContainer extends DLBaseComponent {
     // Set complex data on child components
     this.updateEventList();
     this.updateToolbarFilters();
+    this.updateFilterModal();
+  }
+
+  /**
+   * Open the filter modal.
+   */
+  public openFilterModal(): void {
+    const modal = this.$('dl-filter-modal') as DLFilterModal;
+    if (modal) {
+      modal.visible = true;
+    }
+  }
+
+  /**
+   * Close the filter modal.
+   */
+  public closeFilterModal(): void {
+    const modal = this.$('dl-filter-modal') as DLFilterModal;
+    if (modal) {
+      modal.visible = false;
+    }
+  }
+
+  private updateFilterModal(): void {
+    const modal = this.$('dl-filter-modal') as DLFilterModal;
+    if (modal) {
+      modal.eventFilters = this._settings?.eventFilters ?? [];
+      modal.filterMode = this._settings?.filterMode ?? 'exclude';
+      // Get unique event names from captured events
+      modal.availableEvents = [...new Set(this._events.map(e => e.event))];
+      modal.commonEvents = COMMON_EVENTS;
+    }
   }
 
   private updateEventList(): void {
@@ -305,12 +411,19 @@ export class DLOverlayContainer extends DLBaseComponent {
       this.emit('search-change', detail);
     });
 
-    this.shadow.addEventListener('filter-remove', (e: Event) => {
-      this.emit('filter-remove', (e as CustomEvent).detail);
+    this.shadow.addEventListener('filter-modal-open', () => {
+      this.openFilterModal();
+      this.emit('filter-modal-open');
     });
 
-    this.shadow.addEventListener('filter-modal-open', () => {
-      this.emit('filter-modal-open');
+    // Filter modal events
+    this.shadow.addEventListener('filter-modal-close', () => {
+      this.closeFilterModal();
+    });
+
+    this.shadow.addEventListener('filter-mode-change', (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      this.emit('filter-mode-change', detail);
     });
 
     // Event list events
@@ -329,7 +442,17 @@ export class DLOverlayContainer extends DLBaseComponent {
     });
 
     this.shadow.addEventListener('filter-add', (e: Event) => {
-      this.emit('filter-add', (e as CustomEvent).detail);
+      const detail = (e as CustomEvent).detail;
+      this.emit('filter-add', detail);
+      // Update the modal with new filter state
+      this.updateFilterModal();
+    });
+
+    this.shadow.addEventListener('filter-remove', (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      this.emit('filter-remove', detail);
+      // Update the modal with new filter state
+      this.updateFilterModal();
     });
 
     // Resize handling
@@ -380,4 +503,4 @@ export class DLOverlayContainer extends DLBaseComponent {
   }
 }
 
-defineComponent('dl-overlay-container', DLOverlayContainer);
+// Registration handled by registerComponents() in index.ts

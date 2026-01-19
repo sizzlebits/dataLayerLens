@@ -3,9 +3,9 @@
  * Handles rendering, pagination, and event interactions.
  */
 
-import { DLBaseComponent, defineComponent } from './DLBaseComponent';
+import { DLBaseComponent } from './DLBaseComponent';
 import type { DataLayerEvent } from '@/types';
-import './DLEventItem';
+// DLEventItem is registered by registerComponents() in index.ts
 
 export interface EventListOptions {
   events: DataLayerEvent[];
@@ -40,7 +40,7 @@ export class DLEventList extends DLBaseComponent {
         this._pageSize = parseInt(newValue || '50', 10);
         break;
     }
-    this.render();
+    this.scheduleRender();
   }
 
   /**
@@ -48,7 +48,7 @@ export class DLEventList extends DLBaseComponent {
    */
   set events(value: DataLayerEvent[]) {
     this._events = value;
-    this.render();
+    this.scheduleRender();
   }
 
   get events(): DataLayerEvent[] {
@@ -60,7 +60,7 @@ export class DLEventList extends DLBaseComponent {
    */
   set expandedIds(value: Set<string>) {
     this._expandedIds = value;
-    this.render();
+    this.scheduleRender();
   }
 
   get expandedIds(): Set<string> {
@@ -69,7 +69,7 @@ export class DLEventList extends DLBaseComponent {
 
   set currentPage(value: number) {
     this._currentPage = value;
-    this.render();
+    this.scheduleRender();
   }
 
   get currentPage(): number {
@@ -280,4 +280,4 @@ export class DLEventList extends DLBaseComponent {
   }
 }
 
-defineComponent('dl-event-list', DLEventList);
+// Registration handled by registerComponents() in index.ts

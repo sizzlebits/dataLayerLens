@@ -19,10 +19,14 @@
     },
     "default_title": "DataLayer Lens"
   },
+  "side_panel": {
+    "default_path": "src/sidepanel/index.html"
+  },
   "permissions": [
     "storage",
     "activeTab",
-    "scripting"
+    "scripting",
+    "sidePanel"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -40,7 +44,7 @@
   "devtools_page": "src/devtools/index.html",
   "web_accessible_resources": [
     {
-      "resources": ["injected.js"],
+      "resources": ["injected.js", "overlay.js"],
       "matches": ["<all_urls>"]
     }
   ]

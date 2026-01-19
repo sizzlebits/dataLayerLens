@@ -112,3 +112,90 @@ button {
 .glow-accent {
   box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
 }
+
+/* New event highlight animation - matches overlay style */
+@keyframes highlightFade {
+  0% {
+    background-color: rgba(99, 102, 241, 0.25);
+  }
+  70% {
+    background-color: rgba(99, 102, 241, 0.25);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Sidepanel container - ensure it fills the viewport */
+.sidepanel-container {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sidepanel-container dl-overlay-container {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* DevTools Panel Container Query Support */
+.devtools-header {
+  container-type: inline-size;
+  container-name: devtools-header;
+}
+
+/* Header button styles with container query responsive behavior */
+.devtools-header .header-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.devtools-header .header-btn .btn-label {
+  display: inline;
+}
+
+.devtools-header .header-btn .btn-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Medium width - hide Console and Export labels */
+@container devtools-header (max-width: 600px) {
+  .devtools-header .header-btn.hide-md .btn-label {
+    display: none;
+  }
+}
+
+/* Narrow width - icons only for all buttons */
+@container devtools-header (max-width: 450px) {
+  .devtools-header .header-btn .btn-label {
+    display: none;
+  }
+
+  .devtools-header .header-btn {
+    padding: 0.5rem;
+  }
+}
+
+/* Search/Filter bar container query */
+.search-filter-bar {
+  container-type: inline-size;
+  container-name: search-filter;
+}
+
+.search-filter-bar .filter-label {
+  display: none;
+}
+
+@container search-filter (min-width: 400px) {
+  .search-filter-bar .filter-label {
+    display: inline;
+  }
+}

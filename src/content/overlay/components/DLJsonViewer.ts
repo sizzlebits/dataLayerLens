@@ -3,7 +3,7 @@
  * Renders JSON objects with collapsible nested structures.
  */
 
-import { DLBaseComponent, defineComponent } from './DLBaseComponent';
+import { DLBaseComponent } from './DLBaseComponent';
 import { escapeHtml } from '@/utils/html';
 
 export class DLJsonViewer extends DLBaseComponent {
@@ -17,7 +17,7 @@ export class DLJsonViewer extends DLBaseComponent {
   attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
     if (name === 'max-depth') {
       this._maxDepth = parseInt(newValue || '10', 10);
-      this.render();
+      this.scheduleRender();
     }
   }
 
@@ -26,7 +26,7 @@ export class DLJsonViewer extends DLBaseComponent {
    */
   set data(value: unknown) {
     this._data = value;
-    this.render();
+    this.scheduleRender();
   }
 
   get data(): unknown {
@@ -185,4 +185,4 @@ export class DLJsonViewer extends DLBaseComponent {
   }
 }
 
-defineComponent('dl-json-viewer', DLJsonViewer);
+// Registration handled by registerComponents() in index.ts

@@ -6,10 +6,27 @@
 export abstract class DLBaseComponent extends HTMLElement {
   protected shadow: ShadowRoot;
   private _initialized = false;
+  private _rendering = false;
 
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: 'open' });
+  }
+
+  /**
+   * Schedule a render if not already rendering.
+   * Prevents infinite loops from property setters triggering re-renders.
+   */
+  protected scheduleRender(): void {
+    if (this._rendering || !this.isConnected) return;
+    this._rendering = true;
+    // Use microtask to batch multiple property changes
+    queueMicrotask(() => {
+      this._rendering = false;
+      if (this.isConnected) {
+        this.render();
+      }
+    });
   }
 
   /**
@@ -163,6 +180,11 @@ export abstract class DLBaseComponent extends HTMLElement {
  * Helper to define a custom element only if not already defined.
  */
 export function defineComponent(tagName: string, componentClass: CustomElementConstructor): void {
+  // Guard against environments where customElements is not available
+  if (typeof customElements === 'undefined' || customElements === null) {
+    console.warn(`[DataLayer Lens] customElements not available, cannot register ${tagName}`);
+    return;
+  }
   if (!customElements.get(tagName)) {
     customElements.define(tagName, componentClass);
   }

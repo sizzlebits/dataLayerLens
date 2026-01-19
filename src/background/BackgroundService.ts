@@ -187,6 +187,18 @@ export class BackgroundService implements IBackgroundService {
             sendResponse({ success: false, error: 'No settings data provided' });
           }
           return true;
+
+        case 'SETTINGS_UPDATED':
+          // Relay settings updates to all extension views (sidepanel, devtools, popup)
+          // The message from content script includes tabId, add it if not present
+          if (tabId) {
+            this.browserAPI.runtime.sendMessage({
+              type: 'SETTINGS_UPDATED',
+              payload: msg.payload,
+              tabId,
+            }).catch(() => {}); // Ignore if no listeners
+          }
+          break;
       }
 
       return false;

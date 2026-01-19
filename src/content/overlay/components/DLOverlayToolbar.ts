@@ -3,7 +3,7 @@
  * Contains search input and filter controls.
  */
 
-import { DLBaseComponent, defineComponent } from './DLBaseComponent';
+import { DLBaseComponent } from './DLBaseComponent';
 import { escapeHtml } from '@/utils/html';
 
 export interface FilterTag {
@@ -35,7 +35,7 @@ export class DLOverlayToolbar extends DLBaseComponent {
         this._filterMode = (newValue as 'include' | 'exclude') || 'exclude';
         break;
     }
-    this.render();
+    this.scheduleRender();
   }
 
   set searchText(value: string) {
@@ -52,7 +52,7 @@ export class DLOverlayToolbar extends DLBaseComponent {
 
   set filters(value: FilterTag[]) {
     this._filters = value;
-    this.render();
+    this.scheduleRender();
   }
 
   get filters(): FilterTag[] {
@@ -61,7 +61,7 @@ export class DLOverlayToolbar extends DLBaseComponent {
 
   set filterMode(value: 'include' | 'exclude') {
     this._filterMode = value;
-    this.render();
+    this.scheduleRender();
   }
 
   get filterMode(): 'include' | 'exclude' {
@@ -338,4 +338,4 @@ export class DLOverlayToolbar extends DLBaseComponent {
   }
 }
 
-defineComponent('dl-overlay-toolbar', DLOverlayToolbar);
+// Registration handled by registerComponents() in index.ts

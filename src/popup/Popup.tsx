@@ -18,6 +18,7 @@ import {
   Clock,
   History,
   Search,
+  PanelRight,
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { DomainSettings, DEFAULT_GROUPING, EVENT_CATEGORIES } from '@/types';
@@ -171,30 +172,60 @@ export function Popup() {
       // If content script isn't loaded, try to inject it
       try {
         const [tab] = await browserAPI.tabs.query({ active: true, currentWindow: true });
-        if (tab?.id) {
-          await browserAPI.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: ['content.js'],
-          });
-          // Wait a moment for content script to initialize
-          setTimeout(async () => {
-            try {
-              const response = await browserAPI.tabs.sendMessage(tab.id!, {
-                type: 'TOGGLE_OVERLAY',
-                payload: { enabled: newState },
-              });
-              if (response?.enabled !== undefined) {
-                updateSettings({ overlayEnabled: response.enabled });
+        if (tab?.id && tab?.url) {
+          // Check if this is a restricted URL where we can't inject scripts
+          const isRestrictedUrl = tab.url.startsWith('chrome://') ||
+                                   tab.url.startsWith('chrome-extension://') ||
+                                   tab.url.startsWith('moz-extension://') ||
+                                   tab.url.startsWith('edge://') ||
+                                   tab.url.startsWith('about:') ||
+                                   tab.url.startsWith('https://chrome.google.com/webstore');
+
+          if (isRestrictedUrl) {
+            console.warn('Cannot inject content script on restricted URL:', tab.url);
+            return;
+          }
+
+          if (browserAPI.scripting?.executeScript) {
+            await browserAPI.scripting.executeScript({
+              target: { tabId: tab.id },
+              files: ['content.js'],
+            });
+            // Wait a moment for content script to initialize
+            setTimeout(async () => {
+              try {
+                const response = await browserAPI.tabs.sendMessage(tab.id!, {
+                  type: 'TOGGLE_OVERLAY',
+                  payload: { enabled: newState },
+                });
+                if (response?.enabled !== undefined) {
+                  updateSettings({ overlayEnabled: response.enabled });
+                }
+              } catch {
+                // Still failed
+                console.error('Content script injection failed - try refreshing the page');
               }
-            } catch {
-              // Still failed, reset toggle
-              console.error('Content script injection failed');
-            }
-          }, 100);
+            }, 100);
+          } else {
+            console.warn('Scripting API not available');
+          }
         }
       } catch (injectError) {
         console.error('Failed to inject content script:', injectError);
       }
+    }
+  };
+
+  const openSidePanel = async () => {
+    try {
+      const [tab] = await browserAPI.tabs.query({ active: true, currentWindow: true });
+      if (tab?.id && tab?.windowId && browserAPI.sidePanel?.open) {
+        await browserAPI.sidePanel.open({ tabId: tab.id });
+        // Close the popup after opening sidepanel
+        window.close();
+      }
+    } catch (error) {
+      console.error('Failed to open side panel:', error);
     }
   };
 
@@ -499,6 +530,25 @@ export function Popup() {
                 </motion.button>
               </div>
             </motion.div>
+
+            {/* Side Panel Button */}
+            <motion.button
+              onClick={openSidePanel}
+              className="w-full bg-dl-card rounded-xl p-4 border border-dl-border hover:border-dl-primary/50 transition-colors"
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <PanelRight className="w-5 h-5 text-dl-primary" />
+                  <div className="text-left">
+                    <p className="font-medium text-white">Side Panel</p>
+                    <p className="text-xs text-slate-400">Open in browser sidebar</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-400" />
+              </div>
+            </motion.button>
 
             {/* Event Stats */}
             <motion.div

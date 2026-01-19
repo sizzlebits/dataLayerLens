@@ -3,7 +3,7 @@
  * Contains title, event count, and action buttons.
  */
 
-import { DLBaseComponent, defineComponent } from './DLBaseComponent';
+import { DLBaseComponent } from './DLBaseComponent';
 
 export interface HeaderOptions {
   eventCount: number;
@@ -17,9 +17,10 @@ export class DLOverlayHeader extends DLBaseComponent {
   private _collapsed = false;
   private _groupingEnabled = false;
   private _persistEnabled = false;
+  private _sidepanel = false;
 
   static get observedAttributes(): string[] {
-    return ['event-count', 'collapsed', 'grouping-enabled', 'persist-enabled'];
+    return ['event-count', 'collapsed', 'grouping-enabled', 'persist-enabled', 'sidepanel'];
   }
 
   attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
@@ -36,8 +37,11 @@ export class DLOverlayHeader extends DLBaseComponent {
       case 'persist-enabled':
         this._persistEnabled = newValue !== 'false' && newValue !== null;
         break;
+      case 'sidepanel':
+        this._sidepanel = newValue !== 'false' && newValue !== null;
+        break;
     }
-    this.render();
+    this.scheduleRender();
   }
 
   set eventCount(value: number) {
@@ -51,7 +55,7 @@ export class DLOverlayHeader extends DLBaseComponent {
 
   set collapsed(value: boolean) {
     this._collapsed = value;
-    this.render();
+    this.scheduleRender();
   }
 
   get collapsed(): boolean {
@@ -167,6 +171,24 @@ export class DLOverlayHeader extends DLBaseComponent {
   }
 
   protected render(): void {
+    // In sidepanel mode, hide collapse and close buttons
+    const collapseBtn = this._sidepanel ? '' : `
+      <button class="action-btn collapse-btn ${this._collapsed ? 'collapsed' : ''}" data-action="toggle-collapse" title="${this._collapsed ? 'Expand' : 'Collapse'}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="18,15 12,9 6,15"/>
+        </svg>
+      </button>
+    `;
+
+    const closeBtn = this._sidepanel ? '' : `
+      <button class="action-btn" data-action="close" title="Close overlay">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    `;
+
     const html = `
       <div class="header">
         <div class="header-left">
@@ -200,17 +222,8 @@ export class DLOverlayHeader extends DLBaseComponent {
               <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
             </svg>
           </button>
-          <button class="action-btn collapse-btn ${this._collapsed ? 'collapsed' : ''}" data-action="toggle-collapse" title="${this._collapsed ? 'Expand' : 'Collapse'}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="18,15 12,9 6,15"/>
-            </svg>
-          </button>
-          <button class="action-btn" data-action="close" title="Close overlay">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
+          ${collapseBtn}
+          ${closeBtn}
         </div>
       </div>
     `;
@@ -253,4 +266,4 @@ export class DLOverlayHeader extends DLBaseComponent {
   }
 }
 
-defineComponent('dl-overlay-header', DLOverlayHeader);
+// Registration handled by registerComponents() in index.ts

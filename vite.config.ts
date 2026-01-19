@@ -49,9 +49,13 @@ async function buildStandaloneScripts(): Promise<Plugin> {
         { name: 'content', entry: 'src/content/index.ts' },
         { name: 'background', entry: 'src/background/index.ts' },
         { name: 'injected', entry: 'src/injected/index.ts' },
+        { name: 'overlay', entry: 'src/content/overlay-main.ts' },
       ];
 
       for (const script of standaloneScripts) {
+        // No banner needed - we'll access customElements at runtime when DOM is ready
+        const banner = '';
+
         await build({
           configFile: false,
           resolve: {
@@ -74,10 +78,11 @@ async function buildStandaloneScripts(): Promise<Plugin> {
             rollupOptions: {
               output: {
                 extend: true,
+                banner,
               },
             },
-            minify: true,
-            sourcemap: false,
+            minify: false,
+            sourcemap: true,
           },
           logLevel: 'warn',
         });
@@ -88,6 +93,7 @@ async function buildStandaloneScripts(): Promise<Plugin> {
 
 export default defineConfig(async () => ({
   plugins: [react(), copyExtensionFiles(), await buildStandaloneScripts()],
+  base: '', // Use relative paths for Chrome extension compatibility
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -104,6 +110,7 @@ export default defineConfig(async () => ({
         popup: resolve(__dirname, 'src/popup/index.html'),
         devtools: resolve(__dirname, 'src/devtools/index.html'),
         'devtools-panel': resolve(__dirname, 'src/devtools/panel.html'),
+        sidepanel: resolve(__dirname, 'src/sidepanel/index.html'),
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',

@@ -3,7 +3,7 @@
  * Shows event name, timestamp, category icon, and expandable JSON details.
  */
 
-import { DLBaseComponent, defineComponent } from './DLBaseComponent';
+import { DLBaseComponent } from './DLBaseComponent';
 import type { DataLayerEvent } from '@/types';
 import { getEventCategory } from '@/types';
 import { escapeHtml, syntaxHighlight } from '@/utils/html';
@@ -36,7 +36,7 @@ export class DLEventItem extends DLBaseComponent {
         // Compact mode is applied via CSS attribute selector, no need for property
         break;
     }
-    this.render();
+    this.scheduleRender();
   }
 
   /**
@@ -44,7 +44,7 @@ export class DLEventItem extends DLBaseComponent {
    */
   set event(value: DataLayerEvent | null) {
     this._event = value;
-    this.render();
+    this.scheduleRender();
   }
 
   get event(): DataLayerEvent | null {
@@ -53,7 +53,7 @@ export class DLEventItem extends DLBaseComponent {
 
   set expanded(value: boolean) {
     this._expanded = value;
-    this.render();
+    this.scheduleRender();
   }
 
   get expanded(): boolean {
@@ -295,4 +295,4 @@ export class DLEventItem extends DLBaseComponent {
   }
 }
 
-defineComponent('dl-event-item', DLEventItem);
+// Registration handled by registerComponents() in index.ts
