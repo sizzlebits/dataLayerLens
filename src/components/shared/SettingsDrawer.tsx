@@ -11,8 +11,15 @@ import {
   Zap,
   Settings as SettingsIcon,
   ChevronRight,
+  Download,
+  Database,
+  PanelRight,
+  Wrench,
+  SquareStack,
+  Palette,
 } from 'lucide-react';
-import { Settings, DEFAULT_GROUPING } from '@/types';
+import { Settings, DEFAULT_GROUPING, SOURCE_COLOR_POOL, getSourceColor } from '@/types';
+import { SourceColorEditor } from './SourceColorEditor';
 
 // Browser API abstraction
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
@@ -32,6 +39,9 @@ interface SettingsDrawerProps {
   settings: Settings;
   onUpdateSettings: (updates: Partial<Settings>) => void;
   activeTabId: number | null;
+  eventCount?: number;
+  onExport?: () => void;
+  detectedSources?: string[];
 }
 
 export function SettingsDrawer({
@@ -40,11 +50,15 @@ export function SettingsDrawer({
   settings,
   onUpdateSettings,
   activeTabId,
+  eventCount,
+  onExport,
+  detectedSources = [],
 }: SettingsDrawerProps) {
   const [newLayerName, setNewLayerName] = useState('');
   const [isAddingLayer, setIsAddingLayer] = useState(false);
   const [isAddingTrigger, setIsAddingTrigger] = useState(false);
   const [triggerSearch, setTriggerSearch] = useState('');
+  const [expandedColorPicker, setExpandedColorPicker] = useState<string | null>(null);
 
   const updateSettings = (updates: Partial<Settings>) => {
     onUpdateSettings(updates);
@@ -101,6 +115,53 @@ export function SettingsDrawer({
     });
   };
 
+  const handleSourceColorChange = (source: string, color: string) => {
+    updateSettings({
+      sourceColors: {
+        ...settings.sourceColors,
+        [source]: color,
+      },
+    });
+  };
+
+  const handleViewModeChange = async (mode: 'overlay' | 'sidepanel' | 'devtools') => {
+    updateSettings({ viewMode: mode });
+
+    if (!activeTabId) return;
+
+    try {
+      if (mode === 'overlay') {
+        // Turn on overlay mode
+        await browserAPI.tabs.sendMessage(activeTabId, {
+          type: 'TOGGLE_OVERLAY',
+          payload: { enabled: true },
+        });
+        updateSettings({ overlayEnabled: true });
+      } else {
+        // Turn off overlay when switching to sidepanel or devtools
+        if (settings.overlayEnabled) {
+          await browserAPI.tabs.sendMessage(activeTabId, {
+            type: 'TOGGLE_OVERLAY',
+            payload: { enabled: false },
+          });
+          updateSettings({ overlayEnabled: false });
+        }
+
+        if (mode === 'sidepanel') {
+          // Get tab info to open side panel
+          const tab = await browserAPI.tabs.get(activeTabId);
+          if (tab.windowId && browserAPI.sidePanel?.open) {
+            await browserAPI.sidePanel.open({ tabId: activeTabId });
+            onClose(); // Close the drawer
+          }
+        }
+        // For devtools, we can't open it programmatically - UI shows instructions
+      }
+    } catch (error) {
+      console.error('Failed to change view mode:', error);
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -140,6 +201,87 @@ export function SettingsDrawer({
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 space-y-5">
+              {/* Events Captured */}
+              {(eventCount !== undefined || onExport) && (
+                <div className="space-y-2">
+                  <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <Database className="w-3.5 h-3.5 text-dl-accent" />
+                    Events Captured
+                  </h3>
+                  <div className="flex items-center justify-between bg-dl-card rounded px-3 py-2 border border-dl-border">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-white">{eventCount ?? 0}</span>
+                      <span className="text-xs text-slate-400">events</span>
+                    </div>
+                    {onExport && (
+                      <motion.button
+                        onClick={onExport}
+                        disabled={!eventCount || eventCount === 0}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-dl-card hover:bg-dl-border border border-dl-border rounded text-xs text-slate-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Export
+                      </motion.button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* View Mode */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                  View Mode
+                </h3>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <motion.button
+                    onClick={() => handleViewModeChange('overlay')}
+                    className={`flex flex-col items-center gap-1.5 p-2.5 rounded-lg border transition-colors ${
+                      settings.viewMode === 'overlay'
+                        ? 'bg-dl-primary/20 border-dl-primary text-dl-primary'
+                        : 'border-dl-border text-slate-400 hover:text-white hover:border-slate-500'
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <SquareStack className="w-4 h-4" />
+                    <span className="text-[10px] font-medium">Overlay</span>
+                  </motion.button>
+                  <motion.button
+                    onClick={() => handleViewModeChange('sidepanel')}
+                    className={`flex flex-col items-center gap-1.5 p-2.5 rounded-lg border transition-colors ${
+                      settings.viewMode === 'sidepanel'
+                        ? 'bg-dl-primary/20 border-dl-primary text-dl-primary'
+                        : 'border-dl-border text-slate-400 hover:text-white hover:border-slate-500'
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <PanelRight className="w-4 h-4" />
+                    <span className="text-[10px] font-medium">Side Panel</span>
+                  </motion.button>
+                  <motion.button
+                    onClick={() => handleViewModeChange('devtools')}
+                    className={`flex flex-col items-center gap-1.5 p-2.5 rounded-lg border transition-colors ${
+                      settings.viewMode === 'devtools'
+                        ? 'bg-dl-primary/20 border-dl-primary text-dl-primary'
+                        : 'border-dl-border text-slate-400 hover:text-white hover:border-slate-500'
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Wrench className="w-4 h-4" />
+                    <span className="text-[10px] font-medium">DevTools</span>
+                  </motion.button>
+                </div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">
+                  {settings.viewMode === 'overlay' && 'On-page overlay for quick access.'}
+                  {settings.viewMode === 'sidepanel' && 'Opens in browser side panel.'}
+                  {settings.viewMode === 'devtools' && 'F12 → DL tab'}
+                </p>
+              </div>
+
               {/* DataLayer Names */}
               <div className="space-y-2">
                 <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
@@ -147,23 +289,65 @@ export function SettingsDrawer({
                   DataLayer Arrays
                 </h3>
                 <div className="space-y-1.5">
-                  {settings.dataLayerNames.map((name) => (
-                    <div
-                      key={name}
-                      className="flex items-center justify-between bg-dl-card rounded px-3 py-2 border border-dl-border group"
-                    >
-                      <code className="text-xs text-dl-accent">{name}</code>
-                      <motion.button
-                        onClick={() => removeDataLayerName(name)}
-                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-dl-error/20 rounded transition-all"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        disabled={settings.dataLayerNames.length <= 1}
-                      >
-                        <X className="w-3 h-3 text-dl-error" />
-                      </motion.button>
-                    </div>
-                  ))}
+                  {settings.dataLayerNames.map((name) => {
+                    const color = getSourceColor(name, settings.sourceColors || {});
+                    const isExpanded = expandedColorPicker === name;
+
+                    return (
+                      <div key={name} className="space-y-1">
+                        <div className="flex items-center justify-between bg-dl-card rounded px-3 py-2 border border-dl-border group">
+                          <div className="flex items-center gap-2">
+                            <motion.button
+                              onClick={() => setExpandedColorPicker(isExpanded ? null : name)}
+                              className="w-4 h-4 rounded-full border-2 border-white/20 hover:border-white/40 transition-colors"
+                              style={{ backgroundColor: color }}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              title="Change color"
+                            />
+                            <code className="text-xs text-dl-accent">{name}</code>
+                          </div>
+                          <motion.button
+                            onClick={() => removeDataLayerName(name)}
+                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-dl-error/20 rounded transition-all"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            disabled={settings.dataLayerNames.length <= 1}
+                          >
+                            <X className="w-3 h-3 text-dl-error" />
+                          </motion.button>
+                        </div>
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="flex flex-wrap gap-1.5 p-2 bg-dl-dark rounded border border-dl-border">
+                                {SOURCE_COLOR_POOL.map((poolColor) => (
+                                  <motion.button
+                                    key={poolColor}
+                                    onClick={() => {
+                                      handleSourceColorChange(name, poolColor);
+                                      setExpandedColorPicker(null);
+                                    }}
+                                    className={`w-5 h-5 rounded-full border-2 transition-colors ${
+                                      color === poolColor ? 'border-white' : 'border-transparent hover:border-white/40'
+                                    }`}
+                                    style={{ backgroundColor: poolColor }}
+                                    whileHover={{ scale: 1.15 }}
+                                    whileTap={{ scale: 0.95 }}
+                                  />
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  })}
 
                   {isAddingLayer ? (
                     <div className="flex items-center gap-1.5">
@@ -208,6 +392,19 @@ export function SettingsDrawer({
                     </motion.button>
                   )}
                 </div>
+              </div>
+
+              {/* Source Colors */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                  <Palette className="w-3.5 h-3.5 text-dl-secondary" />
+                  Source Colors
+                </h3>
+                <SourceColorEditor
+                  sources={detectedSources}
+                  sourceColors={settings.sourceColors || {}}
+                  onColorChange={handleSourceColorChange}
+                />
               </div>
 
               {/* Display Settings */}

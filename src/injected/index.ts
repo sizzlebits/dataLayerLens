@@ -5,7 +5,11 @@
 
 interface DataLayerMonitorConfig {
   dataLayerNames: string[];
+  consoleLogging?: boolean;
 }
+
+// Store console logging setting
+let consoleLoggingEnabled = false;
 
 interface MonitoredDataLayer {
   name: string;
@@ -16,6 +20,9 @@ const EXTENSION_ID = '__DATALAYER_MONITOR__';
 
 // Track which dataLayers we're monitoring
 const monitoredLayers: Map<string, MonitoredDataLayer> = new Map();
+
+// Track the current length of each dataLayer for index assignment
+const dataLayerLengths: Map<string, number> = new Map();
 
 // Generate unique event IDs
 function generateId(): string {
@@ -82,7 +89,7 @@ function safeClone(obj: unknown, seen = new WeakSet()): unknown {
 }
 
 // Send event to content script
-function emitEvent(event: Record<string, unknown>, source: string): void {
+function emitEvent(event: Record<string, unknown>, source: string, dataLayerIndex: number): void {
   // Safely clone the event data to avoid DataCloneError
   const safeData = safeClone(event) as Record<string, unknown>;
 
@@ -93,6 +100,7 @@ function emitEvent(event: Record<string, unknown>, source: string): void {
     data: safeData,
     source,
     raw: safeData,
+    dataLayerIndex,
   };
 
   try {
@@ -116,24 +124,27 @@ function emitEvent(event: Record<string, unknown>, source: string): void {
           data: { event: payload.event, _error: 'Data could not be cloned' },
           source,
           raw: { event: payload.event },
+          dataLayerIndex,
         },
       },
       '*'
     );
   }
 
-  // Also log to console with style
-  const eventName = event.event as string;
-  const title = `%c📊 ${source}%c ${eventName}`;
-  console.groupCollapsed(
-    title,
-    'background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;',
-    'color: #22d3ee; font-weight: bold;'
-  );
-  console.log('%cEvent Data:', 'color: #10b981; font-weight: bold;');
-  console.log(event);
-  console.log('%cTimestamp:', 'color: #64748b;', new Date().toLocaleTimeString());
-  console.groupEnd();
+  // Only log to console if enabled
+  if (consoleLoggingEnabled) {
+    const eventName = event.event as string;
+    const title = `%c📊 ${source}%c ${eventName}`;
+    console.groupCollapsed(
+      title,
+      'background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;',
+      'color: #22d3ee; font-weight: bold;'
+    );
+    console.log('%cEvent Data:', 'color: #10b981; font-weight: bold;');
+    console.log(event);
+    console.log('%cTimestamp:', 'color: #64748b;', new Date().toLocaleTimeString());
+    console.groupEnd();
+  }
 }
 
 // Wrap a dataLayer's push method
@@ -147,43 +158,59 @@ function wrapDataLayer(name: string): void {
 
   // Check if already wrapped
   if (monitoredLayers.has(name)) {
-    console.log(`%c[DataLayer Monitor] Already monitoring ${name}`, 'color: #f59e0b;');
+    if (consoleLoggingEnabled) {
+      console.log(`%c[DataLayer Monitor] Already monitoring ${name}`, 'color: #f59e0b;');
+    }
     return;
   }
+
+  // Initialize the length tracker for this dataLayer
+  dataLayerLengths.set(name, dataLayer.length);
 
   // Save original push
   const originalPush = dataLayer.push.bind(dataLayer);
 
   // Create wrapped push
   dataLayer.push = function (...args: unknown[]): number {
+    // Get current index before push
+    const currentLength = dataLayerLengths.get(name) || dataLayer.length;
+
     const result = originalPush(...args);
 
-    // Check each pushed item
+    // Check each pushed item and assign index
+    let index = currentLength;
     for (const item of args) {
       if (isValidEvent(item)) {
-        emitEvent(item, name);
+        emitEvent(item, name, index);
       }
+      index++;
     }
+
+    // Update tracked length
+    dataLayerLengths.set(name, dataLayer.length);
 
     return result;
   };
 
   monitoredLayers.set(name, { name, originalPush });
 
-  // Process existing events in the dataLayer
-  for (const item of dataLayer) {
+  // Process existing events in the dataLayer with their original indices
+  for (let i = 0; i < dataLayer.length; i++) {
+    const item = dataLayer[i];
     if (isValidEvent(item)) {
-      emitEvent(item, name);
+      emitEvent(item, name, i);
     }
   }
 
-  console.log(
-    `%c[DataLayer Monitor] %cNow monitoring %c${name}%c (${dataLayer.length} existing events)`,
-    'background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 2px 8px; border-radius: 4px;',
-    'color: #e2e8f0;',
-    'color: #22d3ee; font-weight: bold;',
-    'color: #64748b;'
-  );
+  if (consoleLoggingEnabled) {
+    console.log(
+      `%c[DataLayer Monitor] %cNow monitoring %c${name}%c (${dataLayer.length} existing events)`,
+      'background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 2px 8px; border-radius: 4px;',
+      'color: #e2e8f0;',
+      'color: #22d3ee; font-weight: bold;',
+      'color: #64748b;'
+    );
+  }
 }
 
 // Unwrap a dataLayer's push method
@@ -201,17 +228,23 @@ function unwrapDataLayer(name: string): void {
 
   monitoredLayers.delete(name);
 
-  console.log(
-    `%c[DataLayer Monitor] %cStopped monitoring %c${name}`,
-    'background: #ef4444; color: white; padding: 2px 8px; border-radius: 4px;',
-    'color: #e2e8f0;',
-    'color: #f87171; font-weight: bold;'
-  );
+  if (consoleLoggingEnabled) {
+    console.log(
+      `%c[DataLayer Monitor] %cStopped monitoring %c${name}`,
+      'background: #ef4444; color: white; padding: 2px 8px; border-radius: 4px;',
+      'color: #e2e8f0;',
+      'color: #f87171; font-weight: bold;'
+    );
+  }
 }
 
 // Update monitored dataLayers based on config
 function updateMonitoring(config: DataLayerMonitorConfig): void {
-  const { dataLayerNames } = config;
+  const { dataLayerNames, consoleLogging } = config;
+
+  // Update console logging setting
+  consoleLoggingEnabled = consoleLogging ?? false;
+
   const currentNames = new Set(monitoredLayers.keys());
   const newNames = new Set(dataLayerNames);
 

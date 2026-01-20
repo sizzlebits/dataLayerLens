@@ -11,14 +11,14 @@ import {
   X,
   Clock,
   Database,
-  Save,
   Grid,
   Settings,
   Plus,
   FolderOpen,
   Folder,
+  Download,
 } from 'lucide-react';
-import { DataLayerEvent, EventGroup, getEventCategory, Settings as SettingsType, DEFAULT_SETTINGS } from '@/types';
+import { DataLayerEvent, EventGroup, getEventCategory, getSourceColor, autoAssignSourceColors, Settings as SettingsType, DEFAULT_SETTINGS } from '@/types';
 import { EventRow, SettingsDrawer } from '@/components/shared';
 import { copyToClipboard } from '@/utils/clipboard';
 
@@ -204,6 +204,32 @@ export function SidePanel() {
     const types = new Set(events.map((e) => e.event));
     return Array.from(types).sort();
   }, [events]);
+
+  // Get unique sources for color assignment
+  const uniqueSources = useMemo(() => {
+    const sources = new Set(events.map((e) => e.source.replace(' (persisted)', '').replace('(persisted)', '')));
+    return Array.from(sources);
+  }, [events]);
+
+  // Auto-assign colors when new sources are discovered
+  useEffect(() => {
+    if (uniqueSources.length > 0 && activeTabId) {
+      const newColors = autoAssignSourceColors(uniqueSources, settings.sourceColors || {});
+      if (newColors) {
+        setSettings((prev) => ({ ...prev, sourceColors: newColors }));
+        browserAPI.tabs.sendMessage(activeTabId, {
+          type: 'UPDATE_SETTINGS',
+          payload: { sourceColors: newColors },
+        }).catch(() => {});
+      }
+    }
+  }, [uniqueSources, settings.sourceColors, activeTabId]);
+
+  // Helper to get source color
+  const getSourceColorForEvent = useCallback((source: string) => {
+    const cleanSource = source.replace(' (persisted)', '').replace('(persisted)', '');
+    return getSourceColor(cleanSource, settings.sourceColors || {});
+  }, [settings.sourceColors]);
 
   // Group events when grouping is enabled
   const eventGroups = useMemo((): EventGroup[] => {
@@ -398,6 +424,17 @@ export function SidePanel() {
     setSettings((prev) => ({ ...prev, ...updates }));
   }, []);
 
+  const exportEvents = useCallback(() => {
+    const data = JSON.stringify(filteredEvents, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `datalayer-events-${new Date().toISOString()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [filteredEvents]);
+
   // Close filter menu when clicking outside
   useEffect(() => {
     if (!filterMenuEvent) return;
@@ -458,7 +495,18 @@ export function SidePanel() {
               whileTap={{ scale: 0.95 }}
               title="Persist events on refresh"
             >
-              <Save className="w-4 h-4" />
+              <Clock className="w-4 h-4" />
+            </motion.button>
+
+            <motion.button
+              onClick={exportEvents}
+              className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-dl-card rounded-lg transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Export events"
+              disabled={filteredEvents.length === 0}
+            >
+              <Download className="w-4 h-4" />
             </motion.button>
 
             <motion.button
@@ -674,22 +722,23 @@ export function SidePanel() {
                       >
                         <div className="pl-4 border-l-2 border-dl-primary/20 ml-3">
                           {group.events.map((event) => (
-                            <EventRow
-                              key={event.id}
-                              event={event}
-                              isExpanded={expandedEvents.has(event.id)}
-                              isCopied={copiedId === event.id}
-                              isNew={newEventIds.has(event.id)}
-                              showFilterMenu={filterMenuEvent === event.id}
-                              compact
-                              onToggle={() => toggleExpanded(event.id)}
-                              onCopy={() => copyEvent(event)}
-                              onAddFilterInclude={() => addFilter(event.event, 'include')}
-                              onAddFilterExclude={() => addFilter(event.event, 'exclude')}
-                              onToggleFilterMenu={() =>
-                                setFilterMenuEvent((prev) => (prev === event.id ? null : event.id))
-                              }
-                            />
+                              <EventRow
+                                key={event.id}
+                                event={event}
+                                isExpanded={expandedEvents.has(event.id)}
+                                isCopied={copiedId === event.id}
+                                isNew={newEventIds.has(event.id)}
+                                showFilterMenu={filterMenuEvent === event.id}
+                                compact
+                                sourceColor={getSourceColorForEvent(event.source)}
+                                onToggle={() => toggleExpanded(event.id)}
+                                onCopy={() => copyEvent(event)}
+                                onAddFilterInclude={() => addFilter(event.event, 'include')}
+                                onAddFilterExclude={() => addFilter(event.event, 'exclude')}
+                                onToggleFilterMenu={() =>
+                                  setFilterMenuEvent((prev) => (prev === event.id ? null : event.id))
+                                }
+                              />
                           ))}
                         </div>
                       </motion.div>
@@ -702,24 +751,43 @@ export function SidePanel() {
         ) : (
           /* Flat View */
           <div className="divide-y divide-dl-border">
-            {paginatedEvents.map((event) => (
-              <EventRow
-                key={event.id}
-                event={event}
-                isExpanded={expandedEvents.has(event.id)}
-                isCopied={copiedId === event.id}
-                isNew={newEventIds.has(event.id)}
-                showFilterMenu={filterMenuEvent === event.id}
-                compact
-                onToggle={() => toggleExpanded(event.id)}
-                onCopy={() => copyEvent(event)}
-                onAddFilterInclude={() => addFilter(event.event, 'include')}
-                onAddFilterExclude={() => addFilter(event.event, 'exclude')}
-                onToggleFilterMenu={() =>
-                  setFilterMenuEvent((prev) => (prev === event.id ? null : event.id))
-                }
-              />
-            ))}
+            {paginatedEvents.map((event, index) => {
+              const isPersisted = event.source.includes('(persisted)');
+              const prevEvent = index > 0 ? paginatedEvents[index - 1] : null;
+              const prevIsPersisted = prevEvent?.source.includes('(persisted)');
+              const showSeparator = settings.persistEvents && isPersisted && !prevIsPersisted && index > 0;
+
+              return (
+                <div key={event.id}>
+                  {showSeparator && (
+                    <div className="flex items-center gap-3 py-3 px-4 bg-dl-card/30">
+                      <div className="flex-1 h-px bg-dl-border" />
+                      <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider flex items-center gap-1.5">
+                        <Clock className="w-3 h-3" />
+                        Persisted Events
+                      </span>
+                      <div className="flex-1 h-px bg-dl-border" />
+                    </div>
+                  )}
+                  <EventRow
+                    event={event}
+                    isExpanded={expandedEvents.has(event.id)}
+                    isCopied={copiedId === event.id}
+                    isNew={newEventIds.has(event.id)}
+                    showFilterMenu={filterMenuEvent === event.id}
+                    compact
+                    sourceColor={getSourceColorForEvent(event.source)}
+                    onToggle={() => toggleExpanded(event.id)}
+                    onCopy={() => copyEvent(event)}
+                    onAddFilterInclude={() => addFilter(event.event, 'include')}
+                    onAddFilterExclude={() => addFilter(event.event, 'exclude')}
+                    onToggleFilterMenu={() =>
+                      setFilterMenuEvent((prev) => (prev === event.id ? null : event.id))
+                    }
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -764,6 +832,9 @@ export function SidePanel() {
         settings={settings}
         onUpdateSettings={handleUpdateSettings}
         activeTabId={activeTabId}
+        eventCount={filteredEvents.length}
+        onExport={exportEvents}
+        detectedSources={uniqueSources}
       />
     </div>
   );

@@ -202,11 +202,14 @@ export class DLEventList extends DLBaseComponent {
       return;
     }
 
-    const eventsHtml = pagedEvents.map((event) => {
+    const eventsHtml = pagedEvents.map((event, index) => {
       const expanded = this._expandedIds.has(event.id);
+      // Events are sorted newest first, so invert to get original capture order
+      const eventNumber = this._events.length - 1 - (start + index);
       return `
         <dl-event-item
           data-event-id="${event.id}"
+          event-index="${eventNumber}"
           ${expanded ? 'expanded' : ''}
           ${this._showTimestamps ? 'show-timestamp' : ''}
           ${this._compactMode ? 'compact-mode' : ''}

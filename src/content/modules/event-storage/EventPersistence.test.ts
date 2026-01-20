@@ -151,7 +151,7 @@ describe('EventPersistence', () => {
       expect(data.events).toHaveLength(100);
     });
 
-    it('excludes already-persisted events', async () => {
+    it('strips persisted marker when saving', async () => {
       const events = [
         createMockEvent({ id: '1', source: 'dataLayer' }),
         createMockEvent({ id: '2', source: 'dataLayer (persisted)' }),
@@ -162,8 +162,11 @@ describe('EventPersistence', () => {
       const stored = await mockBrowserAPI.storage.local.get('persisted_events_example.com');
       const data = stored['persisted_events_example.com'] as { events: DataLayerEvent[] };
 
-      expect(data.events).toHaveLength(1);
-      expect(data.events[0].id).toBe('1');
+      // Both events should be saved
+      expect(data.events).toHaveLength(2);
+      // Both should have the marker stripped
+      expect(data.events[0].source).toBe('dataLayer');
+      expect(data.events[1].source).toBe('dataLayer');
     });
 
     it('handles storage error gracefully', async () => {

@@ -11,7 +11,6 @@ import {
   X,
   Clock,
   Database,
-  Save,
   Grid,
   Download,
   Terminal,
@@ -20,7 +19,7 @@ import {
   Folder,
   Settings,
 } from 'lucide-react';
-import { DataLayerEvent, EventGroup, getEventCategory, Settings as SettingsType, DEFAULT_SETTINGS } from '@/types';
+import { DataLayerEvent, EventGroup, getEventCategory, getSourceColor, autoAssignSourceColors, Settings as SettingsType, DEFAULT_SETTINGS } from '@/types';
 import { EventRow, SettingsDrawer, Toast } from '@/components/shared';
 import { copyToClipboard, isClipboardApiAvailable } from '@/utils/clipboard';
 
@@ -116,6 +115,14 @@ export function DevToolsPanel() {
         if (message.payload) {
           setSettings((prev) => ({ ...prev, ...(message.payload as Partial<SettingsType>) }));
         }
+      } else if (message.type === 'EVENTS_UPDATED') {
+        // Full events list updated (e.g., persisted events loaded)
+        if (message.payload && Array.isArray(message.payload)) {
+          const sortedEvents = [...(message.payload as DataLayerEvent[])].sort(
+            (a: DataLayerEvent, b: DataLayerEvent) => b.timestamp - a.timestamp
+          );
+          setEvents(sortedEvents);
+        }
       }
     };
 
@@ -158,6 +165,32 @@ export function DevToolsPanel() {
     const types = new Set(events.map((e) => e.event));
     return Array.from(types).sort();
   }, [events]);
+
+  // Get unique sources for color assignment
+  const uniqueSources = useMemo(() => {
+    const sources = new Set(events.map((e) => e.source.replace(' (persisted)', '').replace('(persisted)', '')));
+    return Array.from(sources);
+  }, [events]);
+
+  // Auto-assign colors when new sources are discovered
+  useEffect(() => {
+    if (uniqueSources.length > 0 && tabId) {
+      const newColors = autoAssignSourceColors(uniqueSources, settings.sourceColors || {});
+      if (newColors) {
+        setSettings((prev) => ({ ...prev, sourceColors: newColors }));
+        browserAPI.tabs.sendMessage(tabId, {
+          type: 'UPDATE_SETTINGS',
+          payload: { sourceColors: newColors },
+        }).catch(() => {});
+      }
+    }
+  }, [uniqueSources, settings.sourceColors, tabId]);
+
+  // Helper to get source color
+  const getSourceColorForEvent = useCallback((source: string) => {
+    const cleanSource = source.replace(' (persisted)', '').replace('(persisted)', '');
+    return getSourceColor(cleanSource, settings.sourceColors || {});
+  }, [settings.sourceColors]);
 
   // Group events when grouping is enabled
   const eventGroups = useMemo((): EventGroup[] => {
@@ -434,7 +467,7 @@ export function DevToolsPanel() {
               whileTap={{ scale: 0.98 }}
               title="Persist events on refresh"
             >
-              <Save className="btn-icon" />
+              <Clock className="btn-icon" />
               <span className="btn-label">Persist</span>
             </motion.button>
 
@@ -664,21 +697,22 @@ export function DevToolsPanel() {
                       >
                         <div className="pl-6 border-l-2 border-dl-primary/20 ml-4">
                           {group.events.map((event) => (
-                            <EventRow
-                              key={event.id}
-                              event={event}
-                              isExpanded={expandedEvents.has(event.id)}
-                              isCopied={copiedId === event.id}
-                              isNew={newEventIds.has(event.id)}
-                              showFilterMenu={filterMenuEvent === event.id}
-                              onToggle={() => toggleExpanded(event.id)}
-                              onCopy={clipboardAvailable ? () => copyEvent(event) : undefined}
-                              onAddFilterInclude={() => addFilter(event.event, 'include')}
-                              onAddFilterExclude={() => addFilter(event.event, 'exclude')}
-                              onToggleFilterMenu={() =>
-                                setFilterMenuEvent((prev) => (prev === event.id ? null : event.id))
-                              }
-                            />
+                              <EventRow
+                                key={event.id}
+                                event={event}
+                                isExpanded={expandedEvents.has(event.id)}
+                                isCopied={copiedId === event.id}
+                                isNew={newEventIds.has(event.id)}
+                                showFilterMenu={filterMenuEvent === event.id}
+                                sourceColor={getSourceColorForEvent(event.source)}
+                                onToggle={() => toggleExpanded(event.id)}
+                                onCopy={clipboardAvailable ? () => copyEvent(event) : undefined}
+                                onAddFilterInclude={() => addFilter(event.event, 'include')}
+                                onAddFilterExclude={() => addFilter(event.event, 'exclude')}
+                                onToggleFilterMenu={() =>
+                                  setFilterMenuEvent((prev) => (prev === event.id ? null : event.id))
+                                }
+                              />
                           ))}
                         </div>
                       </motion.div>
@@ -691,23 +725,42 @@ export function DevToolsPanel() {
         ) : (
           /* Flat View */
           <div className="divide-y divide-dl-border">
-            {paginatedEvents.map((event) => (
-              <EventRow
-                key={event.id}
-                event={event}
-                isExpanded={expandedEvents.has(event.id)}
-                isCopied={copiedId === event.id}
-                isNew={newEventIds.has(event.id)}
-                showFilterMenu={filterMenuEvent === event.id}
-                onToggle={() => toggleExpanded(event.id)}
-                onCopy={clipboardAvailable ? () => copyEvent(event) : undefined}
-                onAddFilterInclude={() => addFilter(event.event, 'include')}
-                onAddFilterExclude={() => addFilter(event.event, 'exclude')}
-                onToggleFilterMenu={() =>
-                  setFilterMenuEvent((prev) => (prev === event.id ? null : event.id))
-                }
-              />
-            ))}
+            {paginatedEvents.map((event, index) => {
+              const isPersisted = event.source.includes('(persisted)');
+              const prevEvent = index > 0 ? paginatedEvents[index - 1] : null;
+              const prevIsPersisted = prevEvent?.source.includes('(persisted)');
+              const showSeparator = settings.persistEvents && isPersisted && !prevIsPersisted && index > 0;
+
+              return (
+                <div key={event.id}>
+                  {showSeparator && (
+                    <div className="flex items-center gap-3 py-3 px-4 bg-dl-card/30">
+                      <div className="flex-1 h-px bg-dl-border" />
+                      <span className="text-xs text-slate-500 font-medium uppercase tracking-wider flex items-center gap-1.5">
+                        <Clock className="w-3 h-3" />
+                        Persisted Events
+                      </span>
+                      <div className="flex-1 h-px bg-dl-border" />
+                    </div>
+                  )}
+                  <EventRow
+                    event={event}
+                    isExpanded={expandedEvents.has(event.id)}
+                    isCopied={copiedId === event.id}
+                    isNew={newEventIds.has(event.id)}
+                    showFilterMenu={filterMenuEvent === event.id}
+                    sourceColor={getSourceColorForEvent(event.source)}
+                    onToggle={() => toggleExpanded(event.id)}
+                    onCopy={clipboardAvailable ? () => copyEvent(event) : undefined}
+                    onAddFilterInclude={() => addFilter(event.event, 'include')}
+                    onAddFilterExclude={() => addFilter(event.event, 'exclude')}
+                    onToggleFilterMenu={() =>
+                      setFilterMenuEvent((prev) => (prev === event.id ? null : event.id))
+                    }
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -752,6 +805,9 @@ export function DevToolsPanel() {
         settings={settings}
         onUpdateSettings={handleUpdateSettings}
         activeTabId={tabId}
+        eventCount={filteredEvents.length}
+        onExport={exportEvents}
+        detectedSources={uniqueSources}
       />
 
       {/* Copy Error Toast */}

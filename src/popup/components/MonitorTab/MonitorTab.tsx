@@ -14,6 +14,7 @@ export interface MonitorTabProps {
   events: DataLayerEvent[];
   onToggleOverlay: () => void;
   onClearEvents: () => void;
+  onExportEvents?: () => void;
   onAddFilter: (filter: string) => void;
   onRemoveFilter: (filter: string) => void;
   onSetFilterMode: (mode: 'include' | 'exclude') => void;
@@ -24,6 +25,7 @@ export function MonitorTab({
   events,
   onToggleOverlay,
   onClearEvents,
+  onExportEvents,
   onAddFilter,
   onRemoveFilter,
   onSetFilterMode,
@@ -56,6 +58,7 @@ export function MonitorTab({
         eventCount={events.length}
         maxEvents={settings.maxEvents}
         onClear={onClearEvents}
+        onExport={onExportEvents}
       />
     </motion.div>
   );

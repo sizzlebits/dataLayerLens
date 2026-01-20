@@ -6,6 +6,7 @@ export interface DataLayerEvent {
   source: string; // Which dataLayer array it came from
   raw: unknown;
   groupId?: string; // For event grouping
+  dataLayerIndex: number; // Original index in the dataLayer array at capture time
 }
 
 // Event group for displaying grouped events
@@ -35,6 +36,9 @@ export interface DomainSettings {
 }
 
 export interface Settings {
+  // View mode - which UI to use (overlay, side panel, or devtools)
+  viewMode: 'overlay' | 'sidepanel' | 'devtools';
+
   // Overlay settings
   overlayEnabled: boolean;
   overlayPosition: { x: number; y: number };
@@ -60,6 +64,9 @@ export interface Settings {
   animationsEnabled: boolean;
   showTimestamps: boolean;
   compactMode: boolean;
+
+  // Source colors (user-selected colors for dataLayer sources)
+  sourceColors: Record<string, string>;
 
   // Developer settings
   debugLogging: boolean;
@@ -89,6 +96,7 @@ export const DEFAULT_GROUPING: GroupingConfig = {
 };
 
 export const DEFAULT_SETTINGS: Settings = {
+  viewMode: 'sidepanel', // Default to side panel mode
   overlayEnabled: false, // Start disabled, user enables via popup
   overlayPosition: { x: -1, y: -1 }, // -1 means use default (bottom-right)
   overlayCollapsed: false,
@@ -105,6 +113,7 @@ export const DEFAULT_SETTINGS: Settings = {
   animationsEnabled: true,
   showTimestamps: true,
   compactMode: false,
+  sourceColors: {}, // User-selected colors for dataLayer sources
   debugLogging: false,
   consoleLogging: false, // Off by default
 };
@@ -137,6 +146,56 @@ export interface DataLayerEventMessage extends Message {
 export interface SettingsMessage extends Message {
   type: 'GET_SETTINGS' | 'UPDATE_SETTINGS';
   payload?: Partial<Settings>;
+}
+
+// Color pool for dataLayer sources (10 colors with good contrast against dark backgrounds)
+export const SOURCE_COLOR_POOL: string[] = [
+  '#6366f1', // Indigo
+  '#22d3ee', // Cyan
+  '#10b981', // Emerald
+  '#f59e0b', // Amber
+  '#ef4444', // Red
+  '#8b5cf6', // Violet
+  '#ec4899', // Pink
+  '#14b8a6', // Teal
+  '#f97316', // Orange
+  '#3b82f6', // Blue
+];
+
+// Get a color for a source from the pool
+// If the source doesn't have a persisted color, one will be auto-assigned based on index
+export function getSourceColor(source: string, sourceColors: Record<string, string>): string {
+  // Check if user/system has assigned a color
+  if (sourceColors[source]) {
+    return sourceColors[source];
+  }
+  // Fallback to first color (shouldn't happen if colors are properly auto-assigned)
+  return SOURCE_COLOR_POOL[0];
+}
+
+// Auto-assign colors for any sources that don't have one yet
+// Returns a new sourceColors object with any new assignments, or null if no changes needed
+export function autoAssignSourceColors(
+  sources: string[],
+  currentSourceColors: Record<string, string>
+): Record<string, string> | null {
+  let hasNewAssignments = false;
+  const newSourceColors = { ...currentSourceColors };
+
+  // Count how many colors are already assigned to determine next color index
+  const assignedCount = Object.keys(currentSourceColors).length;
+  let nextColorIndex = assignedCount;
+
+  for (const source of sources) {
+    if (!newSourceColors[source]) {
+      // Assign next color from pool
+      newSourceColors[source] = SOURCE_COLOR_POOL[nextColorIndex % SOURCE_COLOR_POOL.length];
+      nextColorIndex++;
+      hasNewAssignments = true;
+    }
+  }
+
+  return hasNewAssignments ? newSourceColors : null;
 }
 
 // Event categories for colorful display

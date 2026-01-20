@@ -16,13 +16,15 @@ export interface EventCaptureOptions {
   dataLayerNames: string[];
   /** Debug logging enabled */
   debugLogging?: boolean;
+  /** Console logging enabled (logs dataLayer events to browser console) */
+  consoleLogging?: boolean;
 }
 
 export interface IEventCapture {
   /** Initialize the event capture (inject script, set up listeners) */
   initialize(): void;
-  /** Update the dataLayer names being monitored */
-  updateConfig(dataLayerNames: string[]): void;
+  /** Update the dataLayer names being monitored and console logging setting */
+  updateConfig(dataLayerNames: string[], consoleLogging?: boolean): void;
   /** Clean up listeners */
   destroy(): void;
 }
@@ -35,6 +37,7 @@ export class EventCapture implements IEventCapture {
   private onEvent: (event: DataLayerEvent) => void;
   private dataLayerNames: string[];
   private debugLogging: boolean;
+  private consoleLogging: boolean;
   private messageHandler: ((event: MessageEvent) => void) | null = null;
   private isInitialized = false;
 
@@ -43,6 +46,7 @@ export class EventCapture implements IEventCapture {
     this.onEvent = options.onEvent;
     this.dataLayerNames = options.dataLayerNames;
     this.debugLogging = options.debugLogging ?? false;
+    this.consoleLogging = options.consoleLogging ?? false;
   }
 
   private debugError(...args: unknown[]): void {
@@ -113,6 +117,7 @@ export class EventCapture implements IEventCapture {
         type: 'DATALAYER_MONITOR_INIT',
         payload: {
           dataLayerNames: this.dataLayerNames,
+          consoleLogging: this.consoleLogging,
         },
       },
       '*'
@@ -147,16 +152,20 @@ export class EventCapture implements IEventCapture {
   }
 
   /**
-   * Update the dataLayer names being monitored.
+   * Update the dataLayer names being monitored and console logging setting.
    */
-  updateConfig(dataLayerNames: string[]): void {
+  updateConfig(dataLayerNames: string[], consoleLogging?: boolean): void {
     this.dataLayerNames = dataLayerNames;
+    if (consoleLogging !== undefined) {
+      this.consoleLogging = consoleLogging;
+    }
 
     window.postMessage(
       {
         type: 'DATALAYER_MONITOR_UPDATE_CONFIG',
         payload: {
           dataLayerNames: this.dataLayerNames,
+          consoleLogging: this.consoleLogging,
         },
       },
       '*'

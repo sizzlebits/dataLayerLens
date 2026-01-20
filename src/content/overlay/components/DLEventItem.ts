@@ -13,15 +13,17 @@ export interface EventItemOptions {
   expanded?: boolean;
   showTimestamp?: boolean;
   compactMode?: boolean;
+  index?: number; // Event number (array index)
 }
 
 export class DLEventItem extends DLBaseComponent {
   private _event: DataLayerEvent | null = null;
   private _expanded = false;
   private _showTimestamp = true;
+  private _index: number | null = null;
 
   static get observedAttributes(): string[] {
-    return ['expanded', 'show-timestamp', 'compact-mode'];
+    return ['expanded', 'show-timestamp', 'compact-mode', 'event-index'];
   }
 
   attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
@@ -34,6 +36,9 @@ export class DLEventItem extends DLBaseComponent {
         break;
       case 'compact-mode':
         // Compact mode is applied via CSS attribute selector, no need for property
+        break;
+      case 'event-index':
+        this._index = newValue !== null ? parseInt(newValue, 10) : null;
         break;
     }
     this.scheduleRender();
@@ -58,6 +63,15 @@ export class DLEventItem extends DLBaseComponent {
 
   get expanded(): boolean {
     return this._expanded;
+  }
+
+  set index(value: number | null) {
+    this._index = value;
+    this.scheduleRender();
+  }
+
+  get index(): number | null {
+    return this._index;
   }
 
   protected getStyles(): string {
@@ -99,6 +113,18 @@ export class DLEventItem extends DLBaseComponent {
 
       .event-icon {
         font-size: 16px;
+        flex-shrink: 0;
+      }
+
+      .event-number {
+        background: rgba(99, 102, 241, 0.2);
+        color: #a5b4fc;
+        font-size: 9px;
+        font-weight: 600;
+        padding: 2px 5px;
+        border-radius: 8px;
+        min-width: 20px;
+        text-align: center;
         flex-shrink: 0;
       }
 
@@ -228,9 +254,12 @@ export class DLEventItem extends DLBaseComponent {
     const timestamp = this._showTimestamp ? this.formatTimestamp(this._event.timestamp) : '';
     const expandedClass = this._expanded ? 'expanded' : '';
 
+    const eventNumberHtml = this._index !== null ? `<span class="event-number">${this._index}</span>` : '';
+
     const html = `
       <div class="event-item ${expandedClass}" style="--category-color: ${category.color}">
         <div class="event-header" data-action="toggle">
+          ${eventNumberHtml}
           <span class="event-icon">${category.icon}</span>
           <div class="event-info">
             <div class="event-name">${escapeHtml(this._event.event)}</div>

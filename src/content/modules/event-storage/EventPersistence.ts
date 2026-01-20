@@ -106,14 +106,17 @@ export class EventPersistence implements IEventPersistence {
 
   /**
    * Save events to storage.
-   * Only saves non-persisted events to avoid duplicating.
+   * Saves all events, stripping the "(persisted)" marker to avoid double-marking on load.
    */
   async saveEvents(events: DataLayerEvent[]): Promise<void> {
     try {
       const key = this.getStorageKey();
 
-      // Only save non-persisted events (avoid duplicating)
-      const eventsToSave = events.filter((e) => !e.source.includes('(persisted)'));
+      // Save all events, but strip "(persisted)" marker to avoid double-marking on next load
+      const eventsToSave = events.map((e) => ({
+        ...e,
+        source: e.source.replace(' (persisted)', '').replace('(persisted)', ''),
+      }));
 
       await this.browserAPI.storage.local.set({
         [key]: {

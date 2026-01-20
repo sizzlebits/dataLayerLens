@@ -293,6 +293,7 @@ function initializeMonitoring(): void {
       type: 'DATALAYER_MONITOR_INIT',
       payload: {
         dataLayerNames: currentSettings.dataLayerNames,
+        consoleLogging: currentSettings.consoleLogging,
       },
     },
     '*'
@@ -306,6 +307,7 @@ function updateMonitoringConfig(): void {
       type: 'DATALAYER_MONITOR_UPDATE_CONFIG',
       payload: {
         dataLayerNames: currentSettings.dataLayerNames,
+        consoleLogging: currentSettings.consoleLogging,
       },
     },
     '*'
@@ -345,6 +347,7 @@ async function loadPersistedEvents(): Promise<void> {
         }
 
         updateEventsList();
+        notifyDevTools();
       }
     }
   } catch (error) {
@@ -358,8 +361,11 @@ async function savePersistedEvents(): Promise<void> {
 
   try {
     const key = `persisted_events_${currentDomain}`;
-    // Only save non-persisted events (avoid duplicating)
-    const eventsToSave = events.filter(e => !e.source.includes('(persisted)'));
+    // Save all events, but strip "(persisted)" marker to avoid double-marking on next load
+    const eventsToSave = events.map(e => ({
+      ...e,
+      source: e.source.replace(' (persisted)', '').replace('(persisted)', ''),
+    }));
 
     await browserAPI.storage.local.set({
       [key]: {
@@ -1136,6 +1142,11 @@ function getOverlayStyles(): string {
       padding: 2px 6px;
       border-radius: 4px;
       font-weight: 500;
+    }
+
+    .event-index {
+      opacity: 0.6;
+      margin-right: 4px;
     }
 
     .event-data {
@@ -2484,7 +2495,7 @@ function createEventElement(event: DataLayerEvent, isNew: boolean, isGrouped: bo
       </button>
     </div>
     <div class="event-meta">
-      <span class="event-source">${escapeHtml(event.source)}</span>
+      <span class="event-source">${event.dataLayerIndex !== undefined ? `<span class="event-index">#${event.dataLayerIndex}</span>` : ''}${escapeHtml(event.source)}</span>
       ${showTime ? `<span class="event-time">${time}</span>` : ''}
     </div>
     <div class="event-data">${syntaxHighlight(event.data)}</div>
@@ -3172,16 +3183,6 @@ window.addEventListener('message', (event) => {
 
     if (isClickEvent && isFromOverlayInteraction) {
       return; // Ignore this event - it was triggered by clicking in our overlay
-    }
-
-    // Log to console if enabled
-    if (currentSettings.consoleLogging) {
-      console.log(
-        `%c[DataLayer Lens]%c ${payload.event}`,
-        'background: #6366f1; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold;',
-        'color: #22d3ee; font-weight: bold;',
-        payload.data
-      );
     }
 
     // Add event to list (newest first)

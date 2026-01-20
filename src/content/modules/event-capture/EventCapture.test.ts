@@ -158,7 +158,7 @@ describe('EventCapture', () => {
       expect(postMessageSpy).toHaveBeenCalledWith(
         {
           type: 'DATALAYER_MONITOR_INIT',
-          payload: { dataLayerNames: ['dataLayer'] },
+          payload: { dataLayerNames: ['dataLayer'], consoleLogging: false },
         },
         '*'
       );
@@ -199,7 +199,7 @@ describe('EventCapture', () => {
       expect(postMessageSpy).toHaveBeenCalledWith(
         {
           type: 'DATALAYER_MONITOR_UPDATE_CONFIG',
-          payload: { dataLayerNames: ['dataLayer', 'customDataLayer'] },
+          payload: { dataLayerNames: ['dataLayer', 'customDataLayer'], consoleLogging: false },
         },
         '*'
       );

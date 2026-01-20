@@ -153,6 +153,8 @@ export class DLOverlayToolbar extends DLBaseComponent {
         flex-wrap: wrap;
         gap: 4px;
         flex: 1;
+        align-items: center;
+        min-height: 24px;
       }
 
       .filter-tag {
@@ -231,6 +233,7 @@ export class DLOverlayToolbar extends DLBaseComponent {
         color: #64748b;
         font-size: 10px;
         font-style: italic;
+        line-height: 24px;
       }
     `;
   }

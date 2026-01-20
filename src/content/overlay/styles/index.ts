@@ -7,6 +7,10 @@
  * import variablesStyles from './styles/variables.module.css?inline';
  */
 
+// Re-export the getCombinedStyles function for easy use
+export { getCombinedStyles, styleModules } from './loadStyles';
+export type { StyleModuleName } from './loadStyles';
+
 // Re-export paths for documentation purposes
 export const stylePaths = {
   variables: './variables.module.css',

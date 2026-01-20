@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Layers,
@@ -19,9 +19,13 @@ import {
   History,
   Search,
   PanelRight,
+  SquareStack,
+  Wrench,
+  Palette,
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { DomainSettings, DEFAULT_GROUPING, EVENT_CATEGORIES } from '@/types';
+import { SourceColorEditor } from '@/components/shared/SourceColorEditor';
 
 // Browser API abstraction
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
@@ -55,6 +59,12 @@ export function Popup() {
   // Trigger events state
   const [isAddingTrigger, setIsAddingTrigger] = useState(false);
   const [triggerSearch, setTriggerSearch] = useState('');
+
+  // Get unique sources from events for color assignment
+  const uniqueSources = useMemo(() => {
+    const sources = new Set(events.map((e) => e.source.replace(' (persisted)', '').replace('(persisted)', '')));
+    return Array.from(sources);
+  }, [events]);
 
   useEffect(() => {
     loadSettings();
@@ -229,6 +239,58 @@ export function Popup() {
     }
   };
 
+  const handleViewModeChange = async (mode: 'overlay' | 'sidepanel' | 'devtools') => {
+    // Update the setting
+    updateSettings({ viewMode: mode });
+
+    try {
+      const [tab] = await browserAPI.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.id) return;
+
+      if (mode === 'overlay') {
+        // Turn on overlay mode
+        const response = await browserAPI.tabs.sendMessage(tab.id, {
+          type: 'TOGGLE_OVERLAY',
+          payload: { enabled: true },
+        });
+        if (response?.enabled !== undefined) {
+          updateSettings({ overlayEnabled: response.enabled });
+        }
+      } else {
+        // Turn off overlay when switching to sidepanel or devtools
+        if (settings.overlayEnabled) {
+          await browserAPI.tabs.sendMessage(tab.id, {
+            type: 'TOGGLE_OVERLAY',
+            payload: { enabled: false },
+          });
+          updateSettings({ overlayEnabled: false });
+        }
+
+        if (mode === 'sidepanel') {
+          // Open the side panel
+          if (tab.windowId && browserAPI.sidePanel?.open) {
+            await browserAPI.sidePanel.open({ tabId: tab.id });
+            window.close();
+          }
+        }
+        // For devtools, we can't open it programmatically - the UI shows instructions
+      }
+    } catch (error) {
+      console.error('Failed to change view mode:', error);
+    }
+  };
+
+  const exportEvents = () => {
+    const data = JSON.stringify(events, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `datalayer-events-${new Date().toISOString()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const addDataLayerName = () => {
     if (newLayerName.trim() && !settings.dataLayerNames.includes(newLayerName.trim())) {
       updateSettings({
@@ -242,6 +304,15 @@ export function Popup() {
   const removeDataLayerName = (name: string) => {
     updateSettings({
       dataLayerNames: settings.dataLayerNames.filter((n) => n !== name),
+    });
+  };
+
+  const handleSourceColorChange = (source: string, color: string) => {
+    updateSettings({
+      sourceColors: {
+        ...settings.sourceColors,
+        [source]: color,
+      },
     });
   };
 
@@ -333,7 +404,7 @@ export function Popup() {
                   : 'bg-dl-card border-dl-border'
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className={`flex items-center justify-between ${settings.eventFilters.length > 0 || isAddingFilter ? 'mb-2' : ''}`}>
                 <div className="flex items-center gap-2">
                   <span
                     className={`text-xs font-semibold ${
@@ -494,61 +565,41 @@ export function Popup() {
               </AnimatePresence>
             </motion.div>
 
-            {/* Overlay Toggle */}
-            <motion.div
-              className="bg-dl-card rounded-xl p-4 border border-dl-border"
-              whileHover={{ borderColor: 'rgba(99, 102, 241, 0.5)' }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {settings.overlayEnabled ? (
-                    <Eye className="w-5 h-5 text-dl-success" />
-                  ) : (
-                    <EyeOff className="w-5 h-5 text-slate-500" />
-                  )}
-                  <div>
-                    <p className="font-medium text-white">Page Overlay</p>
-                    <p className="text-xs text-slate-400">
-                      {settings.overlayEnabled ? 'Visible on page' : 'Hidden'}
-                    </p>
-                  </div>
-                </div>
+            {/* View Mode Launcher */}
+            <div className="bg-dl-card rounded-xl p-4 border border-dl-border">
+              <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                <Eye className="w-4 h-4 text-dl-primary" />
+                View Events
+              </h3>
+              <div className="grid grid-cols-3 gap-2">
                 <motion.button
                   onClick={toggleOverlay}
-                  className={`relative w-12 h-7 rounded-full transition-colors ${
-                    settings.overlayEnabled
-                      ? 'bg-gradient-to-r from-dl-primary to-dl-secondary'
-                      : 'bg-dl-border'
-                  }`}
-                  whileTap={{ scale: 0.95 }}
+                  className="flex flex-col items-center gap-2 p-3 bg-dl-dark rounded-lg border border-dl-border hover:border-dl-primary/50 transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <motion.div
-                    className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
-                    animate={{ left: settings.overlayEnabled ? 24 : 4 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                  />
+                  <SquareStack className="w-5 h-5 text-dl-primary" />
+                  <span className="text-xs text-white font-medium">Overlay</span>
+                  {settings.overlayEnabled && (
+                    <span className="text-[9px] text-dl-success">Active</span>
+                  )}
                 </motion.button>
-              </div>
-            </motion.div>
-
-            {/* Side Panel Button */}
-            <motion.button
-              onClick={openSidePanel}
-              className="w-full bg-dl-card rounded-xl p-4 border border-dl-border hover:border-dl-primary/50 transition-colors"
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <motion.button
+                  onClick={openSidePanel}
+                  className="flex flex-col items-center gap-2 p-3 bg-dl-dark rounded-lg border border-dl-border hover:border-dl-primary/50 transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
                   <PanelRight className="w-5 h-5 text-dl-primary" />
-                  <div className="text-left">
-                    <p className="font-medium text-white">Side Panel</p>
-                    <p className="text-xs text-slate-400">Open in browser sidebar</p>
-                  </div>
+                  <span className="text-xs text-white font-medium">Side Panel</span>
+                </motion.button>
+                <div className="flex flex-col items-center gap-2 p-3 bg-dl-dark rounded-lg border border-dl-border">
+                  <Wrench className="w-5 h-5 text-slate-500" />
+                  <span className="text-xs text-slate-400 font-medium">DevTools</span>
+                  <span className="text-[9px] text-slate-500 text-center">F12 → DL</span>
                 </div>
-                <ChevronRight className="w-5 h-5 text-slate-400" />
               </div>
-            </motion.button>
+            </div>
 
             {/* Event Stats */}
             <motion.div
@@ -568,16 +619,28 @@ export function Popup() {
                 </motion.span>
               </div>
 
-              <motion.button
-                onClick={clearEvents}
-                disabled={events.length === 0}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium border border-red-500/30 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                whileHover={{ scale: events.length > 0 ? 1.02 : 1 }}
-                whileTap={{ scale: events.length > 0 ? 0.98 : 1 }}
-              >
-                <Trash2 className="w-4 h-4" />
-                Clear All Events
-              </motion.button>
+              <div className="flex gap-2">
+                <motion.button
+                  onClick={exportEvents}
+                  disabled={events.length === 0}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-dl-primary/20 hover:bg-dl-primary/30 text-dl-primary font-medium border border-dl-primary/30 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  whileHover={{ scale: events.length > 0 ? 1.02 : 1 }}
+                  whileTap={{ scale: events.length > 0 ? 0.98 : 1 }}
+                >
+                  <Download className="w-4 h-4" />
+                  Export
+                </motion.button>
+                <motion.button
+                  onClick={clearEvents}
+                  disabled={events.length === 0}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium border border-red-500/30 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  whileHover={{ scale: events.length > 0 ? 1.02 : 1 }}
+                  whileTap={{ scale: events.length > 0 ? 0.98 : 1 }}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Clear
+                </motion.button>
+              </div>
             </motion.div>
 
             {/* Quick Info */}
@@ -604,6 +667,57 @@ export function Popup() {
             exit={{ opacity: 0, x: -20 }}
             className="p-4 space-y-4 max-h-80 overflow-y-auto"
           >
+            {/* View Mode */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-slate-300">View Mode</h3>
+              <div className="grid grid-cols-3 gap-2">
+                <motion.button
+                  onClick={() => handleViewModeChange('overlay')}
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-colors ${
+                    settings.viewMode === 'overlay'
+                      ? 'bg-dl-primary/20 border-dl-primary text-dl-primary'
+                      : 'border-dl-border text-slate-400 hover:text-white hover:border-slate-500'
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <SquareStack className="w-5 h-5" />
+                  <span className="text-xs font-medium">Overlay</span>
+                </motion.button>
+                <motion.button
+                  onClick={() => handleViewModeChange('sidepanel')}
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-colors ${
+                    settings.viewMode === 'sidepanel'
+                      ? 'bg-dl-primary/20 border-dl-primary text-dl-primary'
+                      : 'border-dl-border text-slate-400 hover:text-white hover:border-slate-500'
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <PanelRight className="w-5 h-5" />
+                  <span className="text-xs font-medium">Side Panel</span>
+                </motion.button>
+                <motion.button
+                  onClick={() => handleViewModeChange('devtools')}
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-colors ${
+                    settings.viewMode === 'devtools'
+                      ? 'bg-dl-primary/20 border-dl-primary text-dl-primary'
+                      : 'border-dl-border text-slate-400 hover:text-white hover:border-slate-500'
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Wrench className="w-5 h-5" />
+                  <span className="text-xs font-medium">DevTools</span>
+                </motion.button>
+              </div>
+              <p className="text-xs text-slate-500">
+                {settings.viewMode === 'overlay' && 'On-page overlay for quick access.'}
+                {settings.viewMode === 'sidepanel' && 'Opens in browser side panel.'}
+                {settings.viewMode === 'devtools' && 'Open DevTools (F12) → DataLayer Lens tab.'}
+              </p>
+            </div>
+
             {/* DataLayer Names */}
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-slate-300 flex items-center gap-2">
@@ -685,6 +799,19 @@ export function Popup() {
                   )}
                 </AnimatePresence>
               </div>
+            </div>
+
+            {/* Source Colors */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                <Palette className="w-4 h-4 text-dl-secondary" />
+                Source Colors
+              </h3>
+              <SourceColorEditor
+                sources={uniqueSources}
+                sourceColors={settings.sourceColors || {}}
+                onColorChange={handleSourceColorChange}
+              />
             </div>
 
             {/* Max Events */}

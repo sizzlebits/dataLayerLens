@@ -8,7 +8,6 @@ import {
   Tag,
   ListPlus,
   ListMinus,
-  Save,
 } from 'lucide-react';
 import { DataLayerEvent, getEventCategory } from '@/types';
 import { JsonHighlight } from './JsonHighlight';
@@ -20,6 +19,7 @@ export interface EventRowProps {
   isNew?: boolean;
   showFilterMenu?: boolean;
   compact?: boolean;
+  sourceColor?: string; // Color for the dataLayer source
   onToggle: () => void;
   onCopy?: () => void;
   onAddFilterInclude?: () => void;
@@ -34,6 +34,7 @@ export function EventRow({
   isNew = false,
   showFilterMenu = false,
   compact = false,
+  sourceColor,
   onToggle,
   onCopy,
   onAddFilterInclude,
@@ -102,11 +103,23 @@ export function EventRow({
             </span>
           </div>
           <div className={`flex items-center gap-1.5 text-slate-500 ${compact ? 'text-[10px]' : 'text-xs'}`}>
-            <span className={`inline-flex items-center gap-1 px-1 py-0.5 bg-dl-border rounded font-mono ${compact ? 'text-[9px]' : 'text-[10px]'} text-slate-400`}>
+            <span
+              className={`inline-flex items-center gap-1 px-1 py-0.5 rounded font-mono ${compact ? 'text-[9px]' : 'text-[10px]'}`}
+              style={sourceColor ? {
+                backgroundColor: `${sourceColor}20`,
+                color: sourceColor,
+              } : {
+                backgroundColor: 'rgba(51, 65, 85, 0.5)',
+                color: '#94a3b8',
+              }}
+            >
+              {event.dataLayerIndex !== undefined && (
+                <span className="opacity-60">#{event.dataLayerIndex}</span>
+              )}
               {cleanSource}
               {isPersisted && (
                 <span title="Persisted event">
-                  <Save className={`text-slate-400 ${compact ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
+                  <Clock className={`${compact ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} style={{ color: sourceColor || '#94a3b8' }} />
                 </span>
               )}
             </span>
