@@ -1,26 +1,29 @@
 /**
  * Overlay header component styles.
+ * Class names match the legacy overlay HTML structure.
  */
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--dl-space-sm, 8px) var(--dl-space-md, 12px);
+  padding: 8px 12px;
   background: linear-gradient(
     135deg,
     rgba(99, 102, 241, 0.1) 0%,
     rgba(139, 92, 246, 0.05) 100%
   );
-  border-bottom: 1px solid var(--dl-border-light, rgba(255, 255, 255, 0.08));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   cursor: move;
   user-select: none;
+  flex-shrink: 0;
+  transition: padding 0.2s ease, border-bottom 0.2s ease;
 }
 
-.left {
+.header-left {
   display: flex;
   align-items: center;
-  gap: var(--dl-space-sm, 8px);
+  gap: 8px;
 }
 
 .logo {
@@ -29,6 +32,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #6366f1;
+  flex-shrink: 0;
+  transition: width 0.2s ease, height 0.2s ease;
 }
 
 .logo svg {
@@ -38,82 +44,151 @@
 
 .title {
   font-weight: 600;
-  font-size: var(--dl-text-lg, 13px);
-  color: var(--dl-text-primary, #e2e8f0);
+  font-size: 13px;
+  color: #e2e8f0;
   letter-spacing: -0.01em;
+  transition: opacity 0.2s ease, max-width 0.2s ease, margin-left 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.badge {
-  background: var(--dl-primary, #6366f1);
+.event-count {
+  background: #6366f1;
   color: white;
-  font-size: var(--dl-text-xs, 10px);
+  font-size: 10px;
   font-weight: 600;
   padding: 2px 6px;
-  border-radius: var(--dl-radius-full, 9999px);
+  border-radius: 9999px;
   min-width: 20px;
   text-align: center;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 
-.badge.highlight {
-  animation: pulse 2s infinite;
+.event-count.bump {
+  animation: bump 0.2s ease;
 }
 
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
-  }
+@keyframes bump {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
-.controls {
-  display: flex;
-  align-items: center;
-  gap: var(--dl-space-xs, 4px);
-}
-
-.controlBtn {
+/* Close button for collapsed/minimized - hidden by default */
+.close-collapsed {
+  display: none;
   background: transparent;
   border: none;
-  color: var(--dl-text-secondary, #94a3b8);
+  color: #64748b;
   cursor: pointer;
-  padding: var(--dl-space-xs, 4px);
-  border-radius: var(--dl-radius-sm, 4px);
+  padding: 4px;
+  border-radius: 4px;
+  margin-left: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.close-collapsed:hover {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.close-collapsed svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Show close button element when collapsed or minimized */
+.overlay.collapsed .close-collapsed,
+.overlay.minimized .close-collapsed {
+  display: flex;
+}
+
+/* Show close button on hover */
+.overlay.collapsed:hover .close-collapsed,
+.overlay.minimized:hover .close-collapsed {
+  opacity: 1;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--dl-transition-fast, 0.15s ease);
+  transition: all 0.15s ease;
 }
 
-.controlBtn:hover {
-  background: var(--dl-bg-hover, rgba(255, 255, 255, 0.1));
-  color: var(--dl-text-primary, #e2e8f0);
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
 }
 
-.controlBtn svg {
+.action-btn svg {
   width: 16px;
   height: 16px;
 }
 
-/* Clear button */
-.controlBtn.clear:hover {
-  color: var(--dl-error-light, #f87171);
+.action-btn.active {
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.1);
 }
 
-/* Collapse button rotation */
-.controlBtn.collapse svg {
-  transition: transform var(--dl-transition-fast, 0.15s ease);
+.action-btn.danger:hover {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
 }
 
-.controlBtn.collapse.collapsed svg {
-  transform: rotate(180deg);
+/* Hide header actions when collapsed */
+.overlay.collapsed .header-actions {
+  display: none;
 }
 
-/* Close button */
-.controlBtn.close:hover {
-  color: var(--dl-error-light, #f87171);
+/* ========================================
+   MINIMIZED STATE
+   - Icon larger
+   - Hide title by default, show on hover
+   - Keep event count visible
+   - No border-bottom
+   ======================================== */
+
+.overlay.minimized .header {
+  padding: 8px;
+  border-bottom: none;
+  cursor: pointer;
+}
+
+.overlay.minimized .logo {
+  width: 24px;
+  height: 24px;
+}
+
+/* Hide title by default in minimized */
+.overlay.minimized .header-left .title {
+  max-width: 0;
+  opacity: 0;
+  margin-left: 0;
+}
+
+/* Show title on hover in minimized */
+.overlay.minimized:hover .header-left .title {
+  max-width: 200px;
+  opacity: 1;
+  margin-left: 8px;
+}
+
+/* Hide header actions in minimized state */
+.overlay.minimized .header-actions {
+  display: none;
 }

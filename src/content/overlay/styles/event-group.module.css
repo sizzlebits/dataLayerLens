@@ -1,16 +1,18 @@
 /**
  * Event group styles for grouping related events.
+ * Class names match the legacy overlay HTML structure.
  */
 
-.eventGroup {
+.event-group {
   background: var(--dl-bg-light, rgba(255, 255, 255, 0.05));
   border-radius: var(--dl-radius-md, 6px);
   border: 1px solid var(--dl-border-light, rgba(255, 255, 255, 0.08));
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 /* Group header */
-.groupHeader {
+.group-header {
   display: flex;
   align-items: center;
   padding: var(--dl-space-sm, 8px) var(--dl-space-md, 12px);
@@ -22,9 +24,10 @@
     rgba(139, 92, 246, 0.04) 100%
   );
   transition: background var(--dl-transition-fast, 0.15s ease);
+  gap: var(--dl-space-sm, 8px);
 }
 
-.groupHeader:hover {
+.group-header:hover {
   background: linear-gradient(
     135deg,
     rgba(99, 102, 241, 0.12) 0%,
@@ -32,23 +35,21 @@
   );
 }
 
-.expandIcon {
+/* Group chevron icon */
+.group-chevron {
+  width: 14px;
+  height: 14px;
   color: var(--dl-text-muted, #64748b);
-  margin-right: var(--dl-space-sm, 8px);
   transition: transform var(--dl-transition-fast, 0.15s ease);
   flex-shrink: 0;
 }
 
-.expandIcon svg {
-  width: 12px;
-  height: 12px;
+.event-group.collapsed .group-chevron {
+  transform: rotate(-90deg);
 }
 
-.eventGroup.expanded .expandIcon {
-  transform: rotate(90deg);
-}
-
-.groupInfo {
+/* Group info */
+.group-info {
   flex: 1;
   display: flex;
   align-items: center;
@@ -56,52 +57,42 @@
   overflow: hidden;
 }
 
-.groupName {
-  font-weight: 600;
-  font-size: var(--dl-text-base, 12px);
+.group-count {
+  font-size: var(--dl-text-sm, 11px);
+  font-weight: 500;
   color: var(--dl-primary-light, #818cf8);
+}
+
+.group-trigger {
+  font-size: var(--dl-text-xs, 10px);
+  color: var(--dl-text-muted, #64748b);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.groupCount {
+.group-time {
   font-size: var(--dl-text-xs, 10px);
   color: var(--dl-text-muted, #64748b);
-  background: var(--dl-bg-hover, rgba(255, 255, 255, 0.1));
-  padding: 2px 6px;
-  border-radius: var(--dl-radius-full, 9999px);
   flex-shrink: 0;
 }
 
-.timestamp {
-  font-size: var(--dl-text-xs, 10px);
-  color: var(--dl-text-muted, #64748b);
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-/* Group body (expanded content) */
-.groupBody {
-  display: none;
-  padding: var(--dl-space-sm, 8px);
+/* Group events container */
+.group-events {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
   background: var(--dl-bg-darker, rgba(10, 10, 25, 0.5));
   border-top: 1px solid var(--dl-border-light, rgba(255, 255, 255, 0.08));
 }
 
-.eventGroup.expanded .groupBody {
-  display: block;
-}
-
-/* Nested events container */
-.groupEvents {
-  display: flex;
-  flex-direction: column;
-  gap: var(--dl-space-xs, 4px);
+.event-group.collapsed .group-events {
+  display: none;
 }
 
 /* Time-based grouping styles */
-.eventGroup.time-group .groupHeader {
+.event-group.time-group .group-header {
   background: linear-gradient(
     135deg,
     rgba(59, 130, 246, 0.08) 0%,
@@ -109,12 +100,12 @@
   );
 }
 
-.eventGroup.time-group .groupName {
+.event-group.time-group .group-count {
   color: #60a5fa;
 }
 
 /* Trigger-based grouping styles */
-.eventGroup.trigger-group .groupHeader {
+.event-group.trigger-group .group-header {
   background: linear-gradient(
     135deg,
     rgba(34, 197, 94, 0.08) 0%,
@@ -122,23 +113,20 @@
   );
 }
 
-.eventGroup.trigger-group .groupName {
+.event-group.trigger-group .group-count {
   color: var(--dl-success-light, #4ade80);
 }
 
 /* Compact mode */
-.eventGroup.compact .groupHeader {
+.event-group.compact .group-header {
   padding: var(--dl-space-xs, 4px) var(--dl-space-sm, 8px);
 }
 
-.eventGroup.compact .groupName {
-  font-size: var(--dl-text-sm, 11px);
+.event-group.compact .group-count {
+  font-size: var(--dl-text-xs, 10px);
 }
 
-.eventGroup.compact .groupBody {
+.event-group.compact .group-events {
   padding: var(--dl-space-xs, 4px);
-}
-
-.eventGroup.compact .groupEvents {
   gap: 2px;
 }

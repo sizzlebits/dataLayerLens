@@ -1,38 +1,10 @@
 /**
- * Event list container styles.
+ * Event list styles - empty state and loading state.
+ * Note: .events-container styles are in overlay.module.css
  */
 
-.eventList {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: var(--dl-space-sm, 8px);
-  display: flex;
-  flex-direction: column;
-  gap: var(--dl-space-xs, 4px);
-  min-height: 0;
-}
-
-/* Custom scrollbar */
-.eventList::-webkit-scrollbar {
-  width: 6px;
-}
-
-.eventList::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.eventList::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-.eventList::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
 /* Empty state */
-.emptyState {
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -43,33 +15,27 @@
   flex: 1;
 }
 
-.emptyIcon {
-  width: 48px;
-  height: 48px;
+.empty-state-icon {
+  font-size: 32px;
   margin-bottom: var(--dl-space-md, 12px);
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
-.emptyIcon svg {
-  width: 100%;
-  height: 100%;
-  stroke: currentColor;
-}
-
-.emptyTitle {
+.empty-state-text {
   font-size: var(--dl-text-lg, 13px);
   font-weight: 500;
   margin-bottom: var(--dl-space-xs, 4px);
   color: var(--dl-text-secondary, #94a3b8);
 }
 
-.emptyDescription {
+.empty-state-hint {
   font-size: var(--dl-text-sm, 11px);
   line-height: var(--dl-line-height, 1.5);
+  color: var(--dl-text-muted, #64748b);
 }
 
 /* Loading state */
-.loadingState {
+.loading-state {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -90,13 +56,4 @@
   to {
     transform: rotate(360deg);
   }
-}
-
-/* Compact mode */
-.eventList.compact {
-  gap: 2px;
-}
-
-.eventList.compact .emptyState {
-  padding: var(--dl-space-lg, 16px);
 }

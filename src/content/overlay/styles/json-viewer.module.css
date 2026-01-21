@@ -1,8 +1,32 @@
 /**
  * JSON viewer component styles for syntax highlighting.
+ * Class names match the JSON_HIGHLIGHT_CLASSES from @/utils/html.
  */
 
-.jsonViewer {
+/* Syntax highlighting classes matching syntaxHighlight() output */
+.json-key {
+  color: var(--dl-json-key, #9cdcfe);
+}
+
+.json-string {
+  color: var(--dl-json-string, #ce9178);
+}
+
+.json-number {
+  color: var(--dl-json-number, #b5cea8);
+}
+
+.json-boolean {
+  color: var(--dl-json-boolean, #569cd6);
+}
+
+.json-null {
+  color: var(--dl-json-null, #569cd6);
+  font-style: italic;
+}
+
+/* JSON viewer container (used within event-data) */
+.json-viewer {
   font-family: var(--dl-font-mono, 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace);
   font-size: var(--dl-text-sm, 11px);
   line-height: var(--dl-line-height, 1.5);
@@ -10,53 +34,27 @@
   word-break: break-word;
 }
 
-/* Syntax highlighting */
-.key {
-  color: var(--dl-json-key, #9cdcfe);
-}
-
-.string {
-  color: var(--dl-json-string, #ce9178);
-}
-
-.number {
-  color: var(--dl-json-number, #b5cea8);
-}
-
-.boolean {
-  color: var(--dl-json-boolean, #569cd6);
-}
-
-.null {
-  color: var(--dl-json-null, #569cd6);
-  font-style: italic;
-}
-
-.bracket {
+/* Brackets and punctuation */
+.json-bracket {
   color: var(--dl-json-bracket, #ffd700);
 }
 
-.comma,
-.colon {
+.json-comma,
+.json-colon {
   color: var(--dl-json-punctuation, #808080);
 }
 
-/* Line indentation */
-.line {
-  padding-left: calc(var(--indent, 0) * 12px);
-}
-
 /* Collapsible sections */
-.collapsible {
+.json-collapsible {
   cursor: pointer;
   user-select: none;
 }
 
-.collapsible:hover {
+.json-collapsible:hover {
   background: var(--dl-bg-light, rgba(255, 255, 255, 0.05));
 }
 
-.collapseIndicator {
+.json-collapse-indicator {
   display: inline-block;
   width: 12px;
   text-align: center;
@@ -65,25 +63,25 @@
   transition: transform var(--dl-transition-fast, 0.15s ease);
 }
 
-.collapsible.expanded .collapseIndicator {
+.json-collapsible.expanded .json-collapse-indicator {
   transform: rotate(90deg);
 }
 
-.collapsedContent {
+.json-collapsed-content {
   display: none;
 }
 
-.collapsedPreview {
+.json-collapsed-preview {
   color: var(--dl-text-muted, #64748b);
   font-style: italic;
 }
 
 /* Copy button */
-.copyWrapper {
+.json-copy-wrapper {
   position: relative;
 }
 
-.copyBtn {
+.json-copy-btn {
   position: absolute;
   top: 0;
   right: 0;
@@ -97,32 +95,32 @@
   transition: all var(--dl-transition-fast, 0.15s ease);
 }
 
-.copyWrapper:hover .copyBtn {
+.json-copy-wrapper:hover .json-copy-btn {
   opacity: 1;
 }
 
-.copyBtn:hover {
+.json-copy-btn:hover {
   background: var(--dl-bg-lighter, rgba(255, 255, 255, 0.08));
   color: var(--dl-text-primary, #e2e8f0);
 }
 
-.copyBtn.copied {
+.json-copy-btn.copied {
   color: var(--dl-success-light, #4ade80);
 }
 
-.copyBtn svg {
+.json-copy-btn svg {
   width: 12px;
   height: 12px;
 }
 
 /* Max depth warning */
-.maxDepthWarning {
+.json-max-depth-warning {
   color: var(--dl-warning-light, #fbbf24);
   font-style: italic;
   font-size: var(--dl-text-xs, 10px);
 }
 
 /* Empty object/array */
-.empty {
+.json-empty {
   color: var(--dl-text-muted, #64748b);
 }

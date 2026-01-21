@@ -22,3 +22,9 @@ export type { GroupingSettingsProps } from './GroupingSettings';
 
 export { BackupRestore } from './BackupRestore';
 export type { BackupRestoreProps } from './BackupRestore';
+
+export { ViewModeSelector } from './ViewModeSelector';
+export type { ViewModeSelectorProps } from './ViewModeSelector';
+
+export { SourceColorsSection } from './SourceColorsSection';
+export type { SourceColorsSectionProps } from './SourceColorsSection';

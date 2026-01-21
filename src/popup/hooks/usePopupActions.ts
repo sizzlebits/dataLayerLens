@@ -19,7 +19,7 @@ export interface UsePopupActionsProps {
   loadDomainSettings: () => Promise<void>;
   loadSettings: () => void;
   setImportStatus: (status: string | null) => void;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   setIsAddingFilter: (adding: boolean) => void;
   setFilterSearch: (search: string) => void;
   setIsAddingTrigger: (adding: boolean) => void;
@@ -71,6 +71,26 @@ export function usePopupActions({
       });
     } catch (error) {
       console.error('Failed to delete domain settings:', error);
+    }
+  };
+
+  const saveCurrentDomainSettings = async (domain: string) => {
+    try {
+      await browserAPI.runtime.sendMessage({
+        type: 'UPDATE_SETTINGS',
+        domain,
+        saveGlobal: false,
+        payload: {
+          eventFilters: settings.eventFilters,
+          filterMode: settings.filterMode,
+          dataLayerNames: settings.dataLayerNames,
+          grouping: settings.grouping,
+          persistEvents: settings.persistEvents,
+        },
+      });
+      loadDomainSettings();
+    } catch (error) {
+      console.error('Failed to save domain settings:', error);
     }
   };
 
@@ -168,6 +188,47 @@ export function usePopupActions({
     }
   };
 
+  const handleViewModeChange = async (mode: 'overlay' | 'sidepanel' | 'devtools') => {
+    // Update the setting
+    updateSettings({ viewMode: mode });
+
+    try {
+      const [tab] = await browserAPI.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.id) return;
+
+      if (mode === 'overlay') {
+        // Turn on overlay mode
+        const response = await browserAPI.tabs.sendMessage(tab.id, {
+          type: 'TOGGLE_OVERLAY',
+          payload: { enabled: true },
+        });
+        if (response?.enabled !== undefined) {
+          updateSettings({ overlayEnabled: response.enabled });
+        }
+      } else {
+        // Turn off overlay when switching to sidepanel or devtools
+        if (settings.overlayEnabled) {
+          await browserAPI.tabs.sendMessage(tab.id, {
+            type: 'TOGGLE_OVERLAY',
+            payload: { enabled: false },
+          });
+          updateSettings({ overlayEnabled: false });
+        }
+
+        if (mode === 'sidepanel') {
+          // Open the side panel
+          if (tab.windowId && browserAPI.sidePanel?.open) {
+            await browserAPI.sidePanel.open({ tabId: tab.id });
+            window.close();
+          }
+        }
+        // For devtools, we can't open it programmatically - the UI shows instructions
+      }
+    } catch (error) {
+      console.error('Failed to change view mode:', error);
+    }
+  };
+
   // Filter actions
   const addFilter = (filter: string) => {
     if (!settings.eventFilters.includes(filter)) {
@@ -183,6 +244,14 @@ export function usePopupActions({
     updateSettings({
       eventFilters: settings.eventFilters.filter((f) => f !== filter),
     });
+  };
+
+  const clearFilters = () => {
+    updateSettings({ eventFilters: [] });
+  };
+
+  const setFilterMode = (mode: 'include' | 'exclude') => {
+    updateSettings({ filterMode: mode });
   };
 
   // Trigger event actions
@@ -227,6 +296,7 @@ export function usePopupActions({
 
     // Domain actions
     deleteDomain,
+    saveCurrentDomainSettings,
 
     // Export/Import actions
     exportSettings,
@@ -236,10 +306,13 @@ export function usePopupActions({
     // Overlay actions
     toggleOverlay,
     openSidePanel,
+    handleViewModeChange,
 
     // Filter actions
     addFilter,
     removeFilter,
+    clearFilters,
+    setFilterMode,
 
     // Trigger actions
     addTriggerEvent,

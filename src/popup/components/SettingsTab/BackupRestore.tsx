@@ -9,9 +9,10 @@ import { Download, Upload } from 'lucide-react';
 export interface BackupRestoreProps {
   onExport: () => void;
   onImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  importStatus?: string | null;
 }
 
-export function BackupRestore({ onExport, onImport }: BackupRestoreProps) {
+export function BackupRestore({ onExport, onImport, importStatus }: BackupRestoreProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImportClick = () => {
@@ -59,6 +60,20 @@ export function BackupRestore({ onExport, onImport }: BackupRestoreProps) {
           className="hidden"
         />
       </div>
+
+      {importStatus && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`text-xs text-center py-2 rounded ${
+            importStatus.includes('success')
+              ? 'text-green-400 bg-green-500/10'
+              : 'text-red-400 bg-red-500/10'
+          }`}
+        >
+          {importStatus}
+        </motion.div>
+      )}
     </div>
   );
 }

@@ -2,9 +2,49 @@
  * Main overlay container styles.
  */
 
-.overlay {
+/* Global reset for shadow DOM */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Shadow DOM container - receives positioning via JS */
+.overlay-container {
   position: fixed;
-  z-index: var(--dl-z-overlay, 2147483646);
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  height: 400px;
+  pointer-events: auto;
+  z-index: 2147483647;
+  /* Position (top/bottom/left/right) is set via inline styles in JS */
+  /* Only transition width for collapse - height is user-draggable so no transition */
+  transition: width 0.2s ease;
+}
+
+/* Smooth height transition only when collapsing/expanding (not during resize) */
+.overlay-container.collapsed,
+.overlay-container.minimized {
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
+/* Collapsed state - auto size, keep position anchor */
+.overlay-container.collapsed {
+  width: auto;
+  height: auto;
+}
+
+/* Minimized state - auto size, keep position anchor */
+.overlay-container.minimized {
+  width: auto;
+  height: auto;
+}
+
+/* Inner overlay - fills container, not fixed positioned */
+.overlay {
+  position: relative;
+  width: 100%;
+  height: 100%;
   background: var(--dl-bg-dark, rgba(15, 15, 35, 0.98));
   border-radius: var(--dl-radius-lg, 8px);
   box-shadow: var(--dl-shadow-overlay, 0 25px 50px -12px rgba(0, 0, 0, 0.5));
@@ -18,45 +58,44 @@
   transition: all var(--dl-transition-base, 0.2s ease);
 }
 
-/* Positioning anchor classes */
-.overlay.anchor-bottom-right {
-  bottom: 16px;
-  right: 16px;
+/* Hover state for collapsed/minimized */
+.overlay.collapsed:hover,
+.overlay.minimized:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(99, 102, 241, 0.3);
+  border-color: rgba(99, 102, 241, 0.4);
 }
 
-.overlay.anchor-bottom-left {
-  bottom: 16px;
-  left: 16px;
-}
-
-.overlay.anchor-top-right {
-  top: 16px;
-  right: 16px;
-}
-
-.overlay.anchor-top-left {
-  top: 16px;
-  left: 16px;
-}
-
-/* Default size */
-.overlay {
-  width: 420px;
-  max-width: calc(100vw - 32px);
-}
-
-/* Height is controlled via inline style */
-
-/* Collapsed state */
+/* Collapsed state - auto height, hide content */
 .overlay.collapsed {
-  height: auto !important;
+  height: auto;
+  width: auto;
 }
 
-.overlay.collapsed .content {
+.overlay.collapsed .toolbar,
+.overlay.collapsed .events-container,
+.overlay.collapsed .pagination,
+.overlay.collapsed .pagination.has-pages,
+.overlay.collapsed .status-bar,
+.overlay.collapsed .resize-handle {
   display: none;
 }
 
-/* Content wrapper */
+/* Minimized state - icon only, hide all content */
+.overlay.minimized {
+  width: auto;
+  height: auto;
+}
+
+.overlay.minimized .toolbar,
+.overlay.minimized .events-container,
+.overlay.minimized .pagination,
+.overlay.minimized .pagination.has-pages,
+.overlay.minimized .status-bar,
+.overlay.minimized .resize-handle {
+  display: none;
+}
+
+/* Content wrapper - not used in current structure, keeping for compatibility */
 .content {
   flex: 1;
   display: flex;
@@ -78,7 +117,8 @@
 }
 
 .resize-handle:hover,
-.resize-handle.active {
+.resize-handle.active,
+.resize-handle.dragging {
   background: linear-gradient(
     180deg,
     var(--dl-primary, #6366f1) 0%,
@@ -87,13 +127,205 @@
 }
 
 /* Bottom resize handle for top-anchored overlay */
-.overlay.anchor-top-right .resize-handle,
-.overlay.anchor-top-left .resize-handle {
+.resize-handle.bottom {
   top: auto;
   bottom: 0;
+  cursor: ns-resize;
+}
+
+.resize-handle.bottom:hover,
+.resize-handle.bottom.active,
+.resize-handle.bottom.dragging {
   background: linear-gradient(
     0deg,
     var(--dl-primary, #6366f1) 0%,
     transparent 100%
   );
+}
+
+/* Events container - scrollable */
+.events-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--dl-space-sm, 8px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--dl-space-xs, 4px);
+  min-height: 0;
+}
+
+/* Custom scrollbar for events container */
+.events-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.events-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.events-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.events-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Status bar */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--dl-space-xs, 4px) var(--dl-space-md, 12px);
+  border-top: 1px solid var(--dl-border-light, rgba(255, 255, 255, 0.08));
+  background: rgba(15, 15, 35, 0.5);
+  font-size: var(--dl-text-xs, 10px);
+  color: var(--dl-text-muted, #64748b);
+  flex-shrink: 0;
+}
+
+.status-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--dl-space-xs, 4px);
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dl-space-xs, 4px);
+  padding: 2px 6px;
+  border-radius: var(--dl-radius-full, 9999px);
+  font-size: var(--dl-text-xs, 10px);
+  font-weight: 500;
+}
+
+.filter-tag.include {
+  background: var(--dl-success-bg, rgba(34, 197, 94, 0.2));
+  color: var(--dl-success-light, #4ade80);
+  border: 1px solid var(--dl-success-border, rgba(34, 197, 94, 0.3));
+}
+
+.filter-tag.exclude {
+  background: var(--dl-error-bg, rgba(239, 68, 68, 0.2));
+  color: var(--dl-error-light, #f87171);
+  border: 1px solid var(--dl-error-border, rgba(239, 68, 68, 0.3));
+}
+
+.filter-tag button {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+}
+
+.filter-tag button:hover {
+  opacity: 1;
+}
+
+.filter-count {
+  opacity: 0.7;
+  margin-left: 2px;
+}
+
+.filter-add-btn {
+  background: transparent;
+  border: none;
+  color: var(--dl-text-muted, #64748b);
+  cursor: pointer;
+  padding: var(--dl-space-xs, 4px);
+  border-radius: var(--dl-radius-sm, 4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--dl-transition-fast, 0.15s ease);
+}
+
+.filter-add-btn:hover {
+  background: var(--dl-bg-hover, rgba(255, 255, 255, 0.1));
+  color: var(--dl-text-primary, #e2e8f0);
+}
+
+.filter-add-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.filter-add-btn.no-filters {
+  color: var(--dl-text-secondary, #94a3b8);
+}
+
+/* Pagination - hidden by default, shown when has-pages class is applied */
+.pagination {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dl-space-sm, 8px);
+  padding: var(--dl-space-xs, 4px) var(--dl-space-md, 12px);
+  border-top: 1px solid var(--dl-border-light, rgba(255, 255, 255, 0.08));
+  background: rgba(15, 15, 35, 0.5);
+  flex-shrink: 0;
+}
+
+.pagination.has-pages {
+  display: flex;
+}
+
+.pagination-btn {
+  background: transparent;
+  border: 1px solid var(--dl-border-light, rgba(255, 255, 255, 0.08));
+  color: var(--dl-text-secondary, #94a3b8);
+  padding: var(--dl-space-xs, 4px) var(--dl-space-sm, 8px);
+  border-radius: var(--dl-radius-sm, 4px);
+  font-size: var(--dl-text-xs, 10px);
+  cursor: pointer;
+  transition: all var(--dl-transition-fast, 0.15s ease);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--dl-bg-hover, rgba(255, 255, 255, 0.1));
+  color: var(--dl-text-primary, #e2e8f0);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-size: var(--dl-text-xs, 10px);
+  color: var(--dl-text-muted, #64748b);
+}
+
+/* Persisted events separator */
+.persisted-separator {
+  display: flex;
+  align-items: center;
+  gap: var(--dl-space-sm, 8px);
+  padding: var(--dl-space-sm, 8px) 0;
+  margin: var(--dl-space-xs, 4px) 0;
+}
+
+.persisted-separator::before,
+.persisted-separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--dl-border-light, rgba(255, 255, 255, 0.15)), transparent);
+}
+
+.persisted-separator span {
+  font-size: var(--dl-text-xs, 10px);
+  color: var(--dl-text-muted, #64748b);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }

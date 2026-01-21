@@ -1,33 +1,39 @@
 /**
  * MonitorTab - Main monitoring tab component.
- * Shows overlay toggle, event stats, and filter management.
+ * Shows filter panel, view mode launcher, event stats, and quick info.
  */
 
 import { motion } from 'framer-motion';
 import type { Settings, DataLayerEvent } from '@/types';
-import { OverlayToggle } from './OverlayToggle';
-import { EventStats } from './EventStats';
 import { FilterPanel } from './FilterPanel';
+import { ViewModeLauncher } from './ViewModeLauncher';
+import { EventStats } from './EventStats';
 
 export interface MonitorTabProps {
   settings: Settings;
   events: DataLayerEvent[];
+  currentDomain: string;
   onToggleOverlay: () => void;
+  onOpenSidePanel: () => void;
   onClearEvents: () => void;
   onExportEvents?: () => void;
   onAddFilter: (filter: string) => void;
   onRemoveFilter: (filter: string) => void;
+  onClearFilters: () => void;
   onSetFilterMode: (mode: 'include' | 'exclude') => void;
 }
 
 export function MonitorTab({
   settings,
   events,
+  currentDomain,
   onToggleOverlay,
+  onOpenSidePanel,
   onClearEvents,
   onExportEvents,
   onAddFilter,
   onRemoveFilter,
+  onClearFilters,
   onSetFilterMode,
 }: MonitorTabProps) {
   return (
@@ -44,13 +50,15 @@ export function MonitorTab({
         filterMode={settings.filterMode}
         onAddFilter={onAddFilter}
         onRemoveFilter={onRemoveFilter}
+        onClearFilters={onClearFilters}
         onSetFilterMode={onSetFilterMode}
       />
 
-      {/* Overlay Toggle */}
-      <OverlayToggle
-        enabled={settings.overlayEnabled}
-        onToggle={onToggleOverlay}
+      {/* View Mode Launcher */}
+      <ViewModeLauncher
+        overlayEnabled={settings.overlayEnabled}
+        onToggleOverlay={onToggleOverlay}
+        onOpenSidePanel={onOpenSidePanel}
       />
 
       {/* Event Stats */}
@@ -60,6 +68,22 @@ export function MonitorTab({
         onClear={onClearEvents}
         onExport={onExportEvents}
       />
+
+      {/* Quick Info */}
+      <div className="text-center text-xs text-slate-500 py-2">
+        <p>
+          {currentDomain && (
+            <span className="block mb-1 text-dl-accent">{currentDomain}</span>
+          )}
+          Monitoring:{' '}
+          {settings.dataLayerNames.map((name, i) => (
+            <span key={name}>
+              <code className="text-dl-accent">{name}</code>
+              {i < settings.dataLayerNames.length - 1 && ', '}
+            </span>
+          ))}
+        </p>
+      </div>
     </motion.div>
   );
 }

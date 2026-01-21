@@ -27,6 +27,7 @@ export default defineConfig({
         'dist/**',
         'scripts/**',
         'datalayer-monitor-dev/**',
+        'packages/**',
       ],
     },
     reporters: ['default', 'junit'],

@@ -84,11 +84,20 @@ export class SettingsHandler implements ISettingsHandler {
     }
 
     // Merge domain-specific settings with global
+    // Filter out undefined values from domain settings to avoid overriding global settings
+    const domainSettings = domainOverride.settings || {};
+    const filteredDomainSettings: Partial<Settings> = {};
+    for (const [key, value] of Object.entries(domainSettings)) {
+      if (value !== undefined) {
+        (filteredDomainSettings as Record<string, unknown>)[key] = value;
+      }
+    }
+
     return {
       ...globalSettings,
-      ...domainOverride.settings,
+      ...filteredDomainSettings,
       overlayEnabled: domainOverlayEnabled,
-      grouping: { ...globalSettings.grouping, ...domainOverride.settings?.grouping },
+      grouping: { ...globalSettings.grouping, ...(filteredDomainSettings.grouping || {}) },
     };
   }
 

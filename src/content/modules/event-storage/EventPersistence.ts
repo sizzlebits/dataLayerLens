@@ -71,8 +71,10 @@ export class EventPersistence implements IEventPersistence {
   async loadEvents(): Promise<DataLayerEvent[]> {
     try {
       const key = this.getStorageKey();
+      console.debug('[DataLayer Lens] EventPersistence.loadEvents key:', key);
       const result = await this.browserAPI.storage.local.get<Record<string, PersistedEventsData>>(key);
       const persisted = result[key];
+      console.debug('[DataLayer Lens] EventPersistence.loadEvents found:', persisted?.events?.length ?? 0, 'events');
 
       if (!persisted?.events?.length) {
         return [];
@@ -111,6 +113,7 @@ export class EventPersistence implements IEventPersistence {
   async saveEvents(events: DataLayerEvent[]): Promise<void> {
     try {
       const key = this.getStorageKey();
+      console.debug('[DataLayer Lens] EventPersistence.saveEvents key:', key, 'count:', events.length);
 
       // Save all events, but strip "(persisted)" marker to avoid double-marking on next load
       const eventsToSave = events.map((e) => ({

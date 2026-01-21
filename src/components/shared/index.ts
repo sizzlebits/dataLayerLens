@@ -8,3 +8,5 @@ export { SearchInput } from './SearchInput';
 export type { SearchInputProps } from './SearchInput';
 export { Toast } from './Toast';
 export type { ToastProps, ToastType } from './Toast';
+// Note: EventPanel is exported separately from './EventPanel' to avoid circular chunk dependencies
+// Import directly: import { EventPanel } from '@/components/shared/EventPanel'

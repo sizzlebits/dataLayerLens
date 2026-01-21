@@ -5,7 +5,9 @@
 
 import { motion } from 'framer-motion';
 import type { Settings } from '@/types';
+import { ViewModeSelector } from './ViewModeSelector';
 import { DataLayerConfig } from './DataLayerConfig';
+import { SourceColorsSection } from './SourceColorsSection';
 import { MaxEventsSlider } from './MaxEventsSlider';
 import { DisplaySettings } from './DisplaySettings';
 import { OverlayPosition } from './OverlayPosition';
@@ -14,25 +16,37 @@ import { BackupRestore } from './BackupRestore';
 
 export interface SettingsTabProps {
   settings: Settings;
+  uniqueSources: string[];
   onUpdateSettings: (settings: Partial<Settings>) => void;
+  onViewModeChange: (mode: 'overlay' | 'sidepanel' | 'devtools') => void;
   onExportSettings: () => void;
   onImportSettings: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  importStatus: string | null;
 }
 
 export function SettingsTab({
   settings,
+  uniqueSources,
   onUpdateSettings,
+  onViewModeChange,
   onExportSettings,
   onImportSettings,
+  importStatus,
 }: SettingsTabProps) {
   return (
     <motion.div
       key="settings"
-      initial={{ opacity: 0, x: -20 }}
+      initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
-      className="p-4 space-y-4"
+      exit={{ opacity: 0, x: -20 }}
+      className="p-4 space-y-4 max-h-80 overflow-y-auto"
     >
+      {/* View Mode */}
+      <ViewModeSelector
+        viewMode={settings.viewMode || 'overlay'}
+        onViewModeChange={onViewModeChange}
+      />
+
       {/* DataLayer Names */}
       <DataLayerConfig
         dataLayerNames={settings.dataLayerNames}
@@ -44,6 +58,20 @@ export function SettingsTab({
         onRemoveDataLayer={(name) =>
           onUpdateSettings({
             dataLayerNames: settings.dataLayerNames.filter((n) => n !== name),
+          })
+        }
+      />
+
+      {/* Source Colors */}
+      <SourceColorsSection
+        sources={uniqueSources}
+        sourceColors={settings.sourceColors || {}}
+        onColorChange={(source, color) =>
+          onUpdateSettings({
+            sourceColors: {
+              ...settings.sourceColors,
+              [source]: color,
+            },
           })
         }
       />
@@ -77,7 +105,11 @@ export function SettingsTab({
       />
 
       {/* Backup & Restore */}
-      <BackupRestore onExport={onExportSettings} onImport={onImportSettings} />
+      <BackupRestore
+        onExport={onExportSettings}
+        onImport={onImportSettings}
+        importStatus={importStatus}
+      />
     </motion.div>
   );
 }

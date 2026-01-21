@@ -21,6 +21,7 @@ export interface FilterPanelProps {
   filterMode: 'include' | 'exclude';
   onAddFilter: (filter: string) => void;
   onRemoveFilter: (filter: string) => void;
+  onClearFilters?: () => void;
   onSetFilterMode: (mode: 'include' | 'exclude') => void;
 }
 
@@ -29,6 +30,7 @@ export function FilterPanel({
   filterMode,
   onAddFilter,
   onRemoveFilter,
+  onClearFilters,
   onSetFilterMode,
 }: FilterPanelProps) {
   const [isAdding, setIsAdding] = useState(false);
@@ -77,7 +79,7 @@ export function FilterPanel({
           )}
         </div>
 
-        {/* Filter mode toggle */}
+        {/* Filter mode toggle and clear */}
         <div className="flex items-center gap-1 text-xs">
           <button
             onClick={() => onSetFilterMode('exclude')}
@@ -99,6 +101,14 @@ export function FilterPanel({
           >
             Include
           </button>
+          {filters.length > 0 && onClearFilters && (
+            <button
+              onClick={onClearFilters}
+              className="px-2 py-1 rounded text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
 

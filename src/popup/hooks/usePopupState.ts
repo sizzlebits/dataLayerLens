@@ -72,6 +72,7 @@ export function usePopupState() {
   return {
     // Store state
     settings,
+    loadSettings,
     updateSettings,
     events,
     clearEvents,
