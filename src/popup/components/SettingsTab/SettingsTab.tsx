@@ -7,7 +7,6 @@ import { motion } from 'framer-motion';
 import type { Settings } from '@/types';
 import { ViewModeSelector } from './ViewModeSelector';
 import { DataLayerConfig } from './DataLayerConfig';
-import { SourceColorsSection } from './SourceColorsSection';
 import { MaxEventsSlider } from './MaxEventsSlider';
 import { DisplaySettings } from './DisplaySettings';
 import { OverlayPosition } from './OverlayPosition';
@@ -16,7 +15,6 @@ import { BackupRestore } from './BackupRestore';
 
 export interface SettingsTabProps {
   settings: Settings;
-  uniqueSources: string[];
   onUpdateSettings: (settings: Partial<Settings>) => void;
   onViewModeChange: (mode: 'overlay' | 'sidepanel' | 'devtools') => void;
   onExportSettings: () => void;
@@ -26,7 +24,6 @@ export interface SettingsTabProps {
 
 export function SettingsTab({
   settings,
-  uniqueSources,
   onUpdateSettings,
   onViewModeChange,
   onExportSettings,
@@ -47,9 +44,10 @@ export function SettingsTab({
         onViewModeChange={onViewModeChange}
       />
 
-      {/* DataLayer Names */}
+      {/* DataLayer Arrays with Colors */}
       <DataLayerConfig
         dataLayerNames={settings.dataLayerNames}
+        sourceColors={settings.sourceColors || {}}
         onAddDataLayer={(name) =>
           onUpdateSettings({
             dataLayerNames: [...settings.dataLayerNames, name],
@@ -60,12 +58,6 @@ export function SettingsTab({
             dataLayerNames: settings.dataLayerNames.filter((n) => n !== name),
           })
         }
-      />
-
-      {/* Source Colors */}
-      <SourceColorsSection
-        sources={uniqueSources}
-        sourceColors={settings.sourceColors || {}}
         onColorChange={(source, color) =>
           onUpdateSettings({
             sourceColors: {

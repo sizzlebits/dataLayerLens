@@ -423,6 +423,7 @@ export function EventPanel({ context }: EventPanelProps) {
                               isNew={state.newEventIds.has(event.id)}
                               showFilterMenu={state.filterMenuEvent === event.id}
                               compact={isCompact}
+                              showTimestamps={state.settings.showTimestamps}
                               sourceColor={actions.getSourceColorForEvent(event.source)}
                               onToggle={() => actions.toggleExpanded(event.id)}
                               onCopy={clipboardAvailable || context === 'sidepanel' ? () => actions.copyEvent(event) : undefined}
@@ -471,6 +472,7 @@ export function EventPanel({ context }: EventPanelProps) {
                     isNew={state.newEventIds.has(event.id)}
                     showFilterMenu={state.filterMenuEvent === event.id}
                     compact={isCompact}
+                    showTimestamps={state.settings.showTimestamps}
                     sourceColor={actions.getSourceColorForEvent(event.source)}
                     onToggle={() => actions.toggleExpanded(event.id)}
                     onCopy={clipboardAvailable || context === 'sidepanel' ? () => actions.copyEvent(event) : undefined}

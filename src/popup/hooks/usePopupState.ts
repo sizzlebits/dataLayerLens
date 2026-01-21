@@ -2,7 +2,7 @@
  * Hook for managing Popup component state.
  */
 
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { DomainSettings } from '@/types';
 
@@ -31,12 +31,6 @@ export function usePopupState() {
   // Trigger events state
   const [isAddingTrigger, setIsAddingTrigger] = useState(false);
   const [triggerSearch, setTriggerSearch] = useState('');
-
-  // Get unique sources from events for color assignment
-  const uniqueSources = useMemo(() => {
-    const sources = new Set(events.map((e) => e.source.replace(' (persisted)', '').replace('(persisted)', '')));
-    return Array.from(sources);
-  }, [events]);
 
   // Load initial data
   useEffect(() => {
@@ -111,8 +105,5 @@ export function usePopupState() {
     setIsAddingTrigger,
     triggerSearch,
     setTriggerSearch,
-
-    // Computed
-    uniqueSources,
   };
 }

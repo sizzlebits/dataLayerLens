@@ -66,17 +66,6 @@ export function FilterPanel({
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-slate-400" />
           <span className="text-sm font-medium text-white">Active Filters</span>
-          {filters.length > 0 && (
-            <span
-              className={`px-1.5 py-0.5 text-xs rounded ${
-                filterMode === 'exclude'
-                  ? 'bg-dl-error/20 text-dl-error'
-                  : 'bg-dl-success/20 text-dl-success'
-              }`}
-            >
-              {filterMode === 'exclude' ? 'Excluding' : 'Including'}
-            </span>
-          )}
         </div>
 
         {/* Filter mode toggle and clear */}

@@ -1,9 +1,15 @@
 import { defineConfig, Plugin, build } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
-import { copyFileSync, mkdirSync, existsSync } from 'fs';
+import { copyFileSync, mkdirSync, existsSync, readFileSync, writeFileSync } from 'fs';
 
 const browser = process.env.BROWSER || 'chrome';
+
+// Read version from package.json
+function getPackageVersion(): string {
+  const packageJson = JSON.parse(readFileSync('package.json', 'utf-8'));
+  return packageJson.version;
+}
 
 // Plugin to copy manifest and icons, then build standalone scripts
 function copyExtensionFiles(): Plugin {
@@ -12,11 +18,14 @@ function copyExtensionFiles(): Plugin {
     async writeBundle() {
       const outDir = `dist/${browser}`;
 
-      // Copy manifest
+      // Copy manifest with version from package.json
       const manifestSrc = `public/manifest.${browser}.json`;
       const manifestDest = `${outDir}/manifest.json`;
       if (existsSync(manifestSrc)) {
-        copyFileSync(manifestSrc, manifestDest);
+        const manifest = JSON.parse(readFileSync(manifestSrc, 'utf-8'));
+        manifest.version = getPackageVersion();
+        writeFileSync(manifestDest, JSON.stringify(manifest, null, 2));
+        console.log(`📦 Manifest version set to ${manifest.version}`);
       }
 
       // Copy icons

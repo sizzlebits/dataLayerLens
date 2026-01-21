@@ -19,6 +19,7 @@ export interface EventRowProps {
   isNew?: boolean;
   showFilterMenu?: boolean;
   compact?: boolean;
+  showTimestamps?: boolean;
   sourceColor?: string; // Color for the dataLayer source
   onToggle: () => void;
   onCopy?: () => void;
@@ -34,6 +35,7 @@ export function EventRow({
   isNew = false,
   showFilterMenu = false,
   compact = false,
+  showTimestamps = true,
   sourceColor,
   onToggle,
   onCopy,
@@ -123,9 +125,13 @@ export function EventRow({
                 </span>
               )}
             </span>
-            <span className="text-slate-600">•</span>
-            <Clock className={compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
-            {time}
+            {showTimestamps && (
+              <>
+                <span className="text-slate-600">•</span>
+                <Clock className={compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
+                {time}
+              </>
+            )}
             <span className="text-slate-600">•</span>
             <Tag className={compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
             {Object.keys(event.data).length} props

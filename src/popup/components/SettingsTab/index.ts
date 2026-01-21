@@ -25,6 +25,3 @@ export type { BackupRestoreProps } from './BackupRestore';
 
 export { ViewModeSelector } from './ViewModeSelector';
 export type { ViewModeSelectorProps } from './ViewModeSelector';
-
-export { SourceColorsSection } from './SourceColorsSection';
-export type { SourceColorsSectionProps } from './SourceColorsSection';

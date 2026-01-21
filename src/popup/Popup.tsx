@@ -123,7 +123,6 @@ export function Popup() {
           <SettingsTab
             key="settings"
             settings={state.settings}
-            uniqueSources={state.uniqueSources}
             onUpdateSettings={state.updateSettings}
             onViewModeChange={actions.handleViewModeChange}
             onExportSettings={actions.exportSettings}

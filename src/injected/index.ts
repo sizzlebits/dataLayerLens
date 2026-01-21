@@ -29,15 +29,25 @@ function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
-// Check if an object is a valid GTM-style event
-function isValidEvent(data: unknown): data is Record<string, unknown> {
+// Special event name for data-only pushes (no 'event' property)
+const DATA_UPDATE_EVENT = '(data)';
+
+// Check if an object is a valid dataLayer push (any non-empty object)
+function isValidPush(data: unknown): data is Record<string, unknown> {
   return (
     data !== null &&
     typeof data === 'object' &&
     !Array.isArray(data) &&
-    typeof (data as Record<string, unknown>).event === 'string' &&
-    ((data as Record<string, unknown>).event as string).trim() !== ''
+    Object.keys(data as object).length > 0
   );
+}
+
+// Get the event name from a dataLayer push, or use default for data-only pushes
+function getEventName(data: Record<string, unknown>): string {
+  if (typeof data.event === 'string' && data.event.trim() !== '') {
+    return data.event;
+  }
+  return DATA_UPDATE_EVENT;
 }
 
 // Safely clone an object, replacing non-cloneable values
@@ -92,11 +102,12 @@ function safeClone(obj: unknown, seen = new WeakSet()): unknown {
 function emitEvent(event: Record<string, unknown>, source: string, dataLayerIndex: number): void {
   // Safely clone the event data to avoid DataCloneError
   const safeData = safeClone(event) as Record<string, unknown>;
+  const eventName = getEventName(event);
 
   const payload = {
     id: generateId(),
     timestamp: Date.now(),
-    event: event.event as string,
+    event: eventName,
     data: safeData,
     source,
     raw: safeData,
@@ -133,7 +144,6 @@ function emitEvent(event: Record<string, unknown>, source: string, dataLayerInde
 
   // Only log to console if enabled
   if (consoleLoggingEnabled) {
-    const eventName = event.event as string;
     const title = `%c📊 ${source}%c ${eventName}`;
     console.groupCollapsed(
       title,
@@ -180,7 +190,7 @@ function wrapDataLayer(name: string): void {
     // Check each pushed item and assign index
     let index = currentLength;
     for (const item of args) {
-      if (isValidEvent(item)) {
+      if (isValidPush(item)) {
         emitEvent(item, name, index);
       }
       index++;
@@ -197,7 +207,7 @@ function wrapDataLayer(name: string): void {
   // Process existing events in the dataLayer with their original indices
   for (let i = 0; i < dataLayer.length; i++) {
     const item = dataLayer[i];
-    if (isValidEvent(item)) {
+    if (isValidPush(item)) {
       emitEvent(item, name, i);
     }
   }

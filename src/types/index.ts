@@ -198,6 +198,9 @@ export function autoAssignSourceColors(
   return hasNewAssignments ? newSourceColors : null;
 }
 
+// Special event name for pushes without an 'event' property
+export const DATA_UPDATE_EVENT = '(data)';
+
 // Event categories for colorful display
 export const EVENT_CATEGORIES: Record<string, { color: string; icon: string }> = {
   'gtm.js': { color: '#22d3ee', icon: '🚀' },
@@ -218,6 +221,7 @@ export const EVENT_CATEGORIES: Record<string, { color: string; icon: string }> =
   sign_up: { color: '#06b6d4', icon: '✨' },
   login: { color: '#6366f1', icon: '🔐' },
   search: { color: '#a855f7', icon: '🔍' },
+  [DATA_UPDATE_EVENT]: { color: '#94a3b8', icon: '📦' }, // Data-only pushes (no event property)
   default: { color: '#64748b', icon: '📌' },
 };
 

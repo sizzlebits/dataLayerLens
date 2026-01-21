@@ -87,6 +87,16 @@ function createStoreSlice(options: StoreOptions): StateCreator<StoreState> {
           }).catch(() => {
             // Content script may not be loaded
           });
+
+          // Also broadcast directly to extension views (sidepanel, devtools)
+          // This ensures they get the update even if content script relay fails
+          browserAPI.runtime.sendMessage({
+            type: 'SETTINGS_UPDATED',
+            payload: newSettings,
+            tabId: tab.id,
+          }).catch(() => {
+            // No listeners - that's okay
+          });
         }
       } catch (error) {
         console.error('Failed to save settings:', error);

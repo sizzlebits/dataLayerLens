@@ -173,33 +173,40 @@ export function useEventPanelState(config: EventPanelConfig): EventPanelState {
     };
   }, [context, tabId, loadEvents]);
 
-  // Load settings
+  // Load settings from storage (global settings that popup updates)
   useEffect(() => {
-    if (!tabId) return;
-
-    const loadSettings = async () => {
+    const loadSettingsFromStorage = async () => {
       try {
-        const response = await browserAPI.tabs.sendMessage(tabId, { type: 'GET_SETTINGS' });
-        if (response?.settings) {
-          setSettings(response.settings);
+        const result = await browserAPI.storage.local.get('datalayer_monitor_settings');
+        const savedSettings = result.datalayer_monitor_settings;
+        if (savedSettings) {
+          setSettings((prev) => ({ ...prev, ...savedSettings }));
         }
       } catch (err) {
-        console.debug('Could not load settings:', err);
+        console.debug('Could not load settings from storage:', err);
       }
     };
 
-    loadSettings();
+    loadSettingsFromStorage();
+  }, []);
+
+  // Load events when tabId is available
+  useEffect(() => {
+    if (!tabId) return;
     loadEvents(tabId);
   }, [tabId, loadEvents]);
 
-  // Listen for new events and settings changes
+  // Listen for new events and settings changes via messages
   useEffect(() => {
     const messageListener = (
       message: { type: string; payload?: DataLayerEvent | DataLayerEvent[] | Partial<SettingsType>; tabId?: number },
       sender: { tab?: { id?: number } }
     ) => {
-      // For sidepanel, filter by tab ID
-      if (context === 'sidepanel') {
+      // For sidepanel, filter new event messages by tab ID
+      // But not settings or events-updated - those should apply globally
+      if (context === 'sidepanel' &&
+          message.type !== 'SETTINGS_UPDATED' &&
+          message.type !== 'EVENTS_UPDATED') {
         const messageTabId = message.tabId ?? sender?.tab?.id;
         if (messageTabId !== tabId) return;
       }
@@ -228,7 +235,8 @@ export function useEventPanelState(config: EventPanelConfig): EventPanelState {
         if (message.payload) {
           setSettings((prev) => ({ ...prev, ...(message.payload as Partial<SettingsType>) }));
         }
-      } else if (message.type === 'EVENTS_UPDATED' && context === 'devtools') {
+      } else if (message.type === 'EVENTS_UPDATED') {
+        // Handle events cleared/updated from popup or other sources
         if (message.payload && Array.isArray(message.payload)) {
           const sortedEvents = [...(message.payload as DataLayerEvent[])].sort(
             (a: DataLayerEvent, b: DataLayerEvent) => b.timestamp - a.timestamp
@@ -244,6 +252,27 @@ export function useEventPanelState(config: EventPanelConfig): EventPanelState {
       browserAPI.runtime.onMessage.removeListener(messageListener);
     };
   }, [context, tabId]);
+
+  // Listen for settings changes via storage
+  useEffect(() => {
+    const storageListener = (
+      changes: { [key: string]: { oldValue?: unknown; newValue?: unknown } },
+      areaName: string
+    ) => {
+      if (areaName === 'local' && changes.datalayer_monitor_settings) {
+        const newSettings = changes.datalayer_monitor_settings.newValue as SettingsType;
+        if (newSettings) {
+          setSettings((prev) => ({ ...prev, ...newSettings }));
+        }
+      }
+    };
+
+    browserAPI.storage.onChanged.addListener(storageListener);
+
+    return () => {
+      browserAPI.storage.onChanged.removeListener(storageListener);
+    };
+  }, []);
 
   // Filter events
   const filteredEvents = useMemo(() => {
