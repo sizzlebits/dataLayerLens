@@ -27,6 +27,8 @@
   "scripts": {
     "dev": "vite build --watch --mode development",
     "build": "vite build",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "build:firefox": "cross-env BROWSER=firefox vite build",
     "build:chrome": "cross-env BROWSER=chrome vite build",
     "build:all": "npm run build:chrome && npm run build:firefox",
@@ -47,10 +49,14 @@
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "storybook": "^10.2.0",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@storybook/addon-a11y": "^10.2.0",
+    "@storybook/addon-docs": "^10.2.0",
+    "@storybook/react-vite": "^10.2.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",

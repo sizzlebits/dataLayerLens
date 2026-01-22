@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ContentMessageHandler, createContentMessageHandler } from './ContentMessageHandler';
-import { createMockBrowserAPI } from '@/services/browser';
+import { createMockBrowserAPI } from '@/services/browser/MockBrowserAPI';
 import type { DataLayerEvent, Settings } from '@/types';
 
 function createMockEvent(overrides: Partial<DataLayerEvent> = {}): DataLayerEvent {

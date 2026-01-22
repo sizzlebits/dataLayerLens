@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { EventCapture, createEventCapture } from './EventCapture';
-import { createMockBrowserAPI } from '@/services/browser';
+import { createMockBrowserAPI } from '@/services/browser/MockBrowserAPI';
 import type { DataLayerEvent } from '@/types';
 
 describe('EventCapture', () => {

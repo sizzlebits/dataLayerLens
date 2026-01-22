@@ -1,0 +1,142 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/Styleguide" />
+
+# Style Guide
+
+This guide outlines the design patterns and conventions used in the DataLayer Lens component library.
+
+## Component Patterns
+
+### Atomic Design Hierarchy
+
+1. **Atoms** - Single-purpose, reusable building blocks
+   - Examples: Toggle, SearchInput, Toast
+   - Should be stateless where possible
+   - Accept callbacks for user interactions
+
+2. **Molecules** - Combinations of atoms that form functional units
+   - Examples: FilterPanel, EventRow, EventStats
+   - May contain local state for UI interactions
+   - Compose multiple atoms together
+
+3. **Organisms** - Complex components with significant functionality
+   - Examples: EventPanel, SettingsDrawer
+   - May manage substantial local state
+   - Often connect to global state or APIs
+
+4. **Views** - Full-page or panel layouts
+   - Examples: DevToolsPanel, Popup
+   - Orchestrate organisms and provide context
+   - Handle routing and navigation
+
+## Animation Guidelines
+
+All animations use Framer Motion with consistent timing:
+
+```typescript
+// Standard spring animation
+transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+
+// Fade in/out
+initial={{ opacity: 0 }}
+animate={{ opacity: 1 }}
+exit={{ opacity: 0 }}
+
+// Slide animations
+initial={{ x: '100%' }}
+animate={{ x: 0 }}
+exit={{ x: '100%' }}
+```
+
+### Hover Effects
+
+- Use `whileHover={{ scale: 1.05 }}` for subtle emphasis
+- Use `whileTap={{ scale: 0.95 }}` for tactile feedback
+
+## Accessibility Standards
+
+All components follow WCAG 2.1 AA guidelines:
+
+### Interactive Elements
+
+- All buttons have `aria-label` when icon-only
+- Toggles use `role="switch"` with `aria-checked`
+- Expandable sections use `aria-expanded`
+
+### Keyboard Navigation
+
+- All interactive elements are focusable
+- Custom focus styles using `focus-visible:ring-2`
+- Escape key closes modals and dropdowns
+
+### Screen Readers
+
+- Icons include `aria-hidden="true"`
+- Status changes announced with `role="alert"`
+- Live regions use `aria-live="polite"`
+
+## Naming Conventions
+
+### Components
+
+- PascalCase for component names: `EventPanel`, `SearchInput`
+- Descriptive, action-oriented names
+
+### Props
+
+- camelCase for prop names: `isExpanded`, `onToggle`
+- Boolean props prefixed with `is`, `has`, `show`, `can`
+- Callbacks prefixed with `on`: `onClick`, `onToggle`
+
+### CSS Classes
+
+- Tailwind utility classes for styling
+- Custom classes prefixed with `dl-`: `bg-dl-dark`, `text-dl-primary`
+
+## State Management
+
+### Local State
+
+Used for UI-only concerns:
+- Expanded/collapsed states
+- Form input values
+- Menu open/close states
+
+### Global State (Zustand)
+
+Used for shared application state:
+- User settings
+- Captured events
+- Filter configurations
+
+## File Organisation
+
+```
+src/
+├── components/
+│   └── shared/           # Reusable components
+├── stories/
+│   ├── atoms/           # Atom stories
+│   ├── molecules/       # Molecule stories
+│   ├── organisms/       # Organism stories
+│   └── views/           # View stories
+├── tokens/              # Design tokens
+└── types/               # TypeScript types
+```
+
+## Testing Guidelines
+
+Each component should have:
+
+1. **Unit tests** - Test props and callbacks
+2. **Accessibility tests** - Using @storybook/addon-a11y
+3. **Visual tests** - Storybook stories for each state
+
+## Best Practices
+
+1. **Keep components focused** - Single responsibility
+2. **Prop drilling** - Avoid more than 2-3 levels
+3. **Composition over inheritance** - Use children and render props
+4. **Consistent patterns** - Follow existing component patterns
+5. **Document edge cases** - Add stories for error states, loading, empty states
