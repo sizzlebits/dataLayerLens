@@ -42,7 +42,10 @@
     "lint": "eslint src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
     "serve:test": "npx serve . -p 3000",
-    "prepare": "husky"
+    "prepare": "husky",
+    "version": "node scripts/sync-version.js && git add public/manifest.chrome.json public/manifest.firefox.json",
+    "postversion": "npm run build:all && node scripts/package-release.js",
+    "release": "npm run build:all && node scripts/package-release.js"
   },
   "dependencies": {
     "framer-motion": "^11.15.0",
