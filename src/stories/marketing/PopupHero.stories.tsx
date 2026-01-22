@@ -80,7 +80,7 @@ const mockDomainSettings: Record<string, DomainSettings> = {
   },
 };
 
-interface PopupHeroProps extends MarketingArgs {}
+type PopupHeroProps = MarketingArgs;
 
 function PopupHeroShot({
   gradient,

@@ -33,7 +33,7 @@ const LoadingFallback = () => (
   </div>
 );
 
-interface DevToolsHeroProps extends MarketingArgs {}
+type DevToolsHeroProps = MarketingArgs;
 
 // Default panel width - narrower to simulate typical DevTools view
 const DEFAULT_PANEL_WIDTH = 900;
