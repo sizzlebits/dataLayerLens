@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { Toggle } from '@/components/shared/Toggle';
 
 const meta: Meta<typeof Toggle> = {
@@ -23,6 +24,22 @@ export const Default: Story = {
   args: {
     checked: false,
     label: 'Toggle setting',
+    onChange: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // Wait for the component to render and find the toggle switch
+    const toggle = await canvas.findByRole('switch');
+
+    // Verify initial state
+    await expect(toggle).toHaveAttribute('aria-checked', 'false');
+
+    // Click the toggle
+    await userEvent.click(toggle);
+
+    // Verify the onChange callback was called
+    await expect(args.onChange).toHaveBeenCalledWith(true);
   },
 };
 

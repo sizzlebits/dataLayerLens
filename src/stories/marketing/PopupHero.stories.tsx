@@ -1,0 +1,247 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { lazy, Suspense } from 'react';
+import {
+  ScreenshotFrame,
+  FloatingCard,
+  Glow,
+  marketingArgTypes,
+  defaultMarketingArgs,
+  type MarketingArgs,
+} from './decorators';
+import { MonitorTab } from '@/popup/components/MonitorTab';
+import { SettingsTab } from '@/popup/components/SettingsTab';
+import { DomainsTab } from '@/popup/components/DomainsTab';
+import type { Settings, DataLayerEvent, DomainSettings } from '@/types';
+
+const Popup = lazy(() =>
+  import('@/popup/Popup').then((m) => ({ default: m.Popup }))
+);
+
+const LoadingFallback = () => (
+  <div
+    style={{
+      width: 320,
+      height: 448,
+      background: '#0f172a',
+      borderRadius: 12,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#64748b',
+    }}
+  >
+    Loading...
+  </div>
+);
+
+// Mock data for tab showcases
+const mockSettings: Settings = {
+  dataLayerNames: ['dataLayer', 'adobeDataLayer'],
+  showTimestamps: true,
+  maxEvents: 100,
+  compactMode: false,
+  persistEvents: true,
+  persistEventsMaxAge: 0,
+  consoleLogging: false,
+  debugLogging: false,
+  sourceColors: {
+    dataLayer: '#22d3ee',
+    adobeDataLayer: '#f59e0b',
+  },
+  eventFilters: ['gtm.js', 'gtm.dom'],
+  filterMode: 'exclude',
+  theme: 'dark',
+  grouping: {
+    enabled: true,
+    mode: 'time',
+    timeWindowMs: 500,
+    triggerEvents: ['gtm.js', 'page_view'],
+  },
+};
+
+const mockEvents: DataLayerEvent[] = [
+  { id: '1', timestamp: Date.now(), event: 'page_view', data: {}, source: 'dataLayer', raw: {}, dataLayerIndex: 0 },
+  { id: '2', timestamp: Date.now(), event: 'view_item', data: {}, source: 'dataLayer', raw: {}, dataLayerIndex: 1 },
+  { id: '3', timestamp: Date.now(), event: 'add_to_cart', data: {}, source: 'dataLayer', raw: {}, dataLayerIndex: 2 },
+];
+
+const mockDomainSettings: Record<string, DomainSettings> = {
+  'example.com': {
+    domain: 'example.com',
+    settings: { dataLayerNames: ['dataLayer'], maxEvents: 50 },
+    createdAt: Date.now() - 86400000,
+    updatedAt: Date.now(),
+  },
+  'shop.example.com': {
+    domain: 'shop.example.com',
+    settings: { dataLayerNames: ['dataLayer', 'shopLayer'], maxEvents: 200 },
+    createdAt: Date.now() - 172800000,
+    updatedAt: Date.now() - 3600000,
+  },
+};
+
+interface PopupHeroProps extends MarketingArgs {}
+
+function PopupHeroShot({
+  gradient,
+  showGlow,
+  glowColor,
+  rotateX,
+  rotateY,
+  scale,
+}: PopupHeroProps) {
+  const hasRotation = rotateX !== 0 || rotateY !== 0;
+
+  return (
+    <ScreenshotFrame gradient={gradient} padding={40}>
+      {showGlow && <Glow color={glowColor} blur={100} opacity={0.5} offsetY={40} />}
+      <FloatingCard
+        shadow="2xl"
+        scale={scale}
+        rotate={hasRotation ? { x: rotateX, y: rotateY } : undefined}
+      >
+        <Suspense fallback={<LoadingFallback />}>
+          <Popup />
+        </Suspense>
+      </FloatingCard>
+    </ScreenshotFrame>
+  );
+}
+
+const meta: Meta<typeof PopupHeroShot> = {
+  title: 'Marketing/Popup Hero',
+  component: PopupHeroShot,
+  parameters: {
+    layout: 'fullscreen',
+    chromatic: { disableSnapshot: true },
+    docs: { disable: true },
+  },
+  argTypes: marketingArgTypes,
+  args: {
+    ...defaultMarketingArgs,
+    scale: 1,
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof PopupHeroShot>;
+
+export const Default: Story = {
+  name: 'Default (Use Controls)',
+  args: {
+    gradient: 'sunset',
+    showGlow: false,
+  },
+};
+
+// ============================================================================
+// Three Tabs Side-by-Side
+// ============================================================================
+
+interface PopupFrameProps {
+  children: React.ReactNode;
+  activeTab: 'Monitor' | 'Settings' | 'Domains';
+}
+
+function PopupFrame({ children, activeTab }: PopupFrameProps) {
+  const tabs = ['Monitor', 'Settings', 'Domains'] as const;
+
+  return (
+    <div className="w-80 h-[28rem] flex flex-col bg-gradient-to-br from-dl-dark to-dl-darker rounded-xl overflow-hidden">
+      {/* Header */}
+      <header className="flex-shrink-0 bg-gradient-to-r from-dl-primary/20 to-dl-secondary/20 px-4 py-3 border-b border-dl-border">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-dl-primary to-dl-secondary rounded-xl flex items-center justify-center shadow-lg">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </div>
+          <div>
+            <h1 className="font-bold text-lg text-white tracking-tight">DataLayer Lens</h1>
+            <p className="text-xs text-slate-400">Track your GTM events with clarity</p>
+          </div>
+        </div>
+      </header>
+
+      {/* Tab Navigation */}
+      <div className="flex-shrink-0 flex border-b border-dl-border">
+        {tabs.map((tab) => (
+          <div
+            key={tab}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium relative ${
+              activeTab === tab ? 'text-dl-accent' : 'text-slate-400'
+            }`}
+          >
+            {tab}
+            {activeTab === tab && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-dl-primary to-dl-accent" />
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto">{children}</div>
+    </div>
+  );
+}
+
+function ThreeTabsShowcase({ args }: { args: MarketingArgs }) {
+  return (
+    <ScreenshotFrame gradient={args.gradient} padding={40}>
+      {args.showGlow && <Glow color={args.glowColor} blur={120} opacity={0.4} offsetY={20} />}
+      <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+        {/* Monitor Tab */}
+        <FloatingCard shadow="xl" rotate={{ y: 12, x: 5 }}>
+          <PopupFrame activeTab="Monitor">
+            <MonitorTab
+              settings={mockSettings}
+              events={mockEvents}
+              currentDomain="example.com"
+              onClearEvents={() => {}}
+              onExportEvents={() => {}}
+              onAddFilter={() => {}}
+              onRemoveFilter={() => {}}
+              onClearFilters={() => {}}
+              onSetFilterMode={() => {}}
+            />
+          </PopupFrame>
+        </FloatingCard>
+
+        {/* Settings Tab */}
+        <FloatingCard shadow="xl">
+          <PopupFrame activeTab="Settings">
+            <SettingsTab
+              settings={mockSettings}
+              onUpdateSettings={() => {}}
+              onExportSettings={() => {}}
+              onImportSettings={() => {}}
+              importStatus={null}
+            />
+          </PopupFrame>
+        </FloatingCard>
+
+        {/* Domains Tab */}
+        <FloatingCard shadow="xl" rotate={{ y: -12, x: 5 }}>
+          <PopupFrame activeTab="Domains">
+            <DomainsTab
+              currentDomain="example.com"
+              domainSettings={mockDomainSettings}
+              onSaveCurrentDomain={() => {}}
+              onDeleteDomain={() => {}}
+            />
+          </PopupFrame>
+        </FloatingCard>
+      </div>
+    </ScreenshotFrame>
+  );
+}
+
+export const ThreeTabs: Story = {
+  name: 'All Three Tabs',
+  args: {
+    gradient: 'sunset',
+    showGlow: false,
+  },
+  render: (args) => <ThreeTabsShowcase args={args} />,
+};

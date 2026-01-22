@@ -20,6 +20,38 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    viewport: {
+      viewports: {
+        screenshot: {
+          name: 'Store Screenshot (1280x800)',
+          styles: {
+            width: '1280px',
+            height: '800px',
+          },
+        },
+        screenshotSmall: {
+          name: 'Small Screenshot (640x400)',
+          styles: {
+            width: '640px',
+            height: '400px',
+          },
+        },
+      },
+    },
+    options: {
+      storySort: {
+        order: [
+          'Introduction',
+          'Styleguide',
+          'Design Tokens',
+          'Atoms',
+          'Molecules',
+          'Organisms',
+          'Views',
+          'Marketing', // Marketing section appears last
+        ],
+      },
+    },
   },
 };
 

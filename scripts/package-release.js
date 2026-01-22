@@ -25,12 +25,18 @@ if (!existsSync(releasesDir)) {
   mkdirSync(releasesDir, { recursive: true });
 }
 
+// Zip options to exclude macOS resource forks and hidden files
+const zipExcludes = "-x '*.zip' -x '*.DS_Store' -x '__MACOSX*'";
+
 // Package Chrome
 const chromeDistDir = join(rootDir, 'dist/chrome');
 if (existsSync(chromeDistDir)) {
   const chromeZipName = `dataLayerLens-${version}-chrome.zip`;
   const chromeZipPath = join(releasesDir, chromeZipName);
-  execSync(`cd "${chromeDistDir}" && zip -r "${chromeZipPath}" . -x '*.zip'`, { stdio: 'inherit' });
+  execSync(`cd "${chromeDistDir}" && zip -r "${chromeZipPath}" . ${zipExcludes}`, {
+    stdio: 'inherit',
+    env: { ...process.env, COPYFILE_DISABLE: '1' },
+  });
   console.log(`  ✓ Created ${chromeZipName}`);
 } else {
   console.error(`  ✗ Chrome dist not found at ${chromeDistDir}`);
@@ -42,7 +48,10 @@ const firefoxDistDir = join(rootDir, 'dist/firefox');
 if (existsSync(firefoxDistDir)) {
   const firefoxZipName = `dataLayerLens-${version}-firefox.zip`;
   const firefoxZipPath = join(releasesDir, firefoxZipName);
-  execSync(`cd "${firefoxDistDir}" && zip -r "${firefoxZipPath}" . -x '*.zip'`, { stdio: 'inherit' });
+  execSync(`cd "${firefoxDistDir}" && zip -r "${firefoxZipPath}" . ${zipExcludes}`, {
+    stdio: 'inherit',
+    env: { ...process.env, COPYFILE_DISABLE: '1' },
+  });
   console.log(`  ✓ Created ${firefoxZipName}`);
 } else {
   console.error(`  ✗ Firefox dist not found at ${firefoxDistDir}`);
