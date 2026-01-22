@@ -1,9 +1,10 @@
-import { defineConfig, Plugin, build } from 'vite';
+import { defineConfig, Plugin, PluginOption, build } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import { copyFileSync, mkdirSync, existsSync, readFileSync, writeFileSync } from 'fs';
 
 const browser = process.env.BROWSER || 'chrome';
+const isStorybook = process.env.STORYBOOK === 'true' || process.argv.includes('storybook');
 
 // Read version from package.json
 function getPackageVersion(): string {
@@ -99,32 +100,41 @@ async function buildStandaloneScripts(): Promise<Plugin> {
   };
 }
 
-export default defineConfig(async () => ({
-  plugins: [react(), copyExtensionFiles(), await buildStandaloneScripts()],
-  base: '', // Use relative paths for Chrome extension compatibility
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, 'src'),
-    },
-  },
-  define: {
-    'process.env.BROWSER': JSON.stringify(browser),
-  },
-  build: {
-    outDir: `dist/${browser}`,
-    emptyOutDir: true,
-    rollupOptions: {
-      input: {
-        popup: resolve(__dirname, 'src/popup/index.html'),
-        devtools: resolve(__dirname, 'src/devtools/index.html'),
-        'devtools-panel': resolve(__dirname, 'src/devtools/panel.html'),
-      },
-      output: {
-        entryFileNames: 'assets/[name]-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]',
+export default defineConfig(async () => {
+  // Only include extension-specific plugins when NOT building Storybook
+  const plugins: PluginOption[] = [react()];
+  if (!isStorybook) {
+    plugins.push(copyExtensionFiles());
+    plugins.push(await buildStandaloneScripts());
+  }
+
+  return {
+    plugins,
+    base: '', // Use relative paths for Chrome extension compatibility
+    resolve: {
+      alias: {
+        '@': resolve(__dirname, 'src'),
       },
     },
-    sourcemap: process.env.NODE_ENV === 'development',
-  },
-}));
+    define: {
+      'process.env.BROWSER': JSON.stringify(browser),
+    },
+    build: {
+      outDir: `dist/${browser}`,
+      emptyOutDir: true,
+      rollupOptions: {
+        input: {
+          popup: resolve(__dirname, 'src/popup/index.html'),
+          devtools: resolve(__dirname, 'src/devtools/index.html'),
+          'devtools-panel': resolve(__dirname, 'src/devtools/panel.html'),
+        },
+        output: {
+          entryFileNames: 'assets/[name]-[hash].js',
+          chunkFileNames: 'assets/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash].[ext]',
+        },
+      },
+      sourcemap: process.env.NODE_ENV === 'development',
+    },
+  };
+});
