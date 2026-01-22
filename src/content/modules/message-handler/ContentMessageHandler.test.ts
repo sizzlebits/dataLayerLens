@@ -11,16 +11,12 @@ function createMockEvent(overrides: Partial<DataLayerEvent> = {}): DataLayerEven
     data: { event: 'test_event' },
     source: 'dataLayer',
     raw: { event: 'test_event' },
+    dataLayerIndex: 0,
     ...overrides,
   };
 }
 
 const mockSettings: Settings = {
-  overlayEnabled: false,
-  overlayCollapsed: false,
-  overlayPosition: { x: -1, y: -1 },
-  overlayHeight: 400,
-  overlayAnchor: { vertical: 'bottom', horizontal: 'right' },
   maxEvents: 500,
   dataLayerNames: ['dataLayer'],
   eventFilters: [],
@@ -34,11 +30,11 @@ const mockSettings: Settings = {
   persistEvents: false,
   persistEventsMaxAge: 300000,
   theme: 'dark',
-  animationsEnabled: true,
   showTimestamps: true,
   compactMode: false,
   debugLogging: false,
   consoleLogging: false,
+  sourceColors: {},
 };
 
 describe('ContentMessageHandler', () => {
@@ -47,10 +43,8 @@ describe('ContentMessageHandler', () => {
   let callbacks: {
     onGetEvents: ReturnType<typeof vi.fn>;
     onClearEvents: ReturnType<typeof vi.fn>;
-    onToggleOverlay: ReturnType<typeof vi.fn>;
     onUpdateSettings: ReturnType<typeof vi.fn>;
     onGetSettings: ReturnType<typeof vi.fn>;
-    onGetOverlayState: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -58,10 +52,8 @@ describe('ContentMessageHandler', () => {
     callbacks = {
       onGetEvents: vi.fn().mockReturnValue([]),
       onClearEvents: vi.fn(),
-      onToggleOverlay: vi.fn().mockReturnValue(true),
       onUpdateSettings: vi.fn(),
       onGetSettings: vi.fn().mockReturnValue(mockSettings),
-      onGetOverlayState: vi.fn().mockReturnValue(false),
     };
 
     handler = new ContentMessageHandler({
@@ -132,24 +124,6 @@ describe('ContentMessageHandler', () => {
       });
     });
 
-    describe('TOGGLE_OVERLAY', () => {
-      it('calls toggle callback without payload', () => {
-        simulateMessage('TOGGLE_OVERLAY');
-
-        expect(callbacks.onToggleOverlay).toHaveBeenCalledWith(undefined);
-        expect(sendResponseMock).toHaveBeenCalledWith({ enabled: true });
-      });
-
-      it('calls toggle callback with enabled value', () => {
-        callbacks.onToggleOverlay.mockReturnValue(false);
-
-        simulateMessage('TOGGLE_OVERLAY', { enabled: false });
-
-        expect(callbacks.onToggleOverlay).toHaveBeenCalledWith(false);
-        expect(sendResponseMock).toHaveBeenCalledWith({ enabled: false });
-      });
-    });
-
     describe('UPDATE_SETTINGS', () => {
       it('calls update settings callback with payload', () => {
         const settingsUpdate = { maxEvents: 1000, theme: 'light' as const };
@@ -167,17 +141,6 @@ describe('ContentMessageHandler', () => {
 
         expect(callbacks.onGetSettings).toHaveBeenCalled();
         expect(sendResponseMock).toHaveBeenCalledWith({ settings: mockSettings });
-      });
-    });
-
-    describe('GET_OVERLAY_STATE', () => {
-      it('returns overlay state from callback', () => {
-        callbacks.onGetOverlayState.mockReturnValue(true);
-
-        simulateMessage('GET_OVERLAY_STATE');
-
-        expect(callbacks.onGetOverlayState).toHaveBeenCalled();
-        expect(sendResponseMock).toHaveBeenCalledWith({ enabled: true });
       });
     });
 
@@ -237,10 +200,8 @@ describe('createContentMessageHandler', () => {
       callbacks: {
         onGetEvents: vi.fn(),
         onClearEvents: vi.fn(),
-        onToggleOverlay: vi.fn(),
         onUpdateSettings: vi.fn(),
         onGetSettings: vi.fn(),
-        onGetOverlayState: vi.fn(),
       },
     });
 

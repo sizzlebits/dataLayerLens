@@ -4,6 +4,7 @@
  */
 
 import { Settings, getCurrentDomain } from '@/types';
+import { debugError } from '@/utils/debug';
 
 // Browser API abstraction
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
@@ -31,7 +32,7 @@ export function safeSendMessage(message: unknown): Promise<unknown> {
   return browserAPI.runtime.sendMessage(message).catch((error: Error) => {
     if (error?.message?.includes('Extension context invalidated')) {
       extensionContextValid = false;
-      console.debug('[DataLayer Lens] Extension context invalidated - please reload the page');
+      // Silent - extension context invalidated is expected on page reload
     }
   });
 }
@@ -46,9 +47,7 @@ export async function saveSettingsToStorage(
   try {
     await browserAPI.storage.local.set({ datalayer_monitor_settings: settings });
   } catch (error) {
-    if (debugLogging) {
-      console.error('[DataLayer Lens] Failed to save settings:', error);
-    }
+    debugError(debugLogging, 'Failed to save settings:', error);
   }
 }
 
@@ -69,9 +68,7 @@ export async function saveDomainOverlayEnabled(
       payload: { overlayEnabled: enabled },
     });
   } catch (error) {
-    if (debugLogging) {
-      console.error('[DataLayer Lens] Failed to save domain overlay setting:', error);
-    }
+    debugError(debugLogging, 'Failed to save domain overlay setting:', error);
     // Fallback to global settings
     await saveSettingsToStorage(settings, debugLogging);
   }

@@ -29,7 +29,7 @@ export function BackupRestore({ onExport, onImport, importStatus }: BackupRestor
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-slate-300">Backup & Restore</h3>
+      <h3 className="text-sm font-medium text-slate-300">Backup & Restore Settings</h3>
 
       <div className="flex gap-2">
         <motion.button

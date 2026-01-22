@@ -3,6 +3,7 @@
  * Used by both SidePanel and DevToolsPanel with context-specific configuration.
  */
 
+import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Layers,
@@ -16,12 +17,11 @@ import {
   Clock,
   Database,
   Grid,
-  Settings,
   Plus,
   FolderOpen,
   Folder,
   Download,
-  Terminal,
+  Settings,
 } from 'lucide-react';
 import { getEventCategory } from '@/types';
 import { EventRow } from '../EventRow';
@@ -32,8 +32,8 @@ import { useEventPanelState, PAGE_SIZE } from './useEventPanelState';
 import { useEventPanelActions } from './useEventPanelActions';
 
 export interface EventPanelProps {
-  /** Context determines UI differences between sidepanel and devtools */
-  context: 'sidepanel' | 'devtools';
+  /** Context determines UI differences - devtools is the only supported mode */
+  context: 'devtools';
 }
 
 export function EventPanel({ context }: EventPanelProps) {
@@ -58,7 +58,17 @@ export function EventPanel({ context }: EventPanelProps) {
   });
 
   const clipboardAvailable = isClipboardApiAvailable();
-  const isCompact = context === 'sidepanel';
+  // Use compact mode from settings
+  const isCompact = state.settings.compactMode;
+
+  // Compute event counts per event type (for filter display)
+  const eventTypeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const event of state.events) {
+      counts[event.event] = (counts[event.event] || 0) + 1;
+    }
+    return counts;
+  }, [state.events]);
 
   return (
     <div className="h-screen flex flex-col bg-dl-darker text-slate-200 overflow-hidden">
@@ -93,24 +103,6 @@ export function EventPanel({ context }: EventPanelProps) {
           </div>
 
           <div className="flex items-center gap-1">
-            {/* Console Logging - DevTools only */}
-            {context === 'devtools' && (
-              <motion.button
-                onClick={actions.toggleConsoleLogging}
-                className={`header-btn hide-md ${
-                  state.settings.consoleLogging
-                    ? 'bg-dl-accent/20 text-dl-accent'
-                    : 'bg-dl-card text-slate-400 hover:text-slate-200'
-                }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                title="Log events to browser console"
-              >
-                <Terminal className="btn-icon" />
-                <span className="btn-label">Console</span>
-              </motion.button>
-            )}
-
             {/* Grouping Toggle */}
             <motion.button
               onClick={actions.toggleGrouping}
@@ -291,24 +283,30 @@ export function EventPanel({ context }: EventPanelProps) {
                 {/* Active Filters */}
                 {state.settings.eventFilters.length > 0 && (
                   <div className={`flex flex-wrap ${isCompact ? 'gap-1' : 'gap-1.5'}`}>
-                    {state.settings.eventFilters.map((filter) => (
-                      <span
-                        key={filter}
-                        className={`inline-flex items-center gap-1 rounded-full font-medium ${
-                          state.settings.filterMode === 'include'
-                            ? 'bg-dl-success/20 text-dl-success'
-                            : 'bg-dl-error/20 text-dl-error'
-                        } ${isCompact ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'}`}
-                      >
-                        {filter}
-                        <button
-                          onClick={() => actions.removeFilter(filter)}
-                          className="hover:bg-white/10 rounded-full p-0.5"
+                    {state.settings.eventFilters.map((filter) => {
+                      const count = eventTypeCounts[filter] || 0;
+                      return (
+                        <span
+                          key={filter}
+                          className={`inline-flex items-center gap-1 rounded-full font-medium ${
+                            state.settings.filterMode === 'include'
+                              ? 'bg-dl-success/20 text-dl-success'
+                              : 'bg-dl-error/20 text-dl-error'
+                          } ${isCompact ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'}`}
                         >
-                          <X className={isCompact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
-                        </button>
-                      </span>
-                    ))}
+                          {filter}
+                          <span className={`opacity-60 ${isCompact ? 'text-[9px]' : 'text-[10px]'}`}>
+                            ({count})
+                          </span>
+                          <button
+                            onClick={() => actions.removeFilter(filter)}
+                            className="hover:bg-white/10 rounded-full p-0.5"
+                          >
+                            <X className={isCompact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
+                          </button>
+                        </span>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -326,6 +324,7 @@ export function EventPanel({ context }: EventPanelProps) {
                       .filter((type) => !state.settings.eventFilters.includes(type))
                       .map((type) => {
                         const category = getEventCategory(type);
+                        const count = eventTypeCounts[type] || 0;
                         return (
                           <button
                             key={type}
@@ -340,6 +339,9 @@ export function EventPanel({ context }: EventPanelProps) {
                           >
                             <Plus className={isCompact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
                             {type}
+                            <span className={`opacity-60 ${isCompact ? 'text-[9px]' : 'text-[10px]'}`}>
+                              ({count})
+                            </span>
                           </button>
                         );
                       })}
@@ -426,7 +428,7 @@ export function EventPanel({ context }: EventPanelProps) {
                               showTimestamps={state.settings.showTimestamps}
                               sourceColor={actions.getSourceColorForEvent(event.source)}
                               onToggle={() => actions.toggleExpanded(event.id)}
-                              onCopy={clipboardAvailable || context === 'sidepanel' ? () => actions.copyEvent(event) : undefined}
+                              onCopy={clipboardAvailable ? () => actions.copyEvent(event) : undefined}
                               onAddFilterInclude={() => actions.addFilter(event.event, 'include')}
                               onAddFilterExclude={() => actions.addFilter(event.event, 'exclude')}
                               onToggleFilterMenu={() =>
@@ -475,7 +477,7 @@ export function EventPanel({ context }: EventPanelProps) {
                     showTimestamps={state.settings.showTimestamps}
                     sourceColor={actions.getSourceColorForEvent(event.source)}
                     onToggle={() => actions.toggleExpanded(event.id)}
-                    onCopy={clipboardAvailable || context === 'sidepanel' ? () => actions.copyEvent(event) : undefined}
+                    onCopy={clipboardAvailable ? () => actions.copyEvent(event) : undefined}
                     onAddFilterInclude={() => actions.addFilter(event.event, 'include')}
                     onAddFilterExclude={() => actions.addFilter(event.event, 'exclude')}
                     onToggleFilterMenu={() =>
@@ -537,11 +539,10 @@ export function EventPanel({ context }: EventPanelProps) {
         activeTabId={state.tabId}
         eventCount={state.filteredEvents.length}
         onExport={actions.exportEvents}
-        detectedSources={state.uniqueSources}
       />
 
-      {/* Copy Error Toast - DevTools only */}
-      {context === 'devtools' && <Toast message={state.copyError} type="error" />}
+      {/* Copy Error Toast */}
+      <Toast message={state.copyError} type="error" />
     </div>
   );
 }

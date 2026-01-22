@@ -32,7 +32,7 @@ describe('ColorSwatch', () => {
   });
 
   it('should show check icon for selected color', () => {
-    const { container } = render(<ColorSwatch {...defaultProps} />);
+    render(<ColorSwatch {...defaultProps} />);
 
     // The selected color should have an SVG (check icon) inside
     const selectedButton = screen.getAllByRole('button')[0];
@@ -40,7 +40,7 @@ describe('ColorSwatch', () => {
   });
 
   it('should not show check icon for unselected colors', () => {
-    const { container } = render(<ColorSwatch {...defaultProps} />);
+    render(<ColorSwatch {...defaultProps} />);
 
     // Unselected colors should not have the check icon
     const unselectedButtons = screen.getAllByRole('button').slice(1);

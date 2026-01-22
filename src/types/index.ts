@@ -36,16 +36,6 @@ export interface DomainSettings {
 }
 
 export interface Settings {
-  // View mode - which UI to use (overlay, side panel, or devtools)
-  viewMode: 'overlay' | 'sidepanel' | 'devtools';
-
-  // Overlay settings
-  overlayEnabled: boolean;
-  overlayPosition: { x: number; y: number };
-  overlayCollapsed: boolean;
-  overlayHeight: number; // Custom height in pixels, 0 = auto
-  overlayAnchor: { vertical: 'top' | 'bottom'; horizontal: 'left' | 'right' }; // Position anchor
-
   // Event settings
   maxEvents: number;
   dataLayerNames: string[];
@@ -61,7 +51,6 @@ export interface Settings {
 
   // Display settings
   theme: 'dark' | 'light' | 'system';
-  animationsEnabled: boolean;
   showTimestamps: boolean;
   compactMode: boolean;
 
@@ -88,6 +77,12 @@ export interface StorageData {
   }>;
 }
 
+// Type for settings input that allows partial grouping config
+// This is used by mergeSettings/mergeSettingsUpdate where nested partial grouping is valid
+export type PartialSettingsInput = Partial<Omit<Settings, 'grouping'>> & {
+  grouping?: Partial<GroupingConfig>;
+};
+
 export const DEFAULT_GROUPING: GroupingConfig = {
   enabled: false,
   mode: 'time',
@@ -96,12 +91,6 @@ export const DEFAULT_GROUPING: GroupingConfig = {
 };
 
 export const DEFAULT_SETTINGS: Settings = {
-  viewMode: 'sidepanel', // Default to side panel mode
-  overlayEnabled: false, // Start disabled, user enables via popup
-  overlayPosition: { x: -1, y: -1 }, // -1 means use default (bottom-right)
-  overlayCollapsed: false,
-  overlayHeight: 0, // 0 = auto height
-  overlayAnchor: { vertical: 'bottom', horizontal: 'right' }, // Default bottom-right
   maxEvents: 500,
   dataLayerNames: ['dataLayer'],
   eventFilters: [],
@@ -110,7 +99,6 @@ export const DEFAULT_SETTINGS: Settings = {
   persistEvents: false,
   persistEventsMaxAge: 300000, // 5 minutes default
   theme: 'dark',
-  animationsEnabled: true,
   showTimestamps: true,
   compactMode: false,
   sourceColors: {}, // User-selected colors for dataLayer sources
@@ -124,7 +112,6 @@ export type MessageType =
   | 'CLEAR_EVENTS'
   | 'GET_SETTINGS'
   | 'UPDATE_SETTINGS'
-  | 'TOGGLE_OVERLAY'
   | 'INJECT_MONITOR'
   | 'SETTINGS_CHANGED'
   | 'EXPORT_SETTINGS'
@@ -258,4 +245,41 @@ export function mergeSettingsWithDomain(
 ): Settings {
   if (!domainSettings) return globalSettings;
   return { ...globalSettings, ...domainSettings };
+}
+
+/**
+ * Merge partial settings with defaults, properly handling nested grouping config.
+ * This is the canonical way to merge settings across the codebase.
+ */
+export function mergeSettings(
+  defaults: Settings,
+  partial?: PartialSettingsInput
+): Settings {
+  if (!partial) return defaults;
+
+  return {
+    ...defaults,
+    ...partial,
+    grouping: {
+      ...defaults.grouping,
+      ...(partial.grouping || {}),
+    },
+  };
+}
+
+/**
+ * Merge partial settings into existing settings (for updates).
+ * Preserves existing values not specified in the partial.
+ */
+export function mergeSettingsUpdate(
+  current: Settings,
+  update: PartialSettingsInput
+): Settings {
+  return {
+    ...current,
+    ...update,
+    grouping: update.grouping
+      ? { ...current.grouping, ...update.grouping }
+      : current.grouping,
+  };
 }

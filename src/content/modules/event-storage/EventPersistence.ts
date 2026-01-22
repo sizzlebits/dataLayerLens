@@ -5,6 +5,7 @@
 
 import type { IBrowserAPI } from '@/services/browser';
 import type { DataLayerEvent } from '@/types';
+import { createDebugLogger, type DebugLogger } from '@/utils/debug';
 
 export interface EventPersistenceOptions {
   /** Browser API instance for storage */
@@ -33,6 +34,8 @@ export interface IEventPersistence {
   clearEvents(): Promise<void>;
   /** Update persistence settings */
   updateSettings(maxAge: number, maxEvents: number): void;
+  /** Update debug logging setting */
+  updateDebugLogging(enabled: boolean): void;
 }
 
 /**
@@ -43,20 +46,18 @@ export class EventPersistence implements IEventPersistence {
   private domain: string;
   private maxAge: number;
   private maxEvents: number;
-  private debugLogging: boolean;
+  private logger: DebugLogger;
 
   constructor(options: EventPersistenceOptions) {
     this.browserAPI = options.browserAPI;
     this.domain = options.domain;
     this.maxAge = options.maxAge;
     this.maxEvents = options.maxEvents;
-    this.debugLogging = options.debugLogging ?? false;
+    this.logger = createDebugLogger(options.debugLogging ?? false);
   }
 
-  private debugError(...args: unknown[]): void {
-    if (this.debugLogging) {
-      console.error('[DataLayer Lens EventPersistence]', ...args);
-    }
+  updateDebugLogging(enabled: boolean): void {
+    this.logger.setEnabled(enabled);
   }
 
   private getStorageKey(): string {
@@ -71,10 +72,10 @@ export class EventPersistence implements IEventPersistence {
   async loadEvents(): Promise<DataLayerEvent[]> {
     try {
       const key = this.getStorageKey();
-      console.debug('[DataLayer Lens] EventPersistence.loadEvents key:', key);
+      this.logger.debug('EventPersistence.loadEvents key:', key);
       const result = await this.browserAPI.storage.local.get<Record<string, PersistedEventsData>>(key);
       const persisted = result[key];
-      console.debug('[DataLayer Lens] EventPersistence.loadEvents found:', persisted?.events?.length ?? 0, 'events');
+      this.logger.debug('EventPersistence.loadEvents found:', persisted?.events?.length ?? 0, 'events');
 
       if (!persisted?.events?.length) {
         return [];
@@ -101,7 +102,7 @@ export class EventPersistence implements IEventPersistence {
 
       return validEvents;
     } catch (error) {
-      this.debugError('Failed to load persisted events:', error);
+      this.logger.error('Failed to load persisted events:', error);
       return [];
     }
   }
@@ -113,7 +114,7 @@ export class EventPersistence implements IEventPersistence {
   async saveEvents(events: DataLayerEvent[]): Promise<void> {
     try {
       const key = this.getStorageKey();
-      console.debug('[DataLayer Lens] EventPersistence.saveEvents key:', key, 'count:', events.length);
+      this.logger.debug('EventPersistence.saveEvents key:', key, 'count:', events.length);
 
       // Save all events, but strip "(persisted)" marker to avoid double-marking on next load
       const eventsToSave = events.map((e) => ({
@@ -128,7 +129,7 @@ export class EventPersistence implements IEventPersistence {
         },
       });
     } catch (error) {
-      this.debugError('Failed to save persisted events:', error);
+      this.logger.error('Failed to save persisted events:', error);
     }
   }
 
@@ -140,7 +141,7 @@ export class EventPersistence implements IEventPersistence {
       const key = this.getStorageKey();
       await this.browserAPI.storage.local.remove(key);
     } catch (error) {
-      this.debugError('Failed to clear persisted events:', error);
+      this.logger.error('Failed to clear persisted events:', error);
     }
   }
 

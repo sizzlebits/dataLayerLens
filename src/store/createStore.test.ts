@@ -35,6 +35,7 @@ function createMockBrowserAPI() {
           if (idx !== -1) messageListeners.splice(idx, 1);
         }),
       },
+      sendMessage: vi.fn(async () => ({})),
     },
     // Test helpers
     _storageData: storageData,
@@ -56,6 +57,7 @@ function createEvent(overrides: Partial<DataLayerEvent> = {}): DataLayerEvent {
     data: { event: 'test_event' },
     timestamp: Date.now(),
     source: 'dataLayer',
+    raw: { event: 'test_event' },
     dataLayerIndex: 0,
     ...overrides,
   };

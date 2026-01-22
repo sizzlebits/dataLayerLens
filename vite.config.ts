@@ -58,7 +58,6 @@ async function buildStandaloneScripts(): Promise<Plugin> {
         { name: 'content', entry: 'src/content/index.ts' },
         { name: 'background', entry: 'src/background/index.ts' },
         { name: 'injected', entry: 'src/injected/index.ts' },
-        { name: 'overlay', entry: 'src/content/overlay-main.ts' },
       ];
 
       for (const script of standaloneScripts) {
@@ -119,7 +118,6 @@ export default defineConfig(async () => ({
         popup: resolve(__dirname, 'src/popup/index.html'),
         devtools: resolve(__dirname, 'src/devtools/index.html'),
         'devtools-panel': resolve(__dirname, 'src/devtools/panel.html'),
-        sidepanel: resolve(__dirname, 'src/sidepanel/index.html'),
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',

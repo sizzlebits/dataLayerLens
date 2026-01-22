@@ -1,18 +1,17 @@
 /**
  * ContentMessageHandler module - handles messages from popup/background scripts.
- * Processes commands like GET_EVENTS, CLEAR_EVENTS, TOGGLE_OVERLAY, UPDATE_SETTINGS.
+ * Processes commands like GET_EVENTS, CLEAR_EVENTS, UPDATE_SETTINGS.
  */
 
 import type { IBrowserAPI, MessageSender } from '@/services/browser';
 import type { DataLayerEvent, Settings } from '@/types';
+import { createDebugLogger, type DebugLogger } from '@/utils/debug';
 
 export type MessageType =
   | 'GET_EVENTS'
   | 'CLEAR_EVENTS'
-  | 'TOGGLE_OVERLAY'
   | 'UPDATE_SETTINGS'
   | 'GET_SETTINGS'
-  | 'GET_OVERLAY_STATE'
   | 'PING';
 
 export interface Message {
@@ -23,7 +22,6 @@ export interface Message {
 export interface MessageResponse {
   events?: DataLayerEvent[];
   settings?: Settings;
-  enabled?: boolean;
   success?: boolean;
   pong?: boolean;
 }
@@ -33,14 +31,10 @@ export interface MessageHandlerCallbacks {
   onGetEvents: () => DataLayerEvent[];
   /** Clear all events */
   onClearEvents: () => void;
-  /** Toggle overlay visibility */
-  onToggleOverlay: (enabled?: boolean) => boolean;
   /** Update settings */
   onUpdateSettings: (settings: Partial<Settings>) => void;
   /** Get current settings */
   onGetSettings: () => Settings;
-  /** Get overlay state */
-  onGetOverlayState: () => boolean;
 }
 
 export interface ContentMessageHandlerOptions {
@@ -65,7 +59,7 @@ export interface IContentMessageHandler {
 export class ContentMessageHandler implements IContentMessageHandler {
   private browserAPI: IBrowserAPI;
   private callbacks: MessageHandlerCallbacks;
-  private debugLogging: boolean;
+  private logger: DebugLogger;
   private listener:
     | ((
         message: unknown,
@@ -78,13 +72,7 @@ export class ContentMessageHandler implements IContentMessageHandler {
   constructor(options: ContentMessageHandlerOptions) {
     this.browserAPI = options.browserAPI;
     this.callbacks = options.callbacks;
-    this.debugLogging = options.debugLogging ?? false;
-  }
-
-  private debugError(...args: unknown[]): void {
-    if (this.debugLogging) {
-      console.error('[DataLayer Lens MessageHandler]', ...args);
-    }
+    this.logger = createDebugLogger(options.debugLogging ?? false);
   }
 
   /**
@@ -110,7 +98,7 @@ export class ContentMessageHandler implements IContentMessageHandler {
         const response = this.handleMessage(msg);
         sendResponse(response);
       } catch (error) {
-        this.debugError('Error handling message:', error);
+        this.logger.error('Error handling message:', error);
         sendResponse({ success: false });
       }
 
@@ -145,12 +133,6 @@ export class ContentMessageHandler implements IContentMessageHandler {
         this.callbacks.onClearEvents();
         return { success: true };
 
-      case 'TOGGLE_OVERLAY': {
-        const payload = message.payload as { enabled?: boolean } | undefined;
-        const enabled = this.callbacks.onToggleOverlay(payload?.enabled);
-        return { enabled };
-      }
-
       case 'UPDATE_SETTINGS': {
         const settingsPayload = message.payload as Partial<Settings>;
         this.callbacks.onUpdateSettings(settingsPayload);
@@ -160,14 +142,11 @@ export class ContentMessageHandler implements IContentMessageHandler {
       case 'GET_SETTINGS':
         return { settings: this.callbacks.onGetSettings() };
 
-      case 'GET_OVERLAY_STATE':
-        return { enabled: this.callbacks.onGetOverlayState() };
-
       case 'PING':
         return { pong: true };
 
       default:
-        this.debugError('Unknown message type:', message.type);
+        this.logger.error('Unknown message type:', message.type);
         return { success: false };
     }
   }

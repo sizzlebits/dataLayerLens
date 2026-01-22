@@ -42,7 +42,6 @@ export class BackgroundService implements IBackgroundService {
   private eventHandler: IEventHandler;
   private messageListener: ((message: unknown, sender: MessageSender, sendResponse: (response?: unknown) => void) => boolean | void) | null = null;
   private tabRemovedListener: ((tabId: number) => void) | null = null;
-  private actionClickListener: ((tab: { id?: number; url?: string }) => void) | null = null;
 
   constructor(options: BackgroundServiceOptions) {
     this.browserAPI = options.browserAPI;
@@ -62,8 +61,6 @@ export class BackgroundService implements IBackgroundService {
   start(): void {
     this.setupMessageListener();
     this.setupTabRemovedListener();
-    this.setupActionClickListener();
-    console.log('[DataLayer Monitor] Background service initialized');
   }
 
   stop(): void {
@@ -76,8 +73,6 @@ export class BackgroundService implements IBackgroundService {
       this.browserAPI.tabs.onRemoved.removeListener(this.tabRemovedListener);
       this.tabRemovedListener = null;
     }
-
-    // Note: action.onClicked listener removal would require additional browser API surface
   }
 
   getSettingsHandler(): ISettingsHandler {
@@ -213,43 +208,6 @@ export class BackgroundService implements IBackgroundService {
     };
 
     this.browserAPI.tabs.onRemoved.addListener(this.tabRemovedListener);
-  }
-
-  private setupActionClickListener(): void {
-    // Handle extension icon click to toggle overlay
-    this.actionClickListener = async (tab: { id?: number; url?: string }) => {
-      if (!tab.id) return;
-
-      try {
-        await this.browserAPI.tabs.sendMessage(tab.id, {
-          type: 'TOGGLE_OVERLAY',
-        });
-      } catch {
-        // Content script not loaded, try to inject it
-        try {
-          await this.browserAPI.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: ['content.js'],
-          });
-        } catch {
-          // Injection failed - might be a restricted page
-        }
-      }
-    };
-
-    // Chrome action API
-    if (this.browserAPI.action?.onClicked) {
-      this.browserAPI.action.onClicked.addListener(this.actionClickListener);
-    }
-
-    // Firefox browserAction API (not in interface, but handled by actual browser)
-    type ActionClickCallback = (tab: { id?: number; url?: string }) => void;
-    const api = this.browserAPI as unknown as {
-      browserAction?: { onClicked: { addListener: (cb: ActionClickCallback) => void } };
-    };
-    if (api.browserAction?.onClicked && this.actionClickListener) {
-      api.browserAction.onClicked.addListener(this.actionClickListener);
-    }
   }
 
   private extractDomain(url: string): string | undefined {

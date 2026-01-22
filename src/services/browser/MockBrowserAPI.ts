@@ -1,8 +1,10 @@
 /**
  * Mock browser API for testing.
  * Provides controllable implementations of all browser extension APIs.
+ * Uses vi.fn() for methods that need to be tracked in tests.
  */
 
+import { vi } from 'vitest';
 import type {
   IBrowserAPI,
   IBrowserRuntime,
@@ -81,15 +83,15 @@ export class MockStorageArea implements IBrowserStorageArea {
   }
 
   public onChanged = {
-    addListener: (callback: StorageChangeListener): void => {
+    addListener: vi.fn((callback: StorageChangeListener): void => {
       this.listeners.push(callback);
-    },
-    removeListener: (callback: StorageChangeListener): void => {
+    }),
+    removeListener: vi.fn((callback: StorageChangeListener): void => {
       const index = this.listeners.indexOf(callback);
       if (index > -1) {
         this.listeners.splice(index, 1);
       }
-    },
+    }),
   };
 
   // Test helper to trigger storage change events
@@ -111,23 +113,23 @@ export class MockRuntime implements IBrowserRuntime {
   private urlPrefix = 'chrome-extension://mock-extension-id/';
 
   public onMessage = {
-    addListener: (callback: MessageListener): void => {
+    addListener: vi.fn((callback: MessageListener): void => {
       this.listeners.push(callback);
-    },
-    removeListener: (callback: MessageListener): void => {
+    }),
+    removeListener: vi.fn((callback: MessageListener): void => {
       const index = this.listeners.indexOf(callback);
       if (index > -1) {
         this.listeners.splice(index, 1);
       }
-    },
+    }),
   };
 
-  async sendMessage<T = unknown>(message: unknown): Promise<T> {
+  sendMessage = vi.fn(async (message: unknown) => {
     if (this.messageHandler) {
-      return this.messageHandler(message) as T;
+      return this.messageHandler(message);
     }
-    return undefined as T;
-  }
+    return undefined;
+  }) as unknown as IBrowserRuntime['sendMessage'];
 
   getURL(path: string): string {
     return `${this.urlPrefix}${path.replace(/^\//, '')}`;
@@ -164,8 +166,9 @@ export class MockRuntime implements IBrowserRuntime {
 export class MockTabs implements IBrowserTabs {
   private tabs: Tab[] = [];
   private messageHandler: ((tabId: number, message: unknown) => unknown) | null = null;
+  private removedListeners: ((tabId: number, removeInfo: { windowId: number; isWindowClosing: boolean }) => void)[] = [];
 
-  async query(queryInfo: TabQueryInfo): Promise<Tab[]> {
+  query = vi.fn(async (queryInfo: TabQueryInfo): Promise<Tab[]> => {
     return this.tabs.filter((tab) => {
       if (queryInfo.active !== undefined && tab.active !== queryInfo.active) {
         return false;
@@ -187,14 +190,26 @@ export class MockTabs implements IBrowserTabs {
       }
       return true;
     });
-  }
+  });
 
-  async sendMessage<T = unknown>(tabId: number, message: unknown): Promise<T> {
+  sendMessage = vi.fn(async (tabId: number, message: unknown) => {
     if (this.messageHandler) {
-      return this.messageHandler(tabId, message) as T;
+      return this.messageHandler(tabId, message);
     }
-    return undefined as T;
-  }
+    return undefined;
+  }) as unknown as IBrowserTabs['sendMessage'];
+
+  public onRemoved = {
+    addListener: vi.fn((callback: (tabId: number, removeInfo: { windowId: number; isWindowClosing: boolean }) => void): void => {
+      this.removedListeners.push(callback);
+    }),
+    removeListener: vi.fn((callback: (tabId: number, removeInfo: { windowId: number; isWindowClosing: boolean }) => void): void => {
+      const index = this.removedListeners.indexOf(callback);
+      if (index > -1) {
+        this.removedListeners.splice(index, 1);
+      }
+    }),
+  };
 
   // Test helpers
   _setTabs(tabs: Tab[]): void {
@@ -212,21 +227,6 @@ export class MockTabs implements IBrowserTabs {
   _setMessageHandler(handler: (tabId: number, message: unknown) => unknown): void {
     this.messageHandler = handler;
   }
-
-  // Tab removed listener support
-  private removedListeners: ((tabId: number, removeInfo: { windowId: number; isWindowClosing: boolean }) => void)[] = [];
-
-  public onRemoved = {
-    addListener: (callback: (tabId: number, removeInfo: { windowId: number; isWindowClosing: boolean }) => void): void => {
-      this.removedListeners.push(callback);
-    },
-    removeListener: (callback: (tabId: number, removeInfo: { windowId: number; isWindowClosing: boolean }) => void): void => {
-      const index = this.removedListeners.indexOf(callback);
-      if (index > -1) {
-        this.removedListeners.splice(index, 1);
-      }
-    },
-  };
 
   _simulateTabRemoved(tabId: number, windowId = 1, isWindowClosing = false): void {
     for (const listener of this.removedListeners) {
@@ -254,15 +254,15 @@ export class MockAction implements IBrowserAction {
   private clickedListeners: ((tab: Tab) => void)[] = [];
 
   public onClicked = {
-    addListener: (callback: (tab: Tab) => void): void => {
+    addListener: vi.fn((callback: (tab: Tab) => void): void => {
       this.clickedListeners.push(callback);
-    },
-    removeListener: (callback: (tab: Tab) => void): void => {
+    }),
+    removeListener: vi.fn((callback: (tab: Tab) => void): void => {
       const index = this.clickedListeners.indexOf(callback);
       if (index > -1) {
         this.clickedListeners.splice(index, 1);
       }
-    },
+    }),
   };
 
   _simulateClick(tab: Tab): void {

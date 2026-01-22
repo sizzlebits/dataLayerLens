@@ -1,20 +1,18 @@
 /**
  * MonitorTab - Main monitoring tab component.
- * Shows filter panel, view mode launcher, event stats, and quick info.
+ * Shows filter panel, event stats, and quick info.
  */
 
 import { motion } from 'framer-motion';
+import { Wrench } from 'lucide-react';
 import type { Settings, DataLayerEvent } from '@/types';
 import { FilterPanel } from './FilterPanel';
-import { ViewModeLauncher } from './ViewModeLauncher';
 import { EventStats } from './EventStats';
 
 export interface MonitorTabProps {
   settings: Settings;
   events: DataLayerEvent[];
   currentDomain: string;
-  onToggleOverlay: () => void;
-  onOpenSidePanel: () => void;
   onClearEvents: () => void;
   onExportEvents?: () => void;
   onAddFilter: (filter: string) => void;
@@ -27,8 +25,6 @@ export function MonitorTab({
   settings,
   events,
   currentDomain,
-  onToggleOverlay,
-  onOpenSidePanel,
   onClearEvents,
   onExportEvents,
   onAddFilter,
@@ -54,12 +50,18 @@ export function MonitorTab({
         onSetFilterMode={onSetFilterMode}
       />
 
-      {/* View Mode Launcher */}
-      <ViewModeLauncher
-        overlayEnabled={settings.overlayEnabled}
-        onToggleOverlay={onToggleOverlay}
-        onOpenSidePanel={onOpenSidePanel}
-      />
+      {/* DevTools Info */}
+      <div className="bg-dl-card rounded-xl p-4 border border-dl-border">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-dl-dark rounded-lg">
+            <Wrench className="w-5 h-5 text-dl-primary" />
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-white">View Events in DevTools</h3>
+            <p className="text-xs text-slate-400">Press F12, then select the DataLayer Lens tab</p>
+          </div>
+        </div>
+      </div>
 
       {/* Event Stats */}
       <EventStats

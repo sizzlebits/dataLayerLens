@@ -5,8 +5,5 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 browserAPI.devtools.panels.create(
   'DataLayer',
   '../icons/icon-32.png',
-  'src/devtools/panel.html',
-  (panel: chrome.devtools.panels.ExtensionPanel) => {
-    console.log('[DataLayer Monitor] DevTools panel created', panel);
-  }
+  'src/devtools/panel.html'
 );

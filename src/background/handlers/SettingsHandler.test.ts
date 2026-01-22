@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { SettingsHandler, createSettingsHandler } from './SettingsHandler';
-import { DEFAULT_SETTINGS, DEFAULT_GROUPING, Settings, DomainSettings } from '@/types';
+import { DEFAULT_SETTINGS, DEFAULT_GROUPING, type Settings, type DomainSettings } from '@/types';
+import type { IBrowserAPI } from '@/services/browser';
 
 function createMockBrowserAPI() {
   const storage: Record<string, unknown> = {};
@@ -34,8 +35,14 @@ function createMockBrowserAPI() {
       query: vi.fn(),
       sendMessage: vi.fn(),
     },
+    scripting: {
+      executeScript: vi.fn(),
+    },
+    action: {
+      onClicked: { addListener: vi.fn() },
+    },
     _storage: storage, // For test inspection
-  };
+  } as unknown as IBrowserAPI & { _storage: Record<string, unknown> };
 }
 
 describe('SettingsHandler', () => {
@@ -45,7 +52,7 @@ describe('SettingsHandler', () => {
   beforeEach(() => {
     mockAPI = createMockBrowserAPI();
     handler = new SettingsHandler({
-      browserAPI: mockAPI as any,
+      browserAPI: mockAPI,
     });
   });
 
@@ -81,14 +88,14 @@ describe('SettingsHandler', () => {
       expect(settings.grouping.timeWindowMs).toBe(DEFAULT_GROUPING.timeWindowMs);
     });
 
-    it('returns global settings with overlay disabled when no domain settings', async () => {
+    it('returns global settings when no domain settings exist for the domain', async () => {
       mockAPI._storage['datalayer_monitor_settings'] = {
-        overlayEnabled: true,
+        maxEvents: 300,
       };
 
       const settings = await handler.getSettingsForDomain('example.com');
 
-      expect(settings.overlayEnabled).toBe(false);
+      expect(settings.maxEvents).toBe(300);
     });
 
     it('merges domain-specific settings with global', async () => {
@@ -99,7 +106,7 @@ describe('SettingsHandler', () => {
       mockAPI._storage['datalayer_monitor_domain_settings'] = {
         'example.com': {
           domain: 'example.com',
-          settings: { maxEvents: 500, overlayEnabled: true },
+          settings: { maxEvents: 500, persistEvents: true },
           createdAt: 1000,
           updatedAt: 2000,
         },
@@ -108,18 +115,18 @@ describe('SettingsHandler', () => {
       const settings = await handler.getSettingsForDomain('example.com');
 
       expect(settings.maxEvents).toBe(500);
-      expect(settings.overlayEnabled).toBe(true);
+      expect(settings.persistEvents).toBe(true);
       expect(settings.theme).toBe('light');
     });
 
-    it('domain overlay is independent from global', async () => {
+    it('domain settings are independent from global', async () => {
       mockAPI._storage['datalayer_monitor_settings'] = {
-        overlayEnabled: true,
+        persistEvents: true,
       };
       mockAPI._storage['datalayer_monitor_domain_settings'] = {
         'example.com': {
           domain: 'example.com',
-          settings: { overlayEnabled: false },
+          settings: { persistEvents: false },
           createdAt: 1000,
           updatedAt: 2000,
         },
@@ -127,7 +134,7 @@ describe('SettingsHandler', () => {
 
       const settings = await handler.getSettingsForDomain('example.com');
 
-      expect(settings.overlayEnabled).toBe(false);
+      expect(settings.persistEvents).toBe(false);
     });
   });
 
@@ -293,7 +300,7 @@ describe('SettingsHandler', () => {
   describe('custom storage keys', () => {
     it('uses custom global settings key', async () => {
       const customHandler = new SettingsHandler({
-        browserAPI: mockAPI as any,
+        browserAPI: mockAPI,
         globalSettingsKey: 'custom_global',
       });
 
@@ -306,7 +313,7 @@ describe('SettingsHandler', () => {
 
     it('uses custom domain settings key', async () => {
       const customHandler = new SettingsHandler({
-        browserAPI: mockAPI as any,
+        browserAPI: mockAPI,
         domainSettingsKey: 'custom_domain',
       });
 
@@ -320,7 +327,7 @@ describe('SettingsHandler', () => {
 describe('createSettingsHandler', () => {
   it('creates SettingsHandler instance', () => {
     const mockAPI = createMockBrowserAPI();
-    const handler = createSettingsHandler({ browserAPI: mockAPI as any });
+    const handler = createSettingsHandler({ browserAPI: mockAPI });
 
     expect(handler).toBeDefined();
     expect(typeof handler.getSettingsForDomain).toBe('function');

@@ -157,78 +157,6 @@ export function usePopupActions({
     }
   };
 
-  // Overlay actions
-  const toggleOverlay = async () => {
-    const newState = !settings.overlayEnabled;
-    try {
-      const [tab] = await browserAPI.tabs.query({ active: true, currentWindow: true });
-      if (tab?.id) {
-        const response = await browserAPI.tabs.sendMessage(tab.id, {
-          type: 'TOGGLE_OVERLAY',
-          payload: { enabled: newState },
-        });
-        if (response?.enabled !== undefined) {
-          updateSettings({ overlayEnabled: response.enabled });
-        }
-      }
-    } catch (error) {
-      console.error('Failed to toggle overlay:', error);
-    }
-  };
-
-  const openSidePanel = async () => {
-    try {
-      const [tab] = await browserAPI.tabs.query({ active: true, currentWindow: true });
-      if (tab?.id && tab?.windowId && browserAPI.sidePanel?.open) {
-        await browserAPI.sidePanel.open({ tabId: tab.id });
-        window.close();
-      }
-    } catch (error) {
-      console.error('Failed to open side panel:', error);
-    }
-  };
-
-  const handleViewModeChange = async (mode: 'overlay' | 'sidepanel' | 'devtools') => {
-    // Update the setting
-    updateSettings({ viewMode: mode });
-
-    try {
-      const [tab] = await browserAPI.tabs.query({ active: true, currentWindow: true });
-      if (!tab?.id) return;
-
-      if (mode === 'overlay') {
-        // Turn on overlay mode
-        const response = await browserAPI.tabs.sendMessage(tab.id, {
-          type: 'TOGGLE_OVERLAY',
-          payload: { enabled: true },
-        });
-        if (response?.enabled !== undefined) {
-          updateSettings({ overlayEnabled: response.enabled });
-        }
-      } else {
-        // Turn off overlay when switching to sidepanel or devtools
-        if (settings.overlayEnabled) {
-          await browserAPI.tabs.sendMessage(tab.id, {
-            type: 'TOGGLE_OVERLAY',
-            payload: { enabled: false },
-          });
-          updateSettings({ overlayEnabled: false });
-        }
-
-        if (mode === 'sidepanel') {
-          // Open the side panel
-          if (tab.windowId && browserAPI.sidePanel?.open) {
-            await browserAPI.sidePanel.open({ tabId: tab.id });
-            window.close();
-          }
-        }
-        // For devtools, we can't open it programmatically - the UI shows instructions
-      }
-    } catch (error) {
-      console.error('Failed to change view mode:', error);
-    }
-  };
-
   // Filter actions
   const addFilter = (filter: string) => {
     if (!settings.eventFilters.includes(filter)) {
@@ -302,11 +230,6 @@ export function usePopupActions({
     exportSettings,
     exportEvents,
     importSettings,
-
-    // Overlay actions
-    toggleOverlay,
-    openSidePanel,
-    handleViewModeChange,
 
     // Filter actions
     addFilter,
