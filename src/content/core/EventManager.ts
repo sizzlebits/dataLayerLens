@@ -18,6 +18,7 @@ import {
   type IEventPersistence,
 } from '../modules/event-storage/EventPersistence';
 import { chromeBrowserAPI } from '@/services/browser';
+import { createDebugLogger, type DebugLogger } from '@/utils/debug';
 
 export interface EventManagerOptions {
   /** Maximum number of events to store */
@@ -78,10 +79,12 @@ export class EventManager implements IEventManager {
   private persistence: IEventPersistence;
   private expandedEventIds = new Set<string>();
   private persistEnabled: boolean;
+  private logger: DebugLogger;
   private onEventsChange?: (events: DataLayerEvent[]) => void;
 
   constructor(options: EventManagerOptions) {
     this.persistEnabled = options.persistEvents;
+    this.logger = createDebugLogger(options.debugLogging ?? false);
     this.onEventsChange = options.onEventsChange;
 
     // Initialize event storage
@@ -159,14 +162,14 @@ export class EventManager implements IEventManager {
    * Load persisted events from storage.
    */
   async loadPersistedEvents(): Promise<void> {
-    console.debug('[DataLayer Lens] loadPersistedEvents called, persistEnabled:', this.persistEnabled);
+    this.logger.debug('loadPersistedEvents called, persistEnabled:', this.persistEnabled);
     if (!this.persistEnabled) {
-      console.debug('[DataLayer Lens] Persist disabled, skipping load');
+      this.logger.debug('Persist disabled, skipping load');
       return;
     }
 
     const events = await this.persistence.loadEvents();
-    console.debug('[DataLayer Lens] Loaded persisted events:', events.length);
+    this.logger.debug('Loaded persisted events:', events.length);
     if (events.length > 0) {
       this.storage.setEvents(events);
 
@@ -198,7 +201,7 @@ export class EventManager implements IEventManager {
     }
 
     if (settings.persistEvents !== undefined) {
-      console.debug('[DataLayer Lens] EventManager.updateSettings persistEvents:', settings.persistEvents);
+      this.logger.debug('EventManager.updateSettings persistEvents:', settings.persistEvents);
       this.persistEnabled = settings.persistEvents;
       // Don't auto-save here - events are saved automatically in addEvent() when persist is enabled
       // Auto-saving here would wipe persisted events on page load (before events are loaded)
@@ -213,6 +216,11 @@ export class EventManager implements IEventManager {
 
     if (settings.grouping !== undefined) {
       this.grouping.updateSettings(settings.grouping);
+    }
+
+    if (settings.debugLogging !== undefined) {
+      this.logger.setEnabled(settings.debugLogging);
+      this.persistence.updateDebugLogging(settings.debugLogging);
     }
   }
 

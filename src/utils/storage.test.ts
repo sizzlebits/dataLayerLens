@@ -87,6 +87,7 @@ describe('storage utilities', () => {
         data: {},
         source: 'dataLayer',
         raw: {},
+        dataLayerIndex: 0,
       },
     ];
 
@@ -141,6 +142,7 @@ describe('storage utilities', () => {
         data: {},
         source: 'dataLayer',
         raw: {},
+        dataLayerIndex: 0,
       },
     ];
 

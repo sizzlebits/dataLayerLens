@@ -72,15 +72,8 @@ export class SettingsHandler implements ISettingsHandler {
     const domainSettingsMap = (result[this.domainSettingsKey] || {}) as Record<string, DomainSettings>;
     const domainOverride = domainSettingsMap[domain];
 
-    // overlayEnabled is per-domain only - never inherit from global
-    const domainOverlayEnabled = domainOverride?.settings?.overlayEnabled ?? false;
-
     if (!domainOverride) {
-      // No domain settings - use global but with overlay disabled
-      return {
-        ...globalSettings,
-        overlayEnabled: false,
-      };
+      return globalSettings;
     }
 
     // Merge domain-specific settings with global
@@ -96,7 +89,6 @@ export class SettingsHandler implements ISettingsHandler {
     return {
       ...globalSettings,
       ...filteredDomainSettings,
-      overlayEnabled: domainOverlayEnabled,
       grouping: { ...globalSettings.grouping, ...(filteredDomainSettings.grouping || {}) },
     };
   }

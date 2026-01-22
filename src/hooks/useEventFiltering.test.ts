@@ -14,6 +14,7 @@ const createMockEvent = (
   timestamp: Date.now(),
   source: 'test',
   raw: data,
+  dataLayerIndex: 0,
 });
 
 describe('useEventFiltering', () => {

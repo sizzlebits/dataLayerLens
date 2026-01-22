@@ -13,6 +13,7 @@ const mockEvents: DataLayerEvent[] = [
     data: { event: 'page_view', page_title: 'Home' },
     source: 'dataLayer',
     raw: { event: 'page_view', page_title: 'Home' },
+    dataLayerIndex: 0,
   },
   {
     id: '2',
@@ -21,6 +22,7 @@ const mockEvents: DataLayerEvent[] = [
     data: { event: 'add_to_cart', item_id: 'SKU123' },
     source: 'dataLayer',
     raw: { event: 'add_to_cart', item_id: 'SKU123' },
+    dataLayerIndex: 1,
   },
   {
     id: '3',
@@ -29,6 +31,7 @@ const mockEvents: DataLayerEvent[] = [
     data: { event: 'purchase', transaction_id: 'T123' },
     source: 'dataLayer_v2',
     raw: { event: 'purchase', transaction_id: 'T123' },
+    dataLayerIndex: 2,
   },
 ];
 
@@ -195,6 +198,7 @@ describe('EventList', () => {
         },
         source: 'dataLayer',
         raw: {},
+        dataLayerIndex: 0,
       },
     ];
 
@@ -224,6 +228,7 @@ describe('EventList', () => {
         data: {},
         source: 'dataLayer',
         raw: {},
+        dataLayerIndex: 0,
       },
     ];
 
@@ -249,6 +254,7 @@ describe('EventList', () => {
         data: { items: [] },
         source: 'dataLayer',
         raw: {},
+        dataLayerIndex: 0,
       },
     ];
 

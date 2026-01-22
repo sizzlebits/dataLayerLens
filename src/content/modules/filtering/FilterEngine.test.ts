@@ -10,6 +10,7 @@ function createMockEvent(overrides: Partial<DataLayerEvent> = {}): DataLayerEven
     data: { event: 'test_event' },
     source: 'dataLayer',
     raw: { event: 'test_event' },
+    dataLayerIndex: 0,
     ...overrides,
   };
 }

@@ -7,7 +7,6 @@ import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import {
   DataLayerEvent,
   EventGroup,
-  getSourceColor,
   autoAssignSourceColors,
   Settings as SettingsType,
   DEFAULT_SETTINGS,
@@ -20,7 +19,7 @@ const PAGE_SIZE = 50;
 
 export interface EventPanelConfig {
   /** Context determines behavior differences */
-  context: 'sidepanel' | 'devtools';
+  context: 'devtools';
 }
 
 export interface EventPanelState {
@@ -65,13 +64,10 @@ export interface EventPanelState {
   setCopyError: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-export function useEventPanelState(config: EventPanelConfig): EventPanelState {
-  const { context } = config;
-
+export function useEventPanelState(_config: EventPanelConfig): EventPanelState {
   // Core state
   const [events, setEvents] = useState<DataLayerEvent[]>([]);
   const [settings, setSettings] = useState<SettingsType>(DEFAULT_SETTINGS);
-  const [activeTabId, setActiveTabId] = useState<number | null>(null);
 
   // UI state
   const [searchText, setSearchText] = useState('');
@@ -89,10 +85,8 @@ export function useEventPanelState(config: EventPanelConfig): EventPanelState {
   const clearingRef = useRef(false);
   const eventsVersion = useRef(0);
 
-  // Get tab ID based on context
-  const tabId = context === 'devtools'
-    ? browserAPI.devtools?.inspectedWindow?.tabId ?? null
-    : activeTabId;
+  // Get tab ID from devtools
+  const tabId = browserAPI.devtools?.inspectedWindow?.tabId ?? null;
 
   // Load events function - defined before useEffects that depend on it
   const loadEvents = useCallback(async (loadTabId: number) => {
@@ -111,47 +105,9 @@ export function useEventPanelState(config: EventPanelConfig): EventPanelState {
     }
   }, []);
 
-  // SidePanel: Get active tab and listen for changes
+  // Listen for page navigation on the inspected tab
   useEffect(() => {
-    if (context !== 'sidepanel') return;
-
-    const getActiveTab = async () => {
-      try {
-        const [tab] = await browserAPI.tabs.query({ active: true, currentWindow: true });
-        if (tab?.id) {
-          setActiveTabId(tab.id);
-        }
-      } catch (err) {
-        console.error('Failed to get active tab:', err);
-      }
-    };
-
-    getActiveTab();
-
-    const handleTabActivated = (activeInfo: { tabId: number }) => {
-      setActiveTabId(activeInfo.tabId);
-      setEvents([]);
-      setCurrentPage(0);
-    };
-
-    const handleTabUpdated = (updatedTabId: number, changeInfo: { status?: string }) => {
-      if (changeInfo.status === 'complete' && updatedTabId === activeTabId) {
-        loadEvents(updatedTabId);
-      }
-    };
-
-    browserAPI.tabs.onActivated.addListener(handleTabActivated);
-    browserAPI.tabs.onUpdated.addListener(handleTabUpdated);
-
-    return () => {
-      browserAPI.tabs.onActivated.removeListener(handleTabActivated);
-      browserAPI.tabs.onUpdated.removeListener(handleTabUpdated);
-    };
-  }, [context, activeTabId]);
-
-  // DevTools: Listen for page navigation on the inspected tab
-  useEffect(() => {
-    if (context !== 'devtools' || !tabId) return;
+    if (!tabId) return;
 
     const handleTabUpdated = (updatedTabId: number, changeInfo: { status?: string; url?: string }) => {
       // When the inspected tab navigates to a new page, clear events and reload
@@ -171,7 +127,7 @@ export function useEventPanelState(config: EventPanelConfig): EventPanelState {
     return () => {
       browserAPI.tabs.onUpdated.removeListener(handleTabUpdated);
     };
-  }, [context, tabId, loadEvents]);
+  }, [tabId, loadEvents]);
 
   // Load settings from storage (global settings that popup updates)
   useEffect(() => {
@@ -200,17 +156,8 @@ export function useEventPanelState(config: EventPanelConfig): EventPanelState {
   useEffect(() => {
     const messageListener = (
       message: { type: string; payload?: DataLayerEvent | DataLayerEvent[] | Partial<SettingsType>; tabId?: number },
-      sender: { tab?: { id?: number } }
+      _sender: { tab?: { id?: number } }
     ) => {
-      // For sidepanel, filter new event messages by tab ID
-      // But not settings or events-updated - those should apply globally
-      if (context === 'sidepanel' &&
-          message.type !== 'SETTINGS_UPDATED' &&
-          message.type !== 'EVENTS_UPDATED') {
-        const messageTabId = message.tabId ?? sender?.tab?.id;
-        if (messageTabId !== tabId) return;
-      }
-
       if (message.type === 'DATALAYER_EVENT' || message.type === 'EVENT_ADDED') {
         if (clearingRef.current) return;
 
@@ -251,7 +198,7 @@ export function useEventPanelState(config: EventPanelConfig): EventPanelState {
     return () => {
       browserAPI.runtime.onMessage.removeListener(messageListener);
     };
-  }, [context, tabId]);
+  }, [tabId]);
 
   // Listen for settings changes via storage
   useEffect(() => {

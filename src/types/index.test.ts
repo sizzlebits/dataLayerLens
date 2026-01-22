@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { getEventCategory, EVENT_CATEGORIES, DEFAULT_SETTINGS, getCurrentDomain, mergeSettingsWithDomain, DEFAULT_GROUPING } from './index';
+import { getEventCategory, EVENT_CATEGORIES, DEFAULT_SETTINGS, getCurrentDomain, mergeSettingsWithDomain, mergeSettings, mergeSettingsUpdate, DEFAULT_GROUPING } from './index';
 import type { Settings } from './index';
 
 describe('getEventCategory', () => {
@@ -70,13 +70,11 @@ describe('getEventCategory', () => {
 
 describe('DEFAULT_SETTINGS', () => {
   it('has correct default values', () => {
-    expect(DEFAULT_SETTINGS.overlayEnabled).toBe(false); // Starts disabled, user enables via popup
     expect(DEFAULT_SETTINGS.maxEvents).toBe(500);
     expect(DEFAULT_SETTINGS.dataLayerNames).toEqual(['dataLayer']);
     expect(DEFAULT_SETTINGS.eventFilters).toEqual([]);
     expect(DEFAULT_SETTINGS.filterMode).toBe('exclude');
     expect(DEFAULT_SETTINGS.theme).toBe('dark');
-    expect(DEFAULT_SETTINGS.animationsEnabled).toBe(true);
     expect(DEFAULT_SETTINGS.showTimestamps).toBe(true);
     expect(DEFAULT_SETTINGS.compactMode).toBe(false);
   });
@@ -84,14 +82,6 @@ describe('DEFAULT_SETTINGS', () => {
   it('has correct persistence defaults', () => {
     expect(DEFAULT_SETTINGS.persistEvents).toBe(false);
     expect(DEFAULT_SETTINGS.persistEventsMaxAge).toBe(300000); // 5 minutes
-  });
-
-  it('has default overlay position set to -1 (auto)', () => {
-    expect(DEFAULT_SETTINGS.overlayPosition).toEqual({ x: -1, y: -1 });
-  });
-
-  it('has overlayCollapsed set to false by default', () => {
-    expect(DEFAULT_SETTINGS.overlayCollapsed).toBe(false);
   });
 });
 
@@ -173,11 +163,11 @@ describe('mergeSettingsWithDomain', () => {
 
   it('domain settings override global settings', () => {
     const domainSettings: Partial<Settings> = {
-      overlayEnabled: true,
+      persistEvents: true,
       eventFilters: ['gtm.js'],
     };
     const result = mergeSettingsWithDomain(globalSettings, domainSettings);
-    expect(result.overlayEnabled).toBe(true);
+    expect(result.persistEvents).toBe(true);
     expect(result.eventFilters).toEqual(['gtm.js']);
   });
 });
@@ -189,5 +179,76 @@ describe('DEFAULT_GROUPING', () => {
     expect(DEFAULT_GROUPING.timeWindowMs).toBe(500);
     expect(DEFAULT_GROUPING.triggerEvents).toContain('gtm.js');
     expect(DEFAULT_GROUPING.triggerEvents).toContain('page_view');
+  });
+});
+
+describe('mergeSettings', () => {
+  it('returns defaults when partial is undefined', () => {
+    const result = mergeSettings(DEFAULT_SETTINGS, undefined);
+    expect(result).toEqual(DEFAULT_SETTINGS);
+  });
+
+  it('merges top-level settings', () => {
+    const partial = { maxEvents: 200, persistEvents: true };
+    const result = mergeSettings(DEFAULT_SETTINGS, partial);
+
+    expect(result.maxEvents).toBe(200);
+    expect(result.persistEvents).toBe(true);
+    // Other defaults preserved
+    expect(result.dataLayerNames).toEqual(DEFAULT_SETTINGS.dataLayerNames);
+  });
+
+  it('merges nested grouping config', () => {
+    const partial = { grouping: { enabled: true, timeWindowMs: 1000 } };
+    const result = mergeSettings(DEFAULT_SETTINGS, partial);
+
+    expect(result.grouping.enabled).toBe(true);
+    expect(result.grouping.timeWindowMs).toBe(1000);
+    // Other grouping defaults preserved
+    expect(result.grouping.mode).toBe(DEFAULT_GROUPING.mode);
+    expect(result.grouping.triggerEvents).toEqual(DEFAULT_GROUPING.triggerEvents);
+  });
+
+  it('preserves empty grouping when not specified', () => {
+    const partial = { maxEvents: 100 };
+    const result = mergeSettings(DEFAULT_SETTINGS, partial);
+
+    expect(result.grouping).toEqual(DEFAULT_SETTINGS.grouping);
+  });
+});
+
+describe('mergeSettingsUpdate', () => {
+  it('merges update into current settings', () => {
+    const current = { ...DEFAULT_SETTINGS, maxEvents: 100 };
+    const update = { persistEvents: true };
+    const result = mergeSettingsUpdate(current, update);
+
+    expect(result.maxEvents).toBe(100); // Preserved from current
+    expect(result.persistEvents).toBe(true); // Updated
+  });
+
+  it('merges nested grouping updates', () => {
+    const current = {
+      ...DEFAULT_SETTINGS,
+      grouping: { ...DEFAULT_GROUPING, enabled: true, timeWindowMs: 500 },
+    };
+    const update = { grouping: { timeWindowMs: 1000 } };
+    const result = mergeSettingsUpdate(current, update);
+
+    expect(result.grouping.enabled).toBe(true); // Preserved from current
+    expect(result.grouping.timeWindowMs).toBe(1000); // Updated
+    expect(result.grouping.mode).toBe('time'); // Preserved from current
+  });
+
+  it('preserves grouping when update has no grouping', () => {
+    const current = {
+      ...DEFAULT_SETTINGS,
+      grouping: { ...DEFAULT_GROUPING, enabled: true },
+    };
+    const update = { maxEvents: 200 };
+    const result = mergeSettingsUpdate(current, update);
+
+    expect(result.grouping.enabled).toBe(true);
+    expect(result.maxEvents).toBe(200);
   });
 });

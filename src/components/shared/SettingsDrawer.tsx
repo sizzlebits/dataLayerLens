@@ -5,7 +5,6 @@ import {
   Layers,
   Plus,
   Check,
-  Sparkles,
   Clock,
   History,
   Zap,
@@ -13,10 +12,8 @@ import {
   ChevronRight,
   Download,
   Database,
-  PanelRight,
-  Wrench,
-  SquareStack,
   Palette,
+  Minimize2,
 } from 'lucide-react';
 import { Settings, DEFAULT_GROUPING, SOURCE_COLOR_POOL, getSourceColor } from '@/types';
 import { SourceColorEditor } from './SourceColorEditor';
@@ -124,44 +121,6 @@ export function SettingsDrawer({
     });
   };
 
-  const handleViewModeChange = async (mode: 'overlay' | 'sidepanel' | 'devtools') => {
-    updateSettings({ viewMode: mode });
-
-    if (!activeTabId) return;
-
-    try {
-      if (mode === 'overlay') {
-        // Turn on overlay mode
-        await browserAPI.tabs.sendMessage(activeTabId, {
-          type: 'TOGGLE_OVERLAY',
-          payload: { enabled: true },
-        });
-        updateSettings({ overlayEnabled: true });
-      } else {
-        // Turn off overlay when switching to sidepanel or devtools
-        if (settings.overlayEnabled) {
-          await browserAPI.tabs.sendMessage(activeTabId, {
-            type: 'TOGGLE_OVERLAY',
-            payload: { enabled: false },
-          });
-          updateSettings({ overlayEnabled: false });
-        }
-
-        if (mode === 'sidepanel') {
-          // Get tab info to open side panel
-          const tab = await browserAPI.tabs.get(activeTabId);
-          if (tab.windowId && browserAPI.sidePanel?.open) {
-            await browserAPI.sidePanel.open({ tabId: activeTabId });
-            onClose(); // Close the drawer
-          }
-        }
-        // For devtools, we can't open it programmatically - UI shows instructions
-      }
-    } catch (error) {
-      console.error('Failed to change view mode:', error);
-    }
-  };
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -229,59 +188,6 @@ export function SettingsDrawer({
                 </div>
               )}
 
-              {/* View Mode */}
-              <div className="space-y-2">
-                <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                  View Mode
-                </h3>
-                <div className="grid grid-cols-3 gap-1.5">
-                  <motion.button
-                    onClick={() => handleViewModeChange('overlay')}
-                    className={`flex flex-col items-center gap-1.5 p-2.5 rounded-lg border transition-colors ${
-                      settings.viewMode === 'overlay'
-                        ? 'bg-dl-primary/20 border-dl-primary text-dl-primary'
-                        : 'border-dl-border text-slate-400 hover:text-white hover:border-slate-500'
-                    }`}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <SquareStack className="w-4 h-4" />
-                    <span className="text-[10px] font-medium">Overlay</span>
-                  </motion.button>
-                  <motion.button
-                    onClick={() => handleViewModeChange('sidepanel')}
-                    className={`flex flex-col items-center gap-1.5 p-2.5 rounded-lg border transition-colors ${
-                      settings.viewMode === 'sidepanel'
-                        ? 'bg-dl-primary/20 border-dl-primary text-dl-primary'
-                        : 'border-dl-border text-slate-400 hover:text-white hover:border-slate-500'
-                    }`}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <PanelRight className="w-4 h-4" />
-                    <span className="text-[10px] font-medium">Side Panel</span>
-                  </motion.button>
-                  <motion.button
-                    onClick={() => handleViewModeChange('devtools')}
-                    className={`flex flex-col items-center gap-1.5 p-2.5 rounded-lg border transition-colors ${
-                      settings.viewMode === 'devtools'
-                        ? 'bg-dl-primary/20 border-dl-primary text-dl-primary'
-                        : 'border-dl-border text-slate-400 hover:text-white hover:border-slate-500'
-                    }`}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Wrench className="w-4 h-4" />
-                    <span className="text-[10px] font-medium">DevTools</span>
-                  </motion.button>
-                </div>
-                <p className="text-[10px] text-slate-500 leading-relaxed">
-                  {settings.viewMode === 'overlay' && 'On-page overlay for quick access.'}
-                  {settings.viewMode === 'sidepanel' && 'Opens in browser side panel.'}
-                  {settings.viewMode === 'devtools' && 'F12 → DL tab'}
-                </p>
-              </div>
-
               {/* DataLayer Names */}
               <div className="space-y-2">
                 <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
@@ -303,7 +209,7 @@ export function SettingsDrawer({
                               style={{ backgroundColor: color }}
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
-                              title="Change color"
+                              title="Change colour"
                             />
                             <code className="text-xs text-dl-accent">{name}</code>
                           </div>
@@ -394,11 +300,11 @@ export function SettingsDrawer({
                 </div>
               </div>
 
-              {/* Source Colors */}
+              {/* Source Colours */}
               <div className="space-y-2">
                 <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
                   <Palette className="w-3.5 h-3.5 text-dl-secondary" />
-                  Source Colors
+                  Source Colours
                 </h3>
                 <SourceColorEditor
                   sources={detectedSources}
@@ -413,12 +319,13 @@ export function SettingsDrawer({
                   Display
                 </h3>
 
-                {/* Animations */}
+                {/* Compact Mode */}
                 <ToggleRow
-                  icon={<Sparkles className="w-3.5 h-3.5 text-dl-warning" />}
-                  label="Animations"
-                  checked={settings.animationsEnabled}
-                  onChange={() => updateSettings({ animationsEnabled: !settings.animationsEnabled })}
+                  icon={<Minimize2 className="w-3.5 h-3.5 text-dl-primary" />}
+                  label="Compact Mode"
+                  description="Smaller UI elements"
+                  checked={settings.compactMode}
+                  onChange={() => updateSettings({ compactMode: !settings.compactMode })}
                 />
 
                 {/* Timestamps */}
@@ -442,8 +349,18 @@ export function SettingsDrawer({
                 <ToggleRow
                   icon={<Zap className="w-3.5 h-3.5 text-dl-accent" />}
                   label="Console Logging"
+                  description="Log events to browser console"
                   checked={settings.consoleLogging}
                   onChange={() => updateSettings({ consoleLogging: !settings.consoleLogging })}
+                />
+
+                {/* Debug Logging */}
+                <ToggleRow
+                  icon={<SettingsIcon className="w-3.5 h-3.5 text-slate-400" />}
+                  label="Debug Logging"
+                  description="Extension debug info"
+                  checked={settings.debugLogging}
+                  onChange={() => updateSettings({ debugLogging: !settings.debugLogging })}
                 />
               </div>
 

@@ -81,14 +81,14 @@ describe('SettingsHandler', () => {
       expect(settings.grouping.timeWindowMs).toBe(DEFAULT_GROUPING.timeWindowMs);
     });
 
-    it('returns global settings with overlay disabled when no domain settings', async () => {
+    it('returns global settings when no domain settings exist for the domain', async () => {
       mockAPI._storage['datalayer_monitor_settings'] = {
-        overlayEnabled: true,
+        maxEvents: 300,
       };
 
       const settings = await handler.getSettingsForDomain('example.com');
 
-      expect(settings.overlayEnabled).toBe(false);
+      expect(settings.maxEvents).toBe(300);
     });
 
     it('merges domain-specific settings with global', async () => {
@@ -99,7 +99,7 @@ describe('SettingsHandler', () => {
       mockAPI._storage['datalayer_monitor_domain_settings'] = {
         'example.com': {
           domain: 'example.com',
-          settings: { maxEvents: 500, overlayEnabled: true },
+          settings: { maxEvents: 500, persistEvents: true },
           createdAt: 1000,
           updatedAt: 2000,
         },
@@ -108,18 +108,18 @@ describe('SettingsHandler', () => {
       const settings = await handler.getSettingsForDomain('example.com');
 
       expect(settings.maxEvents).toBe(500);
-      expect(settings.overlayEnabled).toBe(true);
+      expect(settings.persistEvents).toBe(true);
       expect(settings.theme).toBe('light');
     });
 
-    it('domain overlay is independent from global', async () => {
+    it('domain settings are independent from global', async () => {
       mockAPI._storage['datalayer_monitor_settings'] = {
-        overlayEnabled: true,
+        persistEvents: true,
       };
       mockAPI._storage['datalayer_monitor_domain_settings'] = {
         'example.com': {
           domain: 'example.com',
-          settings: { overlayEnabled: false },
+          settings: { persistEvents: false },
           createdAt: 1000,
           updatedAt: 2000,
         },
@@ -127,7 +127,7 @@ describe('SettingsHandler', () => {
 
       const settings = await handler.getSettingsForDomain('example.com');
 
-      expect(settings.overlayEnabled).toBe(false);
+      expect(settings.persistEvents).toBe(false);
     });
   });
 

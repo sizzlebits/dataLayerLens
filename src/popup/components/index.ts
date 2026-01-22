@@ -3,8 +3,8 @@
  */
 
 // Monitor Tab
-export { MonitorTab, OverlayToggle, EventStats, FilterPanel } from './MonitorTab';
-export type { MonitorTabProps, OverlayToggleProps, EventStatsProps, FilterPanelProps } from './MonitorTab';
+export { MonitorTab, EventStats, FilterPanel } from './MonitorTab';
+export type { MonitorTabProps, EventStatsProps, FilterPanelProps } from './MonitorTab';
 
 // Settings Tab
 export {
@@ -12,7 +12,6 @@ export {
   DataLayerConfig,
   MaxEventsSlider,
   DisplaySettings,
-  OverlayPosition,
   GroupingSettings,
   BackupRestore,
 } from './SettingsTab';
@@ -21,7 +20,6 @@ export type {
   DataLayerConfigProps,
   MaxEventsSliderProps,
   DisplaySettingsProps,
-  OverlayPositionProps,
   GroupingSettingsProps,
   BackupRestoreProps,
 } from './SettingsTab';

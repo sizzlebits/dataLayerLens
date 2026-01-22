@@ -6,6 +6,7 @@
 import type { IBrowserAPI } from '@/services/browser';
 import type { DataLayerEvent } from '@/types';
 import { generateEventId } from '@/utils/id';
+import { createDebugLogger, type DebugLogger } from '@/utils/debug';
 
 export interface EventCaptureOptions {
   /** Browser API instance for dependency injection */
@@ -36,8 +37,8 @@ export class EventCapture implements IEventCapture {
   private browserAPI: IBrowserAPI;
   private onEvent: (event: DataLayerEvent) => void;
   private dataLayerNames: string[];
-  private debugLogging: boolean;
   private consoleLogging: boolean;
+  private logger: DebugLogger;
   private messageHandler: ((event: MessageEvent) => void) | null = null;
   private isInitialized = false;
 
@@ -45,14 +46,8 @@ export class EventCapture implements IEventCapture {
     this.browserAPI = options.browserAPI;
     this.onEvent = options.onEvent;
     this.dataLayerNames = options.dataLayerNames;
-    this.debugLogging = options.debugLogging ?? false;
     this.consoleLogging = options.consoleLogging ?? false;
-  }
-
-  private debugError(...args: unknown[]): void {
-    if (this.debugLogging) {
-      console.error('[DataLayer Lens EventCapture]', ...args);
-    }
+    this.logger = createDebugLogger(options.debugLogging ?? false);
   }
 
   /**
@@ -78,7 +73,7 @@ export class EventCapture implements IEventCapture {
       script.onload = () => script.remove();
       (document.head || document.documentElement).appendChild(script);
     } catch (error) {
-      this.debugError('Failed to inject script:', error);
+      this.logger.error('Failed to inject script:', error);
     }
   }
 
@@ -146,6 +141,7 @@ export class EventCapture implements IEventCapture {
       data: eventData,
       source: payload.source,
       raw: payload.data,
+      dataLayerIndex: 0, // Index not tracked in push handler
     };
 
     this.onEvent(event);

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Palette } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { SOURCE_COLOR_POOL } from '@/types';
 import { ColorSwatch } from './ColorSwatch';
 

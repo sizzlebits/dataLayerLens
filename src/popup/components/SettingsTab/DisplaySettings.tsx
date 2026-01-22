@@ -2,7 +2,7 @@
  * DisplaySettings - Component for display-related settings.
  */
 
-import { LucideIcon, Sparkles, Clock, History, Zap, Settings as SettingsIcon } from 'lucide-react';
+import { LucideIcon, Clock, History, Zap, Settings as SettingsIcon, Minimize2 } from 'lucide-react';
 import { Toggle } from '../shared';
 
 interface SettingRowProps {
@@ -30,38 +30,30 @@ function SettingRow({ icon: Icon, iconColor, title, description, checked, onChan
 }
 
 export interface DisplaySettingsProps {
-  animationsEnabled: boolean;
   showTimestamps: boolean;
   persistEvents: boolean;
   consoleLogging: boolean;
   debugLogging: boolean;
+  compactMode: boolean;
   onUpdateSettings: (settings: Partial<{
-    animationsEnabled: boolean;
     showTimestamps: boolean;
     persistEvents: boolean;
     consoleLogging: boolean;
     debugLogging: boolean;
+    compactMode: boolean;
   }>) => void;
 }
 
 export function DisplaySettings({
-  animationsEnabled,
   showTimestamps,
   persistEvents,
   consoleLogging,
   debugLogging,
+  compactMode,
   onUpdateSettings,
 }: DisplaySettingsProps) {
   return (
     <div className="space-y-3">
-      <SettingRow
-        icon={Sparkles}
-        iconColor="text-dl-warning"
-        title="Animations"
-        checked={animationsEnabled}
-        onChange={(checked) => onUpdateSettings({ animationsEnabled: checked })}
-      />
-
       <SettingRow
         icon={Clock}
         iconColor="text-dl-accent"
@@ -80,6 +72,15 @@ export function DisplaySettings({
       />
 
       <SettingRow
+        icon={Minimize2}
+        iconColor="text-dl-primary"
+        title="Compact Mode"
+        description="Smaller UI in DevTools panel"
+        checked={compactMode}
+        onChange={(checked) => onUpdateSettings({ compactMode: checked })}
+      />
+
+      <SettingRow
         icon={Zap}
         iconColor="text-dl-accent"
         title="Console Logging"
@@ -92,7 +93,7 @@ export function DisplaySettings({
         icon={SettingsIcon}
         iconColor="text-slate-400"
         title="Debug Logging"
-        description="Extension debug info"
+        description="Extension debug info in console"
         checked={debugLogging}
         onChange={(checked) => onUpdateSettings({ debugLogging: checked })}
       />

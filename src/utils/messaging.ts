@@ -66,6 +66,7 @@ export function createDataLayerEvent(
     data: eventData,
     source,
     raw: data,
+    dataLayerIndex: 0, // Index not tracked in messaging
   };
 }
 

@@ -44,7 +44,14 @@ export function EventRow({
   onToggleFilterMenu,
 }: EventRowProps) {
   const category = getEventCategory(event.event);
-  const time = new Date(event.timestamp).toLocaleTimeString();
+  const eventDate = new Date(event.timestamp);
+  const time = eventDate.toLocaleTimeString();
+  const timeWithMs = eventDate.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    fractionalSecondDigits: 3,
+  });
   const showFilterActions = onAddFilterInclude && onAddFilterExclude && onToggleFilterMenu;
   const showCopyButton = !!onCopy;
 
@@ -128,8 +135,10 @@ export function EventRow({
             {showTimestamps && (
               <>
                 <span className="text-slate-600">•</span>
-                <Clock className={compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
-                {time}
+                <span title={timeWithMs} className="inline-flex items-center gap-1 cursor-default">
+                  <Clock className={compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
+                  {time}
+                </span>
               </>
             )}
             <span className="text-slate-600">•</span>

@@ -10,6 +10,7 @@ function createEvent(overrides: Partial<DataLayerEvent> = {}): DataLayerEvent {
     data: { event: 'test_event' },
     timestamp: Date.now(),
     source: 'dataLayer',
+    raw: { event: 'test_event' },
     dataLayerIndex: 0,
     ...overrides,
   };
