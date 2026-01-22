@@ -26,11 +26,6 @@ export { ChromeBrowserAPI, getBrowserAPI } from './ChromeBrowserAPI';
 import { getBrowserAPI } from './ChromeBrowserAPI';
 export const chromeBrowserAPI = getBrowserAPI();
 
-export {
-  MockBrowserAPI,
-  MockRuntime,
-  MockStorage,
-  MockStorageArea,
-  MockTabs,
-  createMockBrowserAPI,
-} from './MockBrowserAPI';
+// MockBrowserAPI exports are intentionally not re-exported here
+// to avoid pulling vitest into production bundles.
+// Import directly from './MockBrowserAPI' in test files.

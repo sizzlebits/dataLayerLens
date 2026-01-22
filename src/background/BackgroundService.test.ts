@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BackgroundService, createBackgroundService } from './BackgroundService';
-import { createMockBrowserAPI } from '@/services/browser';
+import { createMockBrowserAPI } from '@/services/browser/MockBrowserAPI';
 import type { DataLayerEvent, Settings } from '@/types';
 import { DEFAULT_SETTINGS } from '@/types';
 

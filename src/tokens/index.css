@@ -1,0 +1,22 @@
+:root {
+  /* Colours */
+  --dl-primary: #6366f1;
+  --dl-secondary: #8b5cf6;
+  --dl-accent: #22d3ee;
+  --dl-dark: #0f172a;
+  --dl-darker: #020617;
+  --dl-card: #1e293b;
+  --dl-border: #334155;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', Consolas, monospace;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+}

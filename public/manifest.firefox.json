@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "DataLayer Lens",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "A powerful, beautiful tool for monitoring GTM dataLayer events in real-time",
   "icons": {
     "16": "icons/icon-16.png",
@@ -25,13 +25,19 @@
     "<all_urls>"
   ],
   "background": {
-    "scripts": ["background.js"],
+    "scripts": [
+      "background.js"
+    ],
     "type": "module"
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_start"
     }
   ],
@@ -42,7 +48,10 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "datalayer-lens@extension",
-      "strict_min_version": "109.0"
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   }
 }

@@ -1,0 +1,142 @@
+import { Meta, ColorPalette, ColorItem } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/Design Tokens" />
+
+# Design Tokens
+
+Design tokens are the visual design atoms of the design system. They represent the smallest pieces of the design language.
+
+## Colours
+
+### Brand Colours
+
+<ColorPalette>
+  <ColorItem title="Primary" subtitle="Indigo - Main brand colour" colors={{ primary: '#6366f1' }} />
+  <ColorItem title="Secondary" subtitle="Violet - Supporting brand colour" colors={{ secondary: '#8b5cf6' }} />
+  <ColorItem title="Accent" subtitle="Cyan - Highlights and emphasis" colors={{ accent: '#22d3ee' }} />
+</ColorPalette>
+
+### Background Colours
+
+<ColorPalette>
+  <ColorItem title="Dark" subtitle="slate-900 - Primary background" colors={{ dark: '#0f172a' }} />
+  <ColorItem title="Darker" subtitle="slate-950 - Deepest background" colors={{ darker: '#020617' }} />
+  <ColorItem title="Card" subtitle="slate-800 - Card/surface background" colors={{ card: '#1e293b' }} />
+  <ColorItem title="Border" subtitle="slate-700 - Border colour" colors={{ border: '#334155' }} />
+</ColorPalette>
+
+### Status Colours
+
+<ColorPalette>
+  <ColorItem title="Success" subtitle="Green - Positive actions" colors={{ success: '#22c55e' }} />
+  <ColorItem title="Warning" subtitle="Amber - Caution states" colors={{ warning: '#f59e0b' }} />
+  <ColorItem title="Error" subtitle="Red - Error states" colors={{ error: '#ef4444' }} />
+  <ColorItem title="Info" subtitle="Blue - Informational" colors={{ info: '#3b82f6' }} />
+</ColorPalette>
+
+### Text Colours
+
+<ColorPalette>
+  <ColorItem title="Text Primary" subtitle="slate-50 - Primary text" colors={{ textPrimary: '#f8fafc' }} />
+  <ColorItem title="Text Secondary" subtitle="slate-400 - Secondary text" colors={{ textSecondary: '#94a3b8' }} />
+  <ColorItem title="Text Muted" subtitle="slate-500 - Muted/disabled text" colors={{ textMuted: '#64748b' }} />
+</ColorPalette>
+
+## Typography
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Size</th>
+      <th>Pixels</th>
+      <th>Usage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>xs</td><td>0.75rem</td><td>12px</td><td>Labels, badges, metadata</td></tr>
+    <tr><td>sm</td><td>0.875rem</td><td>14px</td><td>Body text, descriptions</td></tr>
+    <tr><td>base</td><td>1rem</td><td>16px</td><td>Primary content</td></tr>
+    <tr><td>lg</td><td>1.125rem</td><td>18px</td><td>Subheadings</td></tr>
+    <tr><td>xl</td><td>1.25rem</td><td>20px</td><td>Headings</td></tr>
+  </tbody>
+</table>
+
+### Font Families
+
+- **Sans**: Inter, system-ui, sans-serif - Used for UI text
+- **Mono**: JetBrains Mono, Consolas, monospace - Used for code and data
+
+## Spacing
+
+<table>
+  <thead>
+    <tr>
+      <th>Token</th>
+      <th>Value</th>
+      <th>Pixels</th>
+      <th>Usage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>space-0.5</td><td>0.125rem</td><td>2px</td><td>Minimal gaps</td></tr>
+    <tr><td>space-1</td><td>0.25rem</td><td>4px</td><td>Tight spacing</td></tr>
+    <tr><td>space-2</td><td>0.5rem</td><td>8px</td><td>Default small gap</td></tr>
+    <tr><td>space-3</td><td>0.75rem</td><td>12px</td><td>Medium spacing</td></tr>
+    <tr><td>space-4</td><td>1rem</td><td>16px</td><td>Standard spacing</td></tr>
+    <tr><td>space-5</td><td>1.25rem</td><td>20px</td><td>Comfortable spacing</td></tr>
+    <tr><td>space-6</td><td>1.5rem</td><td>24px</td><td>Section spacing</td></tr>
+    <tr><td>space-8</td><td>2rem</td><td>32px</td><td>Large section spacing</td></tr>
+  </tbody>
+</table>
+
+## Border Radius
+
+<table>
+  <thead>
+    <tr>
+      <th>Token</th>
+      <th>Value</th>
+      <th>Usage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>none</td><td>0</td><td>Sharp corners</td></tr>
+    <tr><td>sm</td><td>0.125rem</td><td>Subtle rounding</td></tr>
+    <tr><td>default</td><td>0.25rem</td><td>Standard rounding</td></tr>
+    <tr><td>md</td><td>0.375rem</td><td>Medium rounding</td></tr>
+    <tr><td>lg</td><td>0.5rem</td><td>Card corners</td></tr>
+    <tr><td>xl</td><td>0.75rem</td><td>Large cards</td></tr>
+    <tr><td>full</td><td>9999px</td><td>Circular elements</td></tr>
+  </tbody>
+</table>
+
+## CSS Custom Properties
+
+All design tokens are available as CSS custom properties in `src/tokens/index.css`:
+
+```css
+:root {
+  --dl-primary: #6366f1;
+  --dl-secondary: #8b5cf6;
+  --dl-accent: #22d3ee;
+  --dl-dark: #0f172a;
+  --dl-darker: #020617;
+  --dl-card: #1e293b;
+  --dl-border: #334155;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', Consolas, monospace;
+}
+```
+
+## TypeScript Tokens
+
+Import tokens in TypeScript from `src/tokens/index.ts`:
+
+```typescript
+import { colors, typography, spacing, radii } from '@/tokens';
+
+// Usage
+const primaryColor = colors.primary; // '#6366f1'
+const fontSize = typography.fontSize.sm; // '0.875rem'
+```

@@ -4,6 +4,8 @@ node_modules/
 # Build outputs
 dist/
 build/
+releases/
+storybook-static/
 .turbo/
 
 # Test coverage
@@ -40,3 +42,4 @@ pnpm-debug.log*
 
 # Misc
 .cache/
+designs/

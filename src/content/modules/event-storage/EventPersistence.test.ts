@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { EventPersistence, createEventPersistence } from './EventPersistence';
-import { createMockBrowserAPI } from '@/services/browser';
+import { createMockBrowserAPI } from '@/services/browser/MockBrowserAPI';
 import type { DataLayerEvent } from '@/types';
 
 function createMockEvent(overrides: Partial<DataLayerEvent> = {}): DataLayerEvent {
