@@ -4,12 +4,13 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Layers, Zap, Settings as SettingsIcon, Globe, Sparkles, Coffee } from 'lucide-react';
+import { Layers, Zap, Settings as SettingsIcon, Globe, Sparkles } from 'lucide-react';
 import { usePopupState, type Tab } from './hooks/usePopupState';
 import { usePopupActions } from './hooks/usePopupActions';
 import { MonitorTab } from './components/MonitorTab';
 import { SettingsTab } from './components/SettingsTab';
 import { DomainsTab } from './components/DomainsTab';
+import { SupportLink } from '@/components/shared/SupportLink';
 
 export function Popup() {
   const state = usePopupState();
@@ -148,15 +149,7 @@ export function Popup() {
         transition={{ delay: 0.3 }}
         className="flex-shrink-0 px-4 py-2 border-t border-dl-border bg-dl-darker/80 backdrop-blur-sm"
       >
-        <a
-          href="https://paypal.me/milehighsi"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 text-xs text-slate-500 hover:text-dl-accent transition-colors"
-        >
-          <Coffee className="w-3.5 h-3.5" />
-          <span>Fuel this extension</span>
-        </a>
+        <SupportLink />
       </motion.footer>
     </div>
   );

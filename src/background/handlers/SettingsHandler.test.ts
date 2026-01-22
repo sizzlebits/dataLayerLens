@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { SettingsHandler, createSettingsHandler } from './SettingsHandler';
-import { DEFAULT_SETTINGS, DEFAULT_GROUPING, Settings, DomainSettings } from '@/types';
+import { DEFAULT_SETTINGS, DEFAULT_GROUPING, type Settings, type DomainSettings } from '@/types';
+import type { IBrowserAPI } from '@/services/browser';
 
 function createMockBrowserAPI() {
   const storage: Record<string, unknown> = {};
@@ -34,8 +35,14 @@ function createMockBrowserAPI() {
       query: vi.fn(),
       sendMessage: vi.fn(),
     },
+    scripting: {
+      executeScript: vi.fn(),
+    },
+    action: {
+      onClicked: { addListener: vi.fn() },
+    },
     _storage: storage, // For test inspection
-  };
+  } as unknown as IBrowserAPI & { _storage: Record<string, unknown> };
 }
 
 describe('SettingsHandler', () => {
@@ -45,7 +52,7 @@ describe('SettingsHandler', () => {
   beforeEach(() => {
     mockAPI = createMockBrowserAPI();
     handler = new SettingsHandler({
-      browserAPI: mockAPI as any,
+      browserAPI: mockAPI,
     });
   });
 
@@ -293,7 +300,7 @@ describe('SettingsHandler', () => {
   describe('custom storage keys', () => {
     it('uses custom global settings key', async () => {
       const customHandler = new SettingsHandler({
-        browserAPI: mockAPI as any,
+        browserAPI: mockAPI,
         globalSettingsKey: 'custom_global',
       });
 
@@ -306,7 +313,7 @@ describe('SettingsHandler', () => {
 
     it('uses custom domain settings key', async () => {
       const customHandler = new SettingsHandler({
-        browserAPI: mockAPI as any,
+        browserAPI: mockAPI,
         domainSettingsKey: 'custom_domain',
       });
 
@@ -320,7 +327,7 @@ describe('SettingsHandler', () => {
 describe('createSettingsHandler', () => {
   it('creates SettingsHandler instance', () => {
     const mockAPI = createMockBrowserAPI();
-    const handler = createSettingsHandler({ browserAPI: mockAPI as any });
+    const handler = createSettingsHandler({ browserAPI: mockAPI });
 
     expect(handler).toBeDefined();
     expect(typeof handler.getSettingsForDomain).toBe('function');

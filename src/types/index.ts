@@ -77,6 +77,12 @@ export interface StorageData {
   }>;
 }
 
+// Type for settings input that allows partial grouping config
+// This is used by mergeSettings/mergeSettingsUpdate where nested partial grouping is valid
+export type PartialSettingsInput = Partial<Omit<Settings, 'grouping'>> & {
+  grouping?: Partial<GroupingConfig>;
+};
+
 export const DEFAULT_GROUPING: GroupingConfig = {
   enabled: false,
   mode: 'time',
@@ -247,7 +253,7 @@ export function mergeSettingsWithDomain(
  */
 export function mergeSettings(
   defaults: Settings,
-  partial?: Partial<Settings>
+  partial?: PartialSettingsInput
 ): Settings {
   if (!partial) return defaults;
 
@@ -267,7 +273,7 @@ export function mergeSettings(
  */
 export function mergeSettingsUpdate(
   current: Settings,
-  update: Partial<Settings>
+  update: PartialSettingsInput
 ): Settings {
   return {
     ...current,

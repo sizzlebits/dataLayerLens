@@ -12,11 +12,10 @@ import {
   ChevronRight,
   Download,
   Database,
-  Palette,
   Minimize2,
 } from 'lucide-react';
 import { Settings, DEFAULT_GROUPING, SOURCE_COLOR_POOL, getSourceColor } from '@/types';
-import { SourceColorEditor } from './SourceColorEditor';
+import { SupportLink } from './SupportLink';
 
 // Browser API abstraction
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
@@ -38,7 +37,6 @@ interface SettingsDrawerProps {
   activeTabId: number | null;
   eventCount?: number;
   onExport?: () => void;
-  detectedSources?: string[];
 }
 
 export function SettingsDrawer({
@@ -49,7 +47,6 @@ export function SettingsDrawer({
   activeTabId,
   eventCount,
   onExport,
-  detectedSources = [],
 }: SettingsDrawerProps) {
   const [newLayerName, setNewLayerName] = useState('');
   const [isAddingLayer, setIsAddingLayer] = useState(false);
@@ -300,19 +297,6 @@ export function SettingsDrawer({
                 </div>
               </div>
 
-              {/* Source Colours */}
-              <div className="space-y-2">
-                <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                  <Palette className="w-3.5 h-3.5 text-dl-secondary" />
-                  Source Colours
-                </h3>
-                <SourceColorEditor
-                  sources={detectedSources}
-                  sourceColors={settings.sourceColors || {}}
-                  onColorChange={handleSourceColorChange}
-                />
-              </div>
-
               {/* Display Settings */}
               <div className="space-y-2">
                 <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider">
@@ -544,6 +528,11 @@ export function SettingsDrawer({
                     className="w-full accent-dl-primary h-1"
                   />
                 </div>
+              </div>
+
+              {/* Footer */}
+              <div className="pt-4 mt-4 border-t border-dl-border">
+                <SupportLink />
               </div>
             </div>
           </motion.div>

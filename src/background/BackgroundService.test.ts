@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BackgroundService, createBackgroundService } from './BackgroundService';
 import { createMockBrowserAPI } from '@/services/browser';
-import type { DataLayerEvent, Settings, DomainSettings } from '@/types';
+import type { DataLayerEvent, Settings } from '@/types';
 import { DEFAULT_SETTINGS } from '@/types';
 
 describe('BackgroundService', () => {
@@ -408,7 +408,7 @@ describe('BackgroundService', () => {
 
       // Trigger tab removed
       const tabRemovedHandler = vi.mocked(mockBrowserAPI.tabs.onRemoved.addListener).mock.calls[0][0];
-      tabRemovedHandler(1);
+      tabRemovedHandler(1, { windowId: 1, isWindowClosing: false });
 
       expect(service.getEventHandler().getEvents(1)).toHaveLength(0);
     });

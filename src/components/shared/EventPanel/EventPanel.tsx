@@ -539,7 +539,6 @@ export function EventPanel({ context }: EventPanelProps) {
         activeTabId={state.tabId}
         eventCount={state.filteredEvents.length}
         onExport={actions.exportEvents}
-        detectedSources={state.uniqueSources}
       />
 
       {/* Copy Error Toast */}

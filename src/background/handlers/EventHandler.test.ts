@@ -1,9 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { EventHandler, createEventHandler } from './EventHandler';
 import type { DataLayerEvent } from '@/types';
+import type { IBrowserAPI } from '@/services/browser';
 
+// Create a mock with vi.fn() methods that also satisfies IBrowserAPI
 function createMockBrowserAPI() {
-  return {
+  const mock = {
     runtime: {
       sendMessage: vi.fn().mockResolvedValue(undefined),
     },
@@ -21,7 +23,14 @@ function createMockBrowserAPI() {
       query: vi.fn(),
       sendMessage: vi.fn(),
     },
+    scripting: {
+      executeScript: vi.fn(),
+    },
+    action: {
+      onClicked: { addListener: vi.fn() },
+    },
   };
+  return mock as typeof mock & IBrowserAPI;
 }
 
 function createEvent(overrides: Partial<DataLayerEvent> = {}): DataLayerEvent {
@@ -44,7 +53,7 @@ describe('EventHandler', () => {
   beforeEach(() => {
     mockAPI = createMockBrowserAPI();
     handler = new EventHandler({
-      browserAPI: mockAPI as any,
+      browserAPI: mockAPI,
       maxEventsPerTab: 100,
     });
   });
@@ -70,7 +79,7 @@ describe('EventHandler', () => {
 
     it('limits events per tab to maxEventsPerTab', () => {
       const smallHandler = new EventHandler({
-        browserAPI: mockAPI as any,
+        browserAPI: mockAPI,
         maxEventsPerTab: 3,
       });
 
@@ -182,7 +191,7 @@ describe('EventHandler', () => {
   describe('default maxEventsPerTab', () => {
     it('uses 1000 as default', () => {
       const defaultHandler = new EventHandler({
-        browserAPI: mockAPI as any,
+        browserAPI: mockAPI,
       });
 
       // Add 1001 events
@@ -198,7 +207,7 @@ describe('EventHandler', () => {
 describe('createEventHandler', () => {
   it('creates EventHandler instance', () => {
     const mockAPI = createMockBrowserAPI();
-    const handler = createEventHandler({ browserAPI: mockAPI as any });
+    const handler = createEventHandler({ browserAPI: mockAPI });
 
     expect(handler).toBeDefined();
     expect(typeof handler.addEvent).toBe('function');

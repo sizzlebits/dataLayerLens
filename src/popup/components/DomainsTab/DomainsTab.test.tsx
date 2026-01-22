@@ -51,11 +51,15 @@ describe('CurrentDomain', () => {
 describe('DomainList', () => {
   const mockDomainSettings: Record<string, DomainSettings> = {
     'example.com': {
+      domain: 'example.com',
       settings: { dataLayerNames: ['dataLayer'] },
+      createdAt: Date.now(),
       updatedAt: Date.now(),
     },
     'test.org': {
+      domain: 'test.org',
       settings: { dataLayerNames: ['customLayer'] },
+      createdAt: Date.now() - 86400000,
       updatedAt: Date.now() - 86400000, // 1 day ago
     },
   };
@@ -107,7 +111,7 @@ describe('DomainsTab', () => {
 
   it('passes hasCustomSettings correctly', () => {
     const domainSettings: Record<string, DomainSettings> = {
-      'example.com': { settings: {}, updatedAt: Date.now() },
+      'example.com': { domain: 'example.com', settings: {}, createdAt: Date.now(), updatedAt: Date.now() },
     };
     render(<DomainsTab {...defaultProps} domainSettings={domainSettings} />);
     expect(screen.getByText('Custom')).toBeInTheDocument();

@@ -9,5 +9,6 @@ export { Toast } from './Toast';
 export type { ToastProps, ToastType } from './Toast';
 export { SettingsDrawer } from './SettingsDrawer';
 export { SourceColorEditor } from './SourceColorEditor';
+export { SupportLink } from './SupportLink';
 // Note: EventPanel is exported separately from './EventPanel' to avoid circular chunk dependencies
 // Import directly: import { EventPanel } from '@/components/shared/EventPanel'

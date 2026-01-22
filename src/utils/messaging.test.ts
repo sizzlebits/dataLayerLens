@@ -217,7 +217,7 @@ describe('sendMessage', () => {
   });
 
   it('sends message via runtime.sendMessage', async () => {
-    mockSendMessage.mockImplementation((msg: Message, callback: (response: unknown) => void) => {
+    mockSendMessage.mockImplementation((_msg: Message, callback: (response: unknown) => void) => {
       callback({ success: true });
     });
 
@@ -247,7 +247,7 @@ describe('sendToTab', () => {
   });
 
   it('sends message to specific tab', async () => {
-    mockTabsSendMessage.mockImplementation((tabId: number, msg: Message, callback: (response: unknown) => void) => {
+    mockTabsSendMessage.mockImplementation((_tabId: number, _msg: Message, callback: (response: unknown) => void) => {
       callback({ events: [] });
     });
 

@@ -4,7 +4,6 @@
  */
 
 import type { DataLayerEvent, Settings } from '@/types';
-import type { IBrowserRuntime } from '@/services/browser';
 
 /**
  * Minimal runtime interface for MessageRouter.

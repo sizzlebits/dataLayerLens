@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { DataLayerEvent, Settings } from '@/types';
+import type { DataLayerEvent } from '@/types';
 import { DEFAULT_SETTINGS } from '@/types';
 import {
   MessageRouter,
@@ -41,7 +41,7 @@ function createMockRuntime(): IMessageRouterRuntime & {
     _listeners: listeners,
     _simulateMessage: (message: unknown, sender = {}) => {
       let capturedResponse: unknown;
-      let returnValue: boolean | void;
+      let returnValue: boolean | void = undefined;
       for (const listener of listeners) {
         returnValue = listener(message, sender, (r) => { capturedResponse = r; });
       }

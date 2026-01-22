@@ -8,12 +8,11 @@ const mockSendMessage = vi.fn().mockResolvedValue(undefined);
 
 // Set up the mock before any imports that might use it
 beforeEach(() => {
-  // @ts-expect-error - mocking global chrome
-  globalThis.chrome = {
+  // Minimal mock for chrome/browser API - only what SettingsDrawer needs
+  (globalThis as Record<string, unknown>).chrome = {
     tabs: { sendMessage: mockSendMessage },
   };
-  // @ts-expect-error - mocking global browser
-  globalThis.browser = undefined;
+  (globalThis as Record<string, unknown>).browser = undefined;
   mockSendMessage.mockClear();
 });
 
@@ -26,7 +25,6 @@ describe('SettingsDrawer', () => {
     activeTabId: 1,
     eventCount: 42,
     onExport: vi.fn(),
-    detectedSources: ['dataLayer'],
   };
 
   beforeEach(() => {
@@ -54,11 +52,6 @@ describe('SettingsDrawer', () => {
     expect(screen.getByText('DataLayer Arrays')).toBeInTheDocument();
     // The dataLayer name is shown in a code element
     expect(screen.getByRole('code', { hidden: true }) || screen.getByText(/dataLayer/)).toBeTruthy();
-  });
-
-  it('renders Source Colours section', () => {
-    render(<SettingsDrawer {...defaultProps} />);
-    expect(screen.getByText('Source Colours')).toBeInTheDocument();
   });
 
   it('renders Display settings', () => {

@@ -124,12 +124,12 @@ export class MockRuntime implements IBrowserRuntime {
     }),
   };
 
-  sendMessage = vi.fn(async <T = unknown>(message: unknown): Promise<T> => {
+  sendMessage = vi.fn(async (message: unknown) => {
     if (this.messageHandler) {
-      return this.messageHandler(message) as T;
+      return this.messageHandler(message);
     }
-    return undefined as T;
-  });
+    return undefined;
+  }) as unknown as IBrowserRuntime['sendMessage'];
 
   getURL(path: string): string {
     return `${this.urlPrefix}${path.replace(/^\//, '')}`;
@@ -192,12 +192,12 @@ export class MockTabs implements IBrowserTabs {
     });
   });
 
-  sendMessage = vi.fn(async <T = unknown>(tabId: number, message: unknown): Promise<T> => {
+  sendMessage = vi.fn(async (tabId: number, message: unknown) => {
     if (this.messageHandler) {
-      return this.messageHandler(tabId, message) as T;
+      return this.messageHandler(tabId, message);
     }
-    return undefined as T;
-  });
+    return undefined;
+  }) as unknown as IBrowserTabs['sendMessage'];
 
   public onRemoved = {
     addListener: vi.fn((callback: (tabId: number, removeInfo: { windowId: number; isWindowClosing: boolean }) => void): void => {

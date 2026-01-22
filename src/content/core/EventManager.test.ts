@@ -68,6 +68,7 @@ function createMockGrouping() {
   return {
     addEventToGroup: vi.fn(),
     getGroups: vi.fn(() => [...groups]),
+    getGroupById: vi.fn((id: string) => groups.find(g => g.id === id)),
     clearGroups: vi.fn(() => groups.length = 0),
     rebuildGroups: vi.fn(),
     toggleGroupCollapsed: vi.fn((id: string) => {
@@ -218,7 +219,7 @@ describe('EventManager', () => {
       const event = createMockEvent({ id: 'find-me' });
       mockStorage._events.push(event);
 
-      const result = eventManager.getEventById('find-me');
+      eventManager.getEventById('find-me');
 
       expect(mockStorage.getEventById).toHaveBeenCalledWith('find-me');
     });
@@ -398,7 +399,7 @@ describe('EventManager', () => {
     it('returns count from storage', () => {
       mockStorage._events.push(createMockEvent(), createMockEvent());
 
-      const count = eventManager.getEventCount();
+      eventManager.getEventCount();
 
       expect(mockStorage.getEventCount).toHaveBeenCalled();
     });
