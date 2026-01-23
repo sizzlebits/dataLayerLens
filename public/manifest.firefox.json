@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "DataLayer Lens",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "A powerful, beautiful tool for monitoring GTM dataLayer events in real-time",
   "icons": {
     "16": "icons/icon-16.png",
@@ -50,7 +50,9 @@
       "id": "datalayer-lens@extension",
       "strict_min_version": "142.0",
       "data_collection_permissions": {
-        "required": ["none"]
+        "required": [
+          "none"
+        ]
       }
     }
   }
