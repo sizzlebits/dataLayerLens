@@ -4,13 +4,14 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Layers, Zap, Settings as SettingsIcon, Globe, Sparkles } from 'lucide-react';
+import { Zap, Settings as SettingsIcon, Globe, Sparkles } from 'lucide-react';
 import { usePopupState, type Tab } from './hooks/usePopupState';
 import { usePopupActions } from './hooks/usePopupActions';
 import { MonitorTab } from './components/MonitorTab';
 import { SettingsTab } from './components/SettingsTab';
 import { DomainsTab } from './components/DomainsTab';
 import { SupportLink } from '@/components/shared/SupportLink';
+import { AppIcon } from '@/components/shared/AppIcon';
 
 export function Popup() {
   const state = usePopupState();
@@ -61,13 +62,14 @@ export function Popup() {
         className="flex-shrink-0 bg-gradient-to-r from-dl-primary/20 to-dl-secondary/20 px-4 py-3 border-b border-dl-border"
       >
         <div className="flex items-center gap-3">
-          <motion.div
-            whileHover={{ rotate: 180 }}
-            transition={{ duration: 0.3 }}
-            className="w-10 h-10 bg-gradient-to-br from-dl-primary to-dl-secondary rounded-xl flex items-center justify-center shadow-lg"
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center p-1"
+            style={{
+              boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 -1px 2px rgba(255, 255, 255, 0.05)',
+            }}
           >
-            <Layers className="w-5 h-5 text-white" />
-          </motion.div>
+            <AppIcon className="w-8 h-8 text-dl-primary" />
+          </div>
           <div>
             <h1 className="font-bold text-lg text-white tracking-tight">DataLayer Lens</h1>
             <p className="text-xs text-slate-400">Track your GTM events with clarity</p>

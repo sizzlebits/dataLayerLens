@@ -3,7 +3,7 @@
 A powerful, beautiful tool for monitoring GTM dataLayer events in real-time.
 
 <p align="center">
-  <img src="public/icons/icon.svg" alt="DataLayer Lens" width="128" height="128">
+  <img src="public/icons/datalayerlens_pop.svg" alt="DataLayer Lens" width="285" height="128">
 </p>
 
 <p align="center">
@@ -47,7 +47,7 @@ Install directly from the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ### Firefox Add-ons
 
-*Coming soon*
+Install directly from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/datalayer-lens/).
 
 ### Manual Installation
 
@@ -195,7 +195,7 @@ npm run build:all
 
 - **GitHub**: [github.com/sizzlebits/dataLayerLens](https://github.com/sizzlebits/dataLayerLens)
 - **Chrome Web Store**: [DataLayer Lens](https://chromewebstore.google.com/detail/kmanlaaajnnogjfdbaclbcebaikkmddf?utm_source=item-share-cb)
-- **Firefox Add-ons**: *Coming soon*
+- **Firefox Add-ons**: [DataLayer Lens](https://addons.mozilla.org/en-US/firefox/addon/datalayer-lens/)
 
 ---
 
