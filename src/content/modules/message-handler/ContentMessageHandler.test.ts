@@ -31,6 +31,7 @@ const mockSettings: Settings = {
   persistEventsMaxAge: 300000,
   theme: 'dark',
   showTimestamps: true,
+  showEmojis: true,
   compactMode: false,
   debugLogging: false,
   consoleLogging: false,

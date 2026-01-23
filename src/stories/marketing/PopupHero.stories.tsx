@@ -11,6 +11,7 @@ import {
 import { MonitorTab } from '@/popup/components/MonitorTab';
 import { SettingsTab } from '@/popup/components/SettingsTab';
 import { DomainsTab } from '@/popup/components/DomainsTab';
+import { AppIcon } from '@/components/shared/AppIcon';
 import type { Settings, DataLayerEvent, DomainSettings } from '@/types';
 
 const Popup = lazy(() =>
@@ -38,6 +39,7 @@ const LoadingFallback = () => (
 const mockSettings: Settings = {
   dataLayerNames: ['dataLayer', 'adobeDataLayer'],
   showTimestamps: true,
+  showEmojis: true,
   maxEvents: 100,
   compactMode: false,
   persistEvents: true,
@@ -151,11 +153,7 @@ function PopupFrame({ children, activeTab }: PopupFrameProps) {
       {/* Header */}
       <header className="flex-shrink-0 bg-gradient-to-r from-dl-primary/20 to-dl-secondary/20 px-4 py-3 border-b border-dl-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-dl-primary to-dl-secondary rounded-xl flex items-center justify-center shadow-lg">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-          </div>
+          <AppIcon size="lg" variant="indented" />
           <div>
             <h1 className="font-bold text-lg text-white tracking-tight">DataLayer Lens</h1>
             <p className="text-xs text-slate-400">Track your GTM events with clarity</p>

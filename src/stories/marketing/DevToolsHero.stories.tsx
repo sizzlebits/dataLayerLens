@@ -11,6 +11,7 @@ import {
 } from './decorators';
 import { EventRow } from '@/components/shared/EventRow';
 import { SettingsDrawer } from '@/components/shared/SettingsDrawer';
+import { AppIcon } from '@/components/shared/AppIcon';
 import type { DataLayerEvent, Settings } from '@/types';
 
 const DevToolsPanel = lazy(() =>
@@ -153,6 +154,7 @@ const sampleEvent: DataLayerEvent = {
 const defaultSettings: Settings = {
   dataLayerNames: ['dataLayer'],
   showTimestamps: true,
+  showEmojis: true,
   maxEvents: 100,
   compactMode: false,
   persistEvents: true,
@@ -319,21 +321,7 @@ function GroupingComparisonWrapper({ args }: { args: MarketingArgs }) {
                   background: '#0f172a',
                 }}
               >
-                <div
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 6,
-                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <svg width="12" height="12" fill="none" stroke="white" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
+                <AppIcon size="sm" variant="indented" />
                 <span style={{ color: 'white', fontWeight: 600, fontSize: 13 }}>Ungrouped</span>
                 <span style={{ color: '#64748b', fontSize: 11 }}>{comparisonEvents.length} events</span>
               </div>
@@ -376,21 +364,7 @@ function GroupingComparisonWrapper({ args }: { args: MarketingArgs }) {
                   background: '#0f172a',
                 }}
               >
-                <div
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 6,
-                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <svg width="12" height="12" fill="none" stroke="white" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
+                <AppIcon size="sm" variant="indented" />
                 <span style={{ color: 'white', fontWeight: 600, fontSize: 13 }}>Grouped</span>
                 <span
                   style={{

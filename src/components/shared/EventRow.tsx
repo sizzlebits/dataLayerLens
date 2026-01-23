@@ -20,6 +20,7 @@ export interface EventRowProps {
   showFilterMenu?: boolean;
   compact?: boolean;
   showTimestamps?: boolean;
+  showEmojis?: boolean;
   sourceColor?: string; // Color for the dataLayer source
   onToggle: () => void;
   onCopy?: () => void;
@@ -36,6 +37,7 @@ export function EventRow({
   showFilterMenu = false,
   compact = false,
   showTimestamps = true,
+  showEmojis = true,
   sourceColor,
   onToggle,
   onCopy,
@@ -93,14 +95,16 @@ export function EventRow({
           <ChevronRight className={compact ? 'w-3.5 h-3.5 text-slate-500' : 'w-4 h-4 text-slate-500'} />
         </motion.div>
 
-        <div
-          className={`rounded flex items-center justify-center flex-shrink-0 ${
-            compact ? 'w-6 h-6 text-sm' : 'w-8 h-8 text-lg'
-          }`}
-          style={{ backgroundColor: `${category.color}20` }}
-        >
-          {category.icon}
-        </div>
+        {showEmojis && (
+          <div
+            className={`rounded flex items-center justify-center flex-shrink-0 ${
+              compact ? 'w-6 h-6 text-sm' : 'w-8 h-8 text-lg'
+            }`}
+            style={{ backgroundColor: `${category.color}20` }}
+          >
+            {category.icon}
+          </div>
+        )}
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">

@@ -6,7 +6,6 @@
 import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Layers,
   Search,
   Trash2,
   ChevronRight,
@@ -27,6 +26,7 @@ import { getEventCategory } from '@/types';
 import { EventRow } from '../EventRow';
 import { SettingsDrawer } from '../SettingsDrawer';
 import { Toast } from '../Toast';
+import { AppIcon } from '../AppIcon';
 import { isClipboardApiAvailable } from '@/utils/clipboard';
 import { useEventPanelState, PAGE_SIZE } from './useEventPanelState';
 import { useEventPanelActions } from './useEventPanelActions';
@@ -78,15 +78,7 @@ export function EventPanel({ context }: EventPanelProps) {
       }`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <motion.div
-              whileHover={!isCompact ? { rotate: 180 } : undefined}
-              transition={{ duration: 0.3 }}
-              className={`bg-gradient-to-br from-dl-primary to-dl-secondary rounded-lg flex items-center justify-center ${
-                isCompact ? 'w-6 h-6' : 'w-8 h-8'
-              }`}
-            >
-              <Layers className={isCompact ? 'w-3 h-3 text-white' : 'w-4 h-4 text-white'} />
-            </motion.div>
+            <AppIcon size={isCompact ? 'sm' : 'md'} variant="indented" />
             <div>
               <h1 className={`font-semibold text-white ${isCompact ? 'text-sm' : 'font-bold'}`}>
                 DataLayer Lens
@@ -426,6 +418,7 @@ export function EventPanel({ context }: EventPanelProps) {
                               showFilterMenu={state.filterMenuEvent === event.id}
                               compact={isCompact}
                               showTimestamps={state.settings.showTimestamps}
+                              showEmojis={state.settings.showEmojis}
                               sourceColor={actions.getSourceColorForEvent(event.source)}
                               onToggle={() => actions.toggleExpanded(event.id)}
                               onCopy={clipboardAvailable ? () => actions.copyEvent(event) : undefined}
@@ -475,6 +468,7 @@ export function EventPanel({ context }: EventPanelProps) {
                     showFilterMenu={state.filterMenuEvent === event.id}
                     compact={isCompact}
                     showTimestamps={state.settings.showTimestamps}
+                    showEmojis={state.settings.showEmojis}
                     sourceColor={actions.getSourceColorForEvent(event.source)}
                     onToggle={() => actions.toggleExpanded(event.id)}
                     onCopy={clipboardAvailable ? () => actions.copyEvent(event) : undefined}

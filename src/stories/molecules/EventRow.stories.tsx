@@ -72,6 +72,7 @@ const meta: Meta<typeof EventRow> = {
     showFilterMenu: { control: 'boolean' },
     compact: { control: 'boolean' },
     showTimestamps: { control: 'boolean' },
+    showEmojis: { control: 'boolean' },
     sourceColor: { control: 'color' },
     onToggle: { action: 'toggle' },
     onCopy: { action: 'copy' },
@@ -183,4 +184,83 @@ export const WithFilterMenu: Story = {
     showTimestamps: true,
     sourceColor: '#6366f1',
   },
+};
+
+export const WithoutEmojis: Story = {
+  args: {
+    event: mockEvent,
+    isExpanded: false,
+    showTimestamps: true,
+    showEmojis: false,
+    sourceColor: '#6366f1',
+  },
+};
+
+export const EmojiComparison: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div>
+        <h3 style={{ color: '#e2e8f0', marginBottom: '8px', fontSize: '14px', fontWeight: 600 }}>
+          With Emojis (Default)
+        </h3>
+        <div style={{ backgroundColor: '#0f172a', borderRadius: '8px' }}>
+          <EventRow
+            event={mockGTMEvent}
+            isExpanded={false}
+            showTimestamps={true}
+            showEmojis={true}
+            sourceColor="#22d3ee"
+            onToggle={() => {}}
+          />
+          <EventRow
+            event={mockEvent}
+            isExpanded={false}
+            showTimestamps={true}
+            showEmojis={true}
+            sourceColor="#6366f1"
+            onToggle={() => {}}
+          />
+          <EventRow
+            event={mockPurchaseEvent}
+            isExpanded={false}
+            showTimestamps={true}
+            showEmojis={true}
+            sourceColor="#10b981"
+            onToggle={() => {}}
+          />
+        </div>
+      </div>
+      <div>
+        <h3 style={{ color: '#e2e8f0', marginBottom: '8px', fontSize: '14px', fontWeight: 600 }}>
+          Without Emojis
+        </h3>
+        <div style={{ backgroundColor: '#0f172a', borderRadius: '8px' }}>
+          <EventRow
+            event={mockGTMEvent}
+            isExpanded={false}
+            showTimestamps={true}
+            showEmojis={false}
+            sourceColor="#22d3ee"
+            onToggle={() => {}}
+          />
+          <EventRow
+            event={mockEvent}
+            isExpanded={false}
+            showTimestamps={true}
+            showEmojis={false}
+            sourceColor="#6366f1"
+            onToggle={() => {}}
+          />
+          <EventRow
+            event={mockPurchaseEvent}
+            isExpanded={false}
+            showTimestamps={true}
+            showEmojis={false}
+            sourceColor="#10b981"
+            onToggle={() => {}}
+          />
+        </div>
+      </div>
+    </div>
+  ),
 };
