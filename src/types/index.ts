@@ -52,6 +52,7 @@ export interface Settings {
   // Display settings
   theme: 'dark' | 'light' | 'system';
   showTimestamps: boolean;
+  showEmojis: boolean;
   compactMode: boolean;
 
   // Source colors (user-selected colors for dataLayer sources)
@@ -100,6 +101,7 @@ export const DEFAULT_SETTINGS: Settings = {
   persistEventsMaxAge: 300000, // 5 minutes default
   theme: 'dark',
   showTimestamps: true,
+  showEmojis: true,
   compactMode: false,
   sourceColors: {}, // User-selected colors for dataLayer sources
   debugLogging: false,

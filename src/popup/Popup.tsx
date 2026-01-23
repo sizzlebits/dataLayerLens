@@ -62,14 +62,7 @@ export function Popup() {
         className="flex-shrink-0 bg-gradient-to-r from-dl-primary/20 to-dl-secondary/20 px-4 py-3 border-b border-dl-border"
       >
         <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center p-1"
-            style={{
-              boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 -1px 2px rgba(255, 255, 255, 0.05)',
-            }}
-          >
-            <AppIcon className="w-8 h-8 text-dl-primary" />
-          </div>
+          <AppIcon size="lg" variant="indented" />
           <div>
             <h1 className="font-bold text-lg text-white tracking-tight">DataLayer Lens</h1>
             <p className="text-xs text-slate-400">Track your GTM events with clarity</p>

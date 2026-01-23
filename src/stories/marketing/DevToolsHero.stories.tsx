@@ -154,6 +154,7 @@ const sampleEvent: DataLayerEvent = {
 const defaultSettings: Settings = {
   dataLayerNames: ['dataLayer'],
   showTimestamps: true,
+  showEmojis: true,
   maxEvents: 100,
   compactMode: false,
   persistEvents: true,
@@ -320,20 +321,7 @@ function GroupingComparisonWrapper({ args }: { args: MarketingArgs }) {
                   background: '#0f172a',
                 }}
               >
-                <div
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 6,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 3,
-                    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 -1px 2px rgba(255, 255, 255, 0.05)',
-                  }}
-                >
-                  <AppIcon className="w-full h-full text-dl-primary" />
-                </div>
+                <AppIcon size="sm" variant="indented" />
                 <span style={{ color: 'white', fontWeight: 600, fontSize: 13 }}>Ungrouped</span>
                 <span style={{ color: '#64748b', fontSize: 11 }}>{comparisonEvents.length} events</span>
               </div>
@@ -376,20 +364,7 @@ function GroupingComparisonWrapper({ args }: { args: MarketingArgs }) {
                   background: '#0f172a',
                 }}
               >
-                <div
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 6,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 3,
-                    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 -1px 2px rgba(255, 255, 255, 0.05)',
-                  }}
-                >
-                  <AppIcon className="w-full h-full text-dl-primary" />
-                </div>
+                <AppIcon size="sm" variant="indented" />
                 <span style={{ color: 'white', fontWeight: 600, fontSize: 13 }}>Grouped</span>
                 <span
                   style={{

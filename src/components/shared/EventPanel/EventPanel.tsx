@@ -78,16 +78,7 @@ export function EventPanel({ context }: EventPanelProps) {
       }`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div
-              className={`rounded-lg flex items-center justify-center ${
-                isCompact ? 'w-6 h-6 p-0.5' : 'w-8 h-8 p-1'
-              }`}
-              style={{
-                boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 -1px 2px rgba(255, 255, 255, 0.05)',
-              }}
-            >
-              <AppIcon className={isCompact ? 'w-5 h-5 text-dl-primary' : 'w-6 h-6 text-dl-primary'} />
-            </div>
+            <AppIcon size={isCompact ? 'sm' : 'md'} variant="indented" />
             <div>
               <h1 className={`font-semibold text-white ${isCompact ? 'text-sm' : 'font-bold'}`}>
                 DataLayer Lens
@@ -427,6 +418,7 @@ export function EventPanel({ context }: EventPanelProps) {
                               showFilterMenu={state.filterMenuEvent === event.id}
                               compact={isCompact}
                               showTimestamps={state.settings.showTimestamps}
+                              showEmojis={state.settings.showEmojis}
                               sourceColor={actions.getSourceColorForEvent(event.source)}
                               onToggle={() => actions.toggleExpanded(event.id)}
                               onCopy={clipboardAvailable ? () => actions.copyEvent(event) : undefined}
@@ -476,6 +468,7 @@ export function EventPanel({ context }: EventPanelProps) {
                     showFilterMenu={state.filterMenuEvent === event.id}
                     compact={isCompact}
                     showTimestamps={state.settings.showTimestamps}
+                    showEmojis={state.settings.showEmojis}
                     sourceColor={actions.getSourceColorForEvent(event.source)}
                     onToggle={() => actions.toggleExpanded(event.id)}
                     onCopy={clipboardAvailable ? () => actions.copyEvent(event) : undefined}

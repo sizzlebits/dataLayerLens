@@ -8,18 +8,31 @@ const meta: Meta<typeof AppIcon> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'Custom DataLayer Lens logo icon used in headers throughout the application.',
+        component: 'Custom DataLayer Lens logo icon used in headers throughout the application. Can be used standalone or with an indented container variant.',
       },
     },
   },
   tags: ['autodocs'],
   argTypes: {
+    size: {
+      control: 'select',
+      options: ['sm', 'md', 'lg', 'xl'],
+      description: 'Predefined size for the icon',
+      table: {
+        defaultValue: { summary: 'md' },
+      },
+    },
+    variant: {
+      control: 'select',
+      options: ['plain', 'indented'],
+      description: 'Visual variant - plain or with indented container',
+      table: {
+        defaultValue: { summary: 'plain' },
+      },
+    },
     className: {
       control: 'text',
-      description: 'Tailwind CSS classes for size and color',
-      table: {
-        defaultValue: { summary: 'w-4 h-4' },
-      },
+      description: 'Custom Tailwind CSS classes (overrides size)',
     },
   },
 };
@@ -27,38 +40,67 @@ const meta: Meta<typeof AppIcon> = {
 export default meta;
 type Story = StoryObj<typeof AppIcon>;
 
-export const Default: Story = {
+export const Plain: Story = {
   args: {
-    className: 'w-8 h-8 text-dl-primary',
+    size: 'lg',
+    variant: 'plain',
   },
 };
 
-export const Small: Story = {
+export const Indented: Story = {
   args: {
-    className: 'w-4 h-4 text-slate-400',
+    size: 'lg',
+    variant: 'indented',
   },
 };
 
-export const Large: Story = {
-  args: {
-    className: 'w-12 h-12 text-white',
-  },
-};
-
-export const InIndentedBox: Story = {
+export const Sizes: Story = {
   render: () => (
-    <div
-      className="w-16 h-16 rounded-xl flex items-center justify-center p-2"
-      style={{
-        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 -1px 2px rgba(255, 255, 255, 0.05)',
-      }}
-    >
-      <AppIcon className="w-12 h-12 text-dl-primary" />
+    <div className="flex gap-6 items-center">
+      <div className="text-center">
+        <AppIcon size="sm" variant="plain" />
+        <p className="text-xs mt-2 text-slate-400">Small</p>
+      </div>
+      <div className="text-center">
+        <AppIcon size="md" variant="plain" />
+        <p className="text-xs mt-2 text-slate-400">Medium</p>
+      </div>
+      <div className="text-center">
+        <AppIcon size="lg" variant="plain" />
+        <p className="text-xs mt-2 text-slate-400">Large</p>
+      </div>
+      <div className="text-center">
+        <AppIcon size="xl" variant="plain" />
+        <p className="text-xs mt-2 text-slate-400">X-Large</p>
+      </div>
     </div>
   ),
 };
 
-export const ColorVariations: Story = {
+export const IndentedSizes: Story = {
+  render: () => (
+    <div className="flex gap-6 items-center">
+      <div className="text-center">
+        <AppIcon size="sm" variant="indented" />
+        <p className="text-xs mt-2 text-slate-400">Small</p>
+      </div>
+      <div className="text-center">
+        <AppIcon size="md" variant="indented" />
+        <p className="text-xs mt-2 text-slate-400">Medium</p>
+      </div>
+      <div className="text-center">
+        <AppIcon size="lg" variant="indented" />
+        <p className="text-xs mt-2 text-slate-400">Large</p>
+      </div>
+      <div className="text-center">
+        <AppIcon size="xl" variant="indented" />
+        <p className="text-xs mt-2 text-slate-400">X-Large</p>
+      </div>
+    </div>
+  ),
+};
+
+export const CustomColors: Story = {
   render: () => (
     <div className="flex gap-4 items-center">
       <div className="text-center">

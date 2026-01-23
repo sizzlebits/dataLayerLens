@@ -320,6 +320,14 @@ export function SettingsDrawer({
                   onChange={() => updateSettings({ showTimestamps: !settings.showTimestamps })}
                 />
 
+                {/* Show Emojis */}
+                <ToggleRow
+                  icon={<span className="text-[14px]">😀</span>}
+                  label="Event Emojis"
+                  checked={settings.showEmojis}
+                  onChange={() => updateSettings({ showEmojis: !settings.showEmojis })}
+                />
+
                 {/* Persist Events */}
                 <ToggleRow
                   icon={<History className="w-3.5 h-3.5 text-yellow-400" />}

@@ -1,20 +1,35 @@
 /**
  * AppIcon - Custom DataLayer Lens logo icon
+ * Can be used standalone or with an indented container for header usage
  */
 
 interface AppIconProps {
+  /** Size of the icon */
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  /** Apply an indented container with shadow */
+  variant?: 'plain' | 'indented';
+  /** Custom className for the icon itself */
   className?: string;
 }
 
-export function AppIcon({ className = 'w-4 h-4' }: AppIconProps) {
-  return (
+const sizeClasses = {
+  sm: { icon: 'w-4 h-4', container: 'w-6 h-6 p-0.5 rounded-lg' },
+  md: { icon: 'w-6 h-6', container: 'w-8 h-8 p-1 rounded-lg' },
+  lg: { icon: 'w-8 h-8', container: 'w-10 h-10 p-1 rounded-xl' },
+  xl: { icon: 'w-12 h-12', container: 'w-16 h-16 p-2 rounded-xl' },
+};
+
+export function AppIcon({ size = 'md', variant = 'plain', className }: AppIconProps) {
+  const iconClasses = className || `${sizeClasses[size].icon} text-dl-primary`;
+
+  const icon = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       fill="none"
       viewBox="0 0 24 24"
-      className={className}
+      className={iconClasses}
     >
       <path
         fill="currentColor"
@@ -30,4 +45,19 @@ export function AppIcon({ className = 'w-4 h-4' }: AppIconProps) {
       />
     </svg>
   );
+
+  if (variant === 'indented') {
+    return (
+      <div
+        className={`${sizeClasses[size].container} flex items-center justify-center`}
+        style={{
+          boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 -1px 2px rgba(255, 255, 255, 0.05)',
+        }}
+      >
+        {icon}
+      </div>
+    );
+  }
+
+  return icon;
 }
