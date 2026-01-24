@@ -107,7 +107,7 @@ export default defineConfig({
                 comparatorName: 'pixelmatch',
                 comparatorOptions: {
                   threshold: 0.2,
-                  allowedMismatchedPixelRatio: 0.01,
+                  allowedMismatchedPixelRatio: 0.04, // Allow 4% difference for cross-platform rendering
                 },
                 resolveScreenshotPath: ({ testFileDirectory, testFileName, arg, browserName, ext }) => {
                   const filename = path.basename(testFileName);
