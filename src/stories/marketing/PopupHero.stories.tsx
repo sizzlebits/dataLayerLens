@@ -102,9 +102,11 @@ function PopupHeroShot({
         scale={scale}
         rotate={hasRotation ? { x: rotateX, y: rotateY } : undefined}
       >
-        <Suspense fallback={<LoadingFallback />}>
-          <Popup />
-        </Suspense>
+        <ThemeWrapper theme="dark">
+          <Suspense fallback={<LoadingFallback />}>
+            <Popup forceTheme="dark" />
+          </Suspense>
+        </ThemeWrapper>
       </FloatingCard>
     </ScreenshotFrame>
   );
@@ -196,44 +198,50 @@ function ThreeTabsShowcase({ args }: { args: MarketingArgs }) {
         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
           {/* Monitor Tab */}
           <FloatingCard shadow="xl" rotate={{ y: 12, x: 5 }}>
-            <PopupFrame activeTab="Monitor">
-              <MonitorTab
-                settings={mockSettings}
-                events={mockEvents}
-                currentDomain="example.com"
-                onClearEvents={() => {}}
-                onExportEvents={() => {}}
-                onAddFilter={() => {}}
-                onRemoveFilter={() => {}}
-                onClearFilters={() => {}}
-                onSetFilterMode={() => {}}
-              />
-            </PopupFrame>
+            <ThemeWrapper theme="dark">
+              <PopupFrame activeTab="Monitor">
+                <MonitorTab
+                  settings={mockSettings}
+                  events={mockEvents}
+                  currentDomain="example.com"
+                  onClearEvents={() => {}}
+                  onExportEvents={() => {}}
+                  onAddFilter={() => {}}
+                  onRemoveFilter={() => {}}
+                  onClearFilters={() => {}}
+                  onSetFilterMode={() => {}}
+                />
+              </PopupFrame>
+            </ThemeWrapper>
           </FloatingCard>
 
           {/* Settings Tab */}
           <FloatingCard shadow="xl">
-            <PopupFrame activeTab="Settings">
-              <SettingsTab
-                settings={mockSettings}
-                onUpdateSettings={() => {}}
-                onExportSettings={() => {}}
-                onImportSettings={() => {}}
-                importStatus={null}
-              />
-            </PopupFrame>
+            <ThemeWrapper theme="dark">
+              <PopupFrame activeTab="Settings">
+                <SettingsTab
+                  settings={mockSettings}
+                  onUpdateSettings={() => {}}
+                  onExportSettings={() => {}}
+                  onImportSettings={() => {}}
+                  importStatus={null}
+                />
+              </PopupFrame>
+            </ThemeWrapper>
           </FloatingCard>
 
           {/* Domains Tab */}
           <FloatingCard shadow="xl" rotate={{ y: -12, x: 5 }}>
-            <PopupFrame activeTab="Domains">
-              <DomainsTab
-                currentDomain="example.com"
-                domainSettings={mockDomainSettings}
-                onSaveCurrentDomain={() => {}}
-                onDeleteDomain={() => {}}
-              />
-            </PopupFrame>
+            <ThemeWrapper theme="dark">
+              <PopupFrame activeTab="Domains">
+                <DomainsTab
+                  currentDomain="example.com"
+                  domainSettings={mockDomainSettings}
+                  onSaveCurrentDomain={() => {}}
+                  onDeleteDomain={() => {}}
+                />
+              </PopupFrame>
+            </ThemeWrapper>
           </FloatingCard>
         </div>
       </div>

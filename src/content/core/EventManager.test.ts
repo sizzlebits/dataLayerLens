@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import type { DataLayerEvent, EventGroup } from '@/types';
 import { DEFAULT_GROUPING } from '@/types';
 
@@ -112,8 +112,8 @@ describe('EventManager', () => {
   let mockStorage: ReturnType<typeof createMockStorage>;
   let mockGrouping: ReturnType<typeof createMockGrouping>;
   let mockPersistence: ReturnType<typeof createMockPersistence>;
-  let onEventsChange: ReturnType<typeof vi.fn>;
-  let onGroupsChange: ReturnType<typeof vi.fn>;
+  let onEventsChange: Mock<(events: DataLayerEvent[]) => void>;
+  let onGroupsChange: Mock<(groups: EventGroup[]) => void>;
   let eventManager: EventManager;
   let defaultOptions: EventManagerOptions;
 
@@ -123,8 +123,8 @@ describe('EventManager', () => {
     mockStorage = createMockStorage();
     mockGrouping = createMockGrouping();
     mockPersistence = createMockPersistence();
-    onEventsChange = vi.fn();
-    onGroupsChange = vi.fn();
+    onEventsChange = vi.fn<(events: DataLayerEvent[]) => void>();
+    onGroupsChange = vi.fn<(groups: EventGroup[]) => void>();
 
     vi.mocked(createEventStorage).mockReturnValue(mockStorage);
     vi.mocked(createEventGrouping).mockReturnValue(mockGrouping);

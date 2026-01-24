@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { ContentMessageHandler, createContentMessageHandler } from './ContentMessageHandler';
 import { createMockBrowserAPI } from '@/services/browser/MockBrowserAPI';
 import type { DataLayerEvent, Settings } from '@/types';
@@ -42,19 +42,19 @@ describe('ContentMessageHandler', () => {
   let mockBrowserAPI: ReturnType<typeof createMockBrowserAPI>;
   let handler: ContentMessageHandler;
   let callbacks: {
-    onGetEvents: ReturnType<typeof vi.fn>;
-    onClearEvents: ReturnType<typeof vi.fn>;
-    onUpdateSettings: ReturnType<typeof vi.fn>;
-    onGetSettings: ReturnType<typeof vi.fn>;
+    onGetEvents: Mock<() => DataLayerEvent[]>;
+    onClearEvents: Mock<() => void>;
+    onUpdateSettings: Mock<(settings: Partial<Settings>) => void>;
+    onGetSettings: Mock<() => Settings>;
   };
 
   beforeEach(() => {
     mockBrowserAPI = createMockBrowserAPI();
     callbacks = {
-      onGetEvents: vi.fn().mockReturnValue([]),
-      onClearEvents: vi.fn(),
-      onUpdateSettings: vi.fn(),
-      onGetSettings: vi.fn().mockReturnValue(mockSettings),
+      onGetEvents: vi.fn<() => DataLayerEvent[]>().mockReturnValue([]),
+      onClearEvents: vi.fn<() => void>(),
+      onUpdateSettings: vi.fn<(settings: Partial<Settings>) => void>(),
+      onGetSettings: vi.fn<() => Settings>().mockReturnValue(mockSettings),
     };
 
     handler = new ContentMessageHandler({
@@ -89,10 +89,10 @@ describe('ContentMessageHandler', () => {
   });
 
   describe('message handling', () => {
-    let sendResponseMock: ReturnType<typeof vi.fn>;
+    let sendResponseMock: Mock<(response?: unknown) => void>;
 
     beforeEach(() => {
-      sendResponseMock = vi.fn();
+      sendResponseMock = vi.fn<(response?: unknown) => void>();
       handler.start();
     });
 

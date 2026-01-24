@@ -12,6 +12,13 @@ storybook-static/
 coverage/
 .nyc_output/
 
+# Visual regression test results (NOT baselines)
+# Baseline screenshots in __snapshots__/ directories SHOULD be committed
+test-results/          # Test run outputs, diffs, traces
+*.png-actual.png       # Failed test actual screenshots
+*.png-diff.png         # Diff images
+*.png-expected.png     # Expected (when regenerating)
+
 # Environment variables
 .env
 .env.local
