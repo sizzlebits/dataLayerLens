@@ -17,6 +17,30 @@ interface MockedDevToolsPanelProps {
   clickGroupToggle?: boolean;
 }
 
+// Extended browser API type with devtools
+type BrowserAPIWithDevtools = IBrowserAPI & {
+  devtools: {
+    inspectedWindow: {
+      tabId?: number;
+    };
+  };
+};
+
+// Extended browser API type with tabs.onUpdated
+type BrowserAPIWithTabsOnUpdated = IBrowserAPI & {
+  tabs: IBrowserTabs & {
+    onUpdated: {
+      addListener: (callback: (tabId: number, changeInfo: unknown) => void) => void;
+      removeListener: (callback: (tabId: number, changeInfo: unknown) => void) => void;
+    };
+  };
+};
+
+// Mockable storage type
+type MockableStorage = {
+  get: (keys: string | string[] | null) => Promise<Record<string, unknown>>;
+};
+
 // Sample events for non-mocked stories (same as .storybook/mocks/browserAPI.ts)
 const now = Date.now();
 const defaultSampleEvents: DataLayerEvent[] = [
@@ -64,15 +88,6 @@ export function MockedDevToolsPanel({
     if (!mocksInitialized) {
       mocksInitialized = true;
 
-      // Define extended browser API type with devtools
-      type BrowserAPIWithDevtools = IBrowserAPI & {
-        devtools: {
-          inspectedWindow: {
-            tabId?: number;
-          };
-        };
-      };
-
       // Mock devtools API
       if (!browserAPI.devtools) {
         (browserAPI as BrowserAPIWithDevtools).devtools = {
@@ -85,10 +100,6 @@ export function MockedDevToolsPanel({
 
       // Mock storage.local.get to return mock settings from registry OR default (empty)
       if (browserAPI.storage?.local) {
-        type MockableStorage = {
-          get: (keys: string | string[] | null) => Promise<Record<string, unknown>>;
-        };
-
         const storageLocal = browserAPI.storage.local as unknown as MockableStorage;
         storageLocal.get = async (keys: string | string[] | null) => {
           // Get the current tabId from devtools.inspectedWindow
@@ -131,15 +142,6 @@ export function MockedDevToolsPanel({
       }
 
       // Mock tabs.onUpdated listener (no-op for stories)
-      type BrowserAPIWithTabsOnUpdated = IBrowserAPI & {
-        tabs: IBrowserTabs & {
-          onUpdated: {
-            addListener: (callback: (tabId: number, changeInfo: unknown) => void) => void;
-            removeListener: (callback: (tabId: number, changeInfo: unknown) => void) => void;
-          };
-        };
-      };
-
       if (browserAPI.tabs && !(browserAPI as BrowserAPIWithTabsOnUpdated).tabs.onUpdated) {
         (browserAPI as BrowserAPIWithTabsOnUpdated).tabs.onUpdated = {
           addListener: () => {},
@@ -151,13 +153,6 @@ export function MockedDevToolsPanel({
     }
 
     // Set this instance's tabId
-    type BrowserAPIWithDevtools = IBrowserAPI & {
-      devtools: {
-        inspectedWindow: {
-          tabId?: number;
-        };
-      };
-    };
     (browserAPI as BrowserAPIWithDevtools).devtools.inspectedWindow.tabId = tabId;
 
     setIsReady(true);
