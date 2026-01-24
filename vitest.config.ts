@@ -33,6 +33,7 @@ export default defineConfig({
           environment: 'jsdom',
           setupFiles: ['./src/test/setup.ts'],
           include: ['src/**/*.{test,spec}.{js,ts,jsx,tsx}'],
+          exclude: ['**/node_modules/**', '**/dist/**', '**/*.visual.test.{js,ts,jsx,tsx}'],
         },
       },
       // Storybook browser tests project
@@ -61,11 +62,62 @@ export default defineConfig({
           browser: {
             enabled: true,
             headless: true,
-            provider: playwright(),
+            provider: playwright({
+              screenshot: 'only-on-failure',
+            }),
             instances: [{ browser: 'chromium' }],
+            screenshotDirectory: './test-results/screenshots',
           },
           setupFiles: ['.storybook/vitest.setup.ts'],
           // Don't specify include - Storybook plugin uses the stories field from .storybook/main.ts
+        },
+      },
+      // Visual regression tests project
+      {
+        resolve: {
+          alias: {
+            '@': path.resolve(__dirname, 'src'),
+          },
+          dedupe: ['react', 'react-dom'],
+        },
+        optimizeDeps: {
+          include: [
+            'react',
+            'react-dom',
+            'react/jsx-runtime',
+            'react/jsx-dev-runtime',
+            'framer-motion',
+            '@testing-library/dom',
+            '@testing-library/user-event',
+          ],
+          force: true,
+        },
+        test: {
+          name: 'visual',
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({
+              screenshot: 'on',
+            }),
+            instances: [{ browser: 'chromium' }],
+            screenshotDirectory: './test-results/screenshots',
+            expect: {
+              toMatchScreenshot: {
+                comparatorName: 'pixelmatch',
+                comparatorOptions: {
+                  threshold: 0.2,
+                  allowedMismatchedPixelRatio: 0.01,
+                },
+                resolveScreenshotPath: ({ testFileDirectory, testFileName, arg, browserName, ext }) => {
+                  const filename = path.basename(testFileName);
+                  return `${testFileDirectory}/__snapshots__/${filename}/${arg}-${browserName}${ext}`;
+                },
+              },
+            },
+          },
+          setupFiles: ['.storybook/vitest.setup.ts'],
+          include: ['src/**/*.visual.test.{js,ts,jsx,tsx}'],
         },
       },
     ],
@@ -86,7 +138,7 @@ export default defineConfig({
         'packages/**',
       ],
     },
-    reporters: ['default', 'junit'],
+    reporters: ['default', 'junit', 'tree'],
     outputFile: {
       junit: './coverage/junit.xml',
     },

@@ -69,9 +69,11 @@ function DevToolsHeroShot({
         rotate={hasRotation ? { x: rotateX, y: rotateY } : undefined}
       >
         <DevToolsChrome activeTab="DataLayer Lens" width={DEFAULT_PANEL_WIDTH} height={DEFAULT_PANEL_HEIGHT}>
-          <Suspense fallback={<LoadingFallback />}>
-            <DevToolsPanel />
-          </Suspense>
+          <ThemeWrapper theme="dark">
+            <Suspense fallback={<LoadingFallback />}>
+              <DevToolsPanel forceTheme="dark" />
+            </Suspense>
+          </ThemeWrapper>
         </DevToolsChrome>
       </FloatingCard>
     </ScreenshotFrame>
@@ -122,9 +124,11 @@ export const FullWidth: Story = {
       {args.showGlow && <Glow color={args.glowColor} blur={100} opacity={0.5} offsetY={60} />}
       <FloatingCard shadow="2xl" scale={args.scale}>
         <DevToolsChrome activeTab="DataLayer Lens" width={1100} height={620}>
-          <Suspense fallback={<LoadingFallback />}>
-            <DevToolsPanel />
-          </Suspense>
+          <ThemeWrapper theme="dark">
+            <Suspense fallback={<LoadingFallback />}>
+              <DevToolsPanel forceTheme="dark" />
+            </Suspense>
+          </ThemeWrapper>
         </DevToolsChrome>
       </FloatingCard>
     </ScreenshotFrame>
@@ -191,35 +195,37 @@ export const WithEventExpanded: Story = {
       {args.showGlow && <Glow color={args.glowColor} blur={100} opacity={0.5} offsetY={60} />}
       <FloatingCard shadow="2xl" scale={args.scale}>
         <DevToolsChrome activeTab="DataLayer Lens" width={DEFAULT_PANEL_WIDTH} height={DEFAULT_PANEL_HEIGHT}>
-          <div style={{ height: '100%', overflow: 'hidden', position: 'relative' }}>
-            <Suspense fallback={<LoadingFallback />}>
-              <DevToolsPanel />
-            </Suspense>
-            {/* Real EventRow component positioned as overlay, showing expanded state */}
-            <div
-              style={{
-                position: 'absolute',
-                top: 100,
-                left: 16,
-                right: 16,
-                zIndex: 20,
-                background: '#0f172a',
-                borderRadius: 8,
-                border: '1px solid #6366f1',
-                boxShadow: '0 10px 40px rgba(99, 102, 241, 0.3)',
-                overflow: 'hidden',
-              }}
-            >
-              <EventRow
-                event={sampleEvent}
-                isExpanded={true}
-                showTimestamps={true}
-                sourceColor="#22d3ee"
-                onToggle={() => {}}
-                onCopy={() => {}}
-              />
+          <ThemeWrapper theme="dark">
+            <div style={{ height: '100%', overflow: 'hidden', position: 'relative' }}>
+              <Suspense fallback={<LoadingFallback />}>
+                <DevToolsPanel forceTheme="dark" />
+              </Suspense>
+              {/* Real EventRow component positioned as overlay, showing expanded state */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 100,
+                  left: 16,
+                  right: 16,
+                  zIndex: 20,
+                  background: '#0f172a',
+                  borderRadius: 8,
+                  border: '1px solid #6366f1',
+                  boxShadow: '0 10px 40px rgba(99, 102, 241, 0.3)',
+                  overflow: 'hidden',
+                }}
+              >
+                <EventRow
+                  event={sampleEvent}
+                  isExpanded={true}
+                  showTimestamps={true}
+                  sourceColor="#22d3ee"
+                  onToggle={() => {}}
+                  onCopy={() => {}}
+                />
+              </div>
             </div>
-          </div>
+          </ThemeWrapper>
         </DevToolsChrome>
       </FloatingCard>
     </ScreenshotFrame>
@@ -234,11 +240,12 @@ function SettingsDrawerWrapper({ args }: { args: MarketingArgs }) {
       {args.showGlow && <Glow color={args.glowColor} blur={120} opacity={0.35} offsetY={80} />}
       <FloatingCard shadow="2xl" scale={args.scale}>
         <DevToolsChrome activeTab="DataLayer Lens" width={DEFAULT_PANEL_WIDTH} height={DEFAULT_PANEL_HEIGHT}>
-          <div style={{ height: '100%', overflow: 'hidden', position: 'relative' }}>
-            <Suspense fallback={<LoadingFallback />}>
-              <DevToolsPanel />
-            </Suspense>
-            {/* Real SettingsDrawer component - override fixed positioning */}
+          <ThemeWrapper theme="dark">
+            <div style={{ height: '100%', overflow: 'hidden', position: 'relative' }}>
+              <Suspense fallback={<LoadingFallback />}>
+                <DevToolsPanel forceTheme="dark" />
+              </Suspense>
+              {/* Real SettingsDrawer component - override fixed positioning */}
             <div
               style={{
                 position: 'absolute',
@@ -267,6 +274,7 @@ function SettingsDrawerWrapper({ args }: { args: MarketingArgs }) {
               />
             </div>
           </div>
+          </ThemeWrapper>
         </DevToolsChrome>
       </FloatingCard>
     </ScreenshotFrame>
@@ -495,13 +503,15 @@ function EventsStreamWrapper({ args }: { args: MarketingArgs }) {
                   border: `1px solid ${streamEventColors[index]}40`,
                 }}
               >
-                <EventRow
-                  event={event}
-                  isExpanded={false}
-                  showTimestamps={true}
-                  sourceColor={streamEventColors[index]}
-                  onToggle={() => {}}
-                />
+                <ThemeWrapper theme="dark">
+                  <EventRow
+                    event={event}
+                    isExpanded={false}
+                    showTimestamps={true}
+                    sourceColor={streamEventColors[index]}
+                    onToggle={() => {}}
+                  />
+                </ThemeWrapper>
               </div>
             </div>
           );

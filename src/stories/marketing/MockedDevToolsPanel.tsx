@@ -38,6 +38,15 @@ const mockRegistry = new Map<number, {
 let nextTabId = 1;
 let mocksInitialized = false;
 
+// Define extended browser API type with devtools
+type BrowserAPIWithDevtools = IBrowserAPI & {
+  devtools: {
+    inspectedWindow: {
+      tabId?: number;
+    };
+  };
+};
+
 export function MockedDevToolsPanel({
   forceTheme,
   mockEvents = [],
@@ -63,15 +72,6 @@ export function MockedDevToolsPanel({
     // Initialize global mocks once
     if (!mocksInitialized) {
       mocksInitialized = true;
-
-      // Define extended browser API type with devtools
-      type BrowserAPIWithDevtools = IBrowserAPI & {
-        devtools: {
-          inspectedWindow: {
-            tabId?: number;
-          };
-        };
-      };
 
       // Mock devtools API
       if (!browserAPI.devtools) {
@@ -151,13 +151,6 @@ export function MockedDevToolsPanel({
     }
 
     // Set this instance's tabId
-    type BrowserAPIWithDevtools = IBrowserAPI & {
-      devtools: {
-        inspectedWindow: {
-          tabId?: number;
-        };
-      };
-    };
     (browserAPI as BrowserAPIWithDevtools).devtools.inspectedWindow.tabId = tabId;
 
     setIsReady(true);

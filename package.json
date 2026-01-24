@@ -41,6 +41,8 @@
     "test:coverage": "vitest run --coverage",
     "test:storybook": "vitest run --project storybook",
     "test:storybook:watch": "vitest --project storybook",
+    "test:visual": "vitest run --project visual",
+    "test:visual:update": "vitest run --project visual -u",
     "test:unit": "vitest run --project unit",
     "lint": "eslint src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
@@ -91,7 +93,8 @@
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.53.0",
     "vite": "^6.0.5",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "vitest-browser-react": "^2.0.4"
   },
   "engines": {
     "node": ">=18.0.0",
