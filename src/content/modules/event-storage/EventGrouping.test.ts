@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { EventGrouping, createEventGrouping } from './EventGrouping';
-import type { DataLayerEvent, GroupingConfig } from '@/types';
+import type { DataLayerEvent, GroupingConfig, EventGroup } from '@/types';
 
 function createMockEvent(overrides: Partial<DataLayerEvent> = {}): DataLayerEvent {
   return {
@@ -24,10 +24,10 @@ const defaultSettings: GroupingConfig = {
 
 describe('EventGrouping', () => {
   let grouping: EventGrouping;
-  let onGroupsChangeMock: ReturnType<typeof vi.fn>;
+  let onGroupsChangeMock: Mock<(groups: EventGroup[]) => void>;
 
   beforeEach(() => {
-    onGroupsChangeMock = vi.fn();
+    onGroupsChangeMock = vi.fn<(groups: EventGroup[]) => void>();
     grouping = new EventGrouping({
       settings: defaultSettings,
       onGroupsChange: onGroupsChangeMock,

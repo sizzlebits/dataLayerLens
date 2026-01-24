@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { BackgroundService, createBackgroundService } from './BackgroundService';
 import { createMockBrowserAPI } from '@/services/browser/MockBrowserAPI';
 import type { DataLayerEvent, Settings } from '@/types';
@@ -46,13 +46,13 @@ describe('BackgroundService', () => {
 
   describe('message handling', () => {
     let messageHandler: (message: unknown, sender: chrome.runtime.MessageSender, sendResponse: (response?: unknown) => void) => boolean | void;
-    let sendResponse: ReturnType<typeof vi.fn>;
+    let sendResponse: Mock<(response?: unknown) => void>;
 
     beforeEach(() => {
       service.start();
       // Get the registered message handler
       messageHandler = vi.mocked(mockBrowserAPI.runtime.onMessage.addListener).mock.calls[0][0];
-      sendResponse = vi.fn();
+      sendResponse = vi.fn<(response?: unknown) => void>();
     });
 
     const createSender = (tabId?: number, url?: string): chrome.runtime.MessageSender => ({
@@ -418,7 +418,7 @@ describe('BackgroundService', () => {
     it('handles invalid URLs gracefully', () => {
       service.start();
       const messageHandler = vi.mocked(mockBrowserAPI.runtime.onMessage.addListener).mock.calls[0][0];
-      const sendResponse = vi.fn();
+      const sendResponse = vi.fn<(response?: unknown) => void>();
 
       // Create sender with invalid URL
       const sender = {

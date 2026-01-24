@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { FilterEngine, createFilterEngine } from './FilterEngine';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import { FilterEngine, createFilterEngine, type FilterConfig } from './FilterEngine';
 import type { DataLayerEvent } from '@/types';
 
 function createMockEvent(overrides: Partial<DataLayerEvent> = {}): DataLayerEvent {
@@ -17,10 +17,10 @@ function createMockEvent(overrides: Partial<DataLayerEvent> = {}): DataLayerEven
 
 describe('FilterEngine', () => {
   let filterEngine: FilterEngine;
-  let onFilterChangeMock: ReturnType<typeof vi.fn>;
+  let onFilterChangeMock: Mock<(config: FilterConfig) => void>;
 
   beforeEach(() => {
-    onFilterChangeMock = vi.fn();
+    onFilterChangeMock = vi.fn<(config: FilterConfig) => void>();
     filterEngine = new FilterEngine({
       onFilterChange: onFilterChangeMock,
     });

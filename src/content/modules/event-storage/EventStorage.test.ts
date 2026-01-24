@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { EventStorage, createEventStorage } from './EventStorage';
 import type { DataLayerEvent } from '@/types';
 
@@ -17,10 +17,10 @@ function createMockEvent(overrides: Partial<DataLayerEvent> = {}): DataLayerEven
 
 describe('EventStorage', () => {
   let storage: EventStorage;
-  let onEventsChangeMock: ReturnType<typeof vi.fn>;
+  let onEventsChangeMock: Mock<(events: DataLayerEvent[]) => void>;
 
   beforeEach(() => {
-    onEventsChangeMock = vi.fn();
+    onEventsChangeMock = vi.fn<(events: DataLayerEvent[]) => void>();
     storage = new EventStorage({
       maxEvents: 100,
       onEventsChange: onEventsChangeMock,

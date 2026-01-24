@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { EventCapture, createEventCapture } from './EventCapture';
 import { createMockBrowserAPI } from '@/services/browser/MockBrowserAPI';
 import type { DataLayerEvent } from '@/types';
 
 describe('EventCapture', () => {
   let mockBrowserAPI: ReturnType<typeof createMockBrowserAPI>;
-  let onEventMock: ReturnType<typeof vi.fn>;
+  let onEventMock: Mock<(event: DataLayerEvent) => void>;
   let eventCapture: EventCapture;
   let addEventListenerSpy: ReturnType<typeof vi.spyOn>;
   let removeEventListenerSpy: ReturnType<typeof vi.spyOn>;
@@ -13,7 +13,7 @@ describe('EventCapture', () => {
 
   beforeEach(() => {
     mockBrowserAPI = createMockBrowserAPI();
-    onEventMock = vi.fn();
+    onEventMock = vi.fn<(event: DataLayerEvent) => void>();
     addEventListenerSpy = vi.spyOn(window, 'addEventListener');
     removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
     postMessageSpy = vi.spyOn(window, 'postMessage');
