@@ -4,16 +4,54 @@ export default {
   theme: {
     extend: {
       colors: {
-        'dl-primary': '#6366f1',
-        'dl-secondary': '#8b5cf6',
-        'dl-accent': '#22d3ee',
-        'dl-success': '#10b981',
-        'dl-warning': '#f59e0b',
-        'dl-error': '#ef4444',
-        'dl-dark': '#0f0f23',
-        'dl-darker': '#050510',
-        'dl-card': '#1a1a2e',
-        'dl-border': '#2d2d44',
+        // Legacy colors (use CSS variables)
+        'dl-primary': 'var(--dl-primary)',
+        'dl-secondary': 'var(--dl-secondary)',
+        'dl-accent': 'var(--dl-accent)',
+        'dl-success': 'var(--dl-success)',
+        'dl-warning': 'var(--dl-warning)',
+        'dl-error': 'var(--dl-error)',
+        'dl-dark': 'var(--dl-dark)',
+        'dl-darker': 'var(--dl-darker)',
+        'dl-card': 'var(--dl-card)',
+        'dl-border': 'var(--dl-border)',
+
+        // Semantic theme-aware colors for text
+        'theme-text': {
+          DEFAULT: 'var(--color-text-primary)',
+          primary: 'var(--color-text-primary)',
+          secondary: 'var(--color-text-secondary)',
+          tertiary: 'var(--color-text-tertiary)',
+          disabled: 'var(--color-text-disabled)',
+          inverse: 'var(--color-text-inverse)',
+        },
+
+        // Semantic theme-aware colors for backgrounds
+        'theme-bg': {
+          DEFAULT: 'var(--color-bg-base)',
+          base: 'var(--color-bg-base)',
+          elevated: 'var(--color-bg-elevated)',
+          card: 'var(--color-bg-card)',
+          hover: 'var(--color-bg-hover)',
+          active: 'var(--color-bg-active)',
+        },
+
+        // Semantic theme-aware colors for borders
+        'theme-border': {
+          DEFAULT: 'var(--color-border-base)',
+          base: 'var(--color-border-base)',
+          hover: 'var(--color-border-hover)',
+          focus: 'var(--color-border-focus)',
+        },
+
+        // JSON syntax highlighting colors
+        'json': {
+          key: 'var(--color-json-key)',
+          string: 'var(--color-json-string)',
+          number: 'var(--color-json-number)',
+          boolean: 'var(--color-json-boolean)',
+          null: 'var(--color-json-null)',
+        },
       },
       fontFamily: {
         mono: ['JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', 'monospace'],

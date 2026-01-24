@@ -19,7 +19,7 @@ export function MaxEventsSlider({
 }: MaxEventsSliderProps) {
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-slate-300">Max Events</h3>
+      <h3 className="text-sm font-medium text-theme-text-secondary">Max Events</h3>
       <div className="flex items-center gap-3">
         <input
           type="range"

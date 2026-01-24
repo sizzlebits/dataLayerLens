@@ -37,7 +37,7 @@ export function DataLayerSection({
 
   return (
     <div className="space-y-2">
-      <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
+      <h3 className="text-xs font-medium text-theme-text-secondary uppercase tracking-wider flex items-center gap-2">
         <Layers className="w-3.5 h-3.5 text-dl-primary" />
         DataLayer Arrays
       </h3>
@@ -52,7 +52,7 @@ export function DataLayerSection({
                 <div className="flex items-center gap-2">
                   <motion.button
                     onClick={() => setExpandedColorPicker(isExpanded ? null : name)}
-                    className="w-4 h-4 rounded-full border-2 border-white/20 hover:border-white/40 transition-colors"
+                    className="w-4 h-4 rounded-full border-2 border-theme-border-base/20 hover:border-theme-border-hover transition-colors"
                     style={{ backgroundColor: color }}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
@@ -110,7 +110,7 @@ export function DataLayerSection({
               onChange={(e) => setNewLayerName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
               placeholder="e.g., dataLayer_v2"
-              className="flex-1 bg-dl-card border border-dl-border rounded px-2 py-1.5 text-xs text-white placeholder:text-slate-500 focus:border-dl-primary focus:outline-none"
+              className="flex-1 bg-dl-card border border-dl-border rounded px-2 py-1.5 text-xs text-theme-text placeholder:text-theme-text-tertiary focus:border-dl-primary focus:outline-none"
               autoFocus
             />
             <motion.button
@@ -136,7 +136,7 @@ export function DataLayerSection({
         ) : (
           <motion.button
             onClick={() => setIsAdding(true)}
-            className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 border border-dashed border-dl-border hover:border-dl-primary text-slate-400 hover:text-dl-primary rounded text-xs transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 border border-dashed border-dl-border hover:border-dl-primary text-theme-text-secondary hover:text-dl-primary rounded text-xs transition-colors"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >

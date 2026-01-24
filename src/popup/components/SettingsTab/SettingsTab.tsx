@@ -66,7 +66,9 @@ export function SettingsTab({
 
       {/* Display Settings */}
       <DisplaySettings
+        theme={settings.theme}
         showTimestamps={settings.showTimestamps}
+        showEmojis={settings.showEmojis}
         persistEvents={settings.persistEvents}
         consoleLogging={settings.consoleLogging}
         debugLogging={settings.debugLogging}

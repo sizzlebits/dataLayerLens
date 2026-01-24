@@ -21,10 +21,10 @@ export function CurrentDomain({ domain, hasCustomSettings, onSaveSettings }: Cur
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Globe className="w-4 h-4 text-dl-primary" />
-          <span className="text-sm font-medium text-white">Current Site</span>
+          <span className="text-sm font-medium text-theme-text">Current Site</span>
         </div>
         {hasCustomSettings && (
-          <span className="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded">
+          <span className="text-xs text-dl-success bg-dl-success/10 px-2 py-0.5 rounded">
             Custom
           </span>
         )}

@@ -31,7 +31,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     return (
       <div className={`relative ${className}`}>
         <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-tertiary"
           aria-hidden="true"
         />
         <input
@@ -43,12 +43,12 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
           placeholder={placeholder}
           autoFocus={autoFocus}
           aria-label={ariaLabel || placeholder}
-          className="w-full bg-dl-dark border border-dl-border rounded-lg pl-10 pr-8 py-2 text-sm text-white placeholder:text-slate-500 focus:border-dl-primary focus:outline-none"
+          className="w-full bg-dl-dark border border-dl-border rounded-lg pl-10 pr-8 py-2 text-sm text-theme-text placeholder:text-theme-text-tertiary focus:border-dl-primary focus:outline-none"
         />
         {value && (
           <button
             onClick={() => onChange('')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-white"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-theme-text-secondary hover:text-theme-text"
             aria-label="Clear search"
             type="button"
           >

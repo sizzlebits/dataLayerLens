@@ -92,8 +92,8 @@ describe('SettingsDrawer', () => {
     const onClose = vi.fn();
     const { container } = render(<SettingsDrawer {...defaultProps} onClose={onClose} />);
 
-    // Click the backdrop (first fixed div with bg-black)
-    const backdrop = container.querySelector('.bg-black\\/50');
+    // Click the backdrop (first fixed div with bg-theme-bg-overlay)
+    const backdrop = container.querySelector('.bg-theme-bg-overlay');
     if (backdrop) {
       fireEvent.click(backdrop);
     }

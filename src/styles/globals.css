@@ -1,20 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
+/* Import Design Token System */
+@import './tokens/index.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --dl-primary: #6366f1;
-  --dl-secondary: #8b5cf6;
-  --dl-accent: #22d3ee;
-  --dl-success: #10b981;
-  --dl-warning: #f59e0b;
-  --dl-error: #ef4444;
-  --dl-dark: #0f0f23;
-  --dl-darker: #050510;
-  --dl-card: #1a1a2e;
-  --dl-border: #2d2d44;
+/* Legacy tokens for backward compatibility - will be removed gradually */
+/* These need to be defined at both :root and [data-theme] levels for side-by-side theme rendering */
+:root,
+[data-theme="dark"] {
+  --dl-primary: var(--color-primary);
+  --dl-secondary: var(--color-secondary);
+  --dl-accent: var(--color-accent);
+  --dl-success: var(--color-success);
+  --dl-warning: var(--color-warning);
+  --dl-error: var(--color-error);
+  --dl-dark: var(--color-bg-elevated);
+  --dl-darker: var(--color-bg-base);
+  --dl-card: var(--color-bg-card);
+  --dl-border: var(--color-border-base);
+}
+
+[data-theme="light"] {
+  --dl-primary: var(--color-primary);
+  --dl-secondary: var(--color-secondary);
+  --dl-accent: var(--color-accent);
+  --dl-success: var(--color-success);
+  --dl-warning: var(--color-warning);
+  --dl-error: var(--color-error);
+  --dl-dark: var(--color-bg-elevated);
+  --dl-darker: var(--color-bg-base);
+  --dl-card: var(--color-bg-card);
+  --dl-border: var(--color-border-base);
 }
 
 * {
@@ -23,15 +42,15 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(145deg, var(--dl-dark), var(--dl-darker));
-  color: #e2e8f0;
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
 }
 
 code, pre {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: var(--font-mono);
 }
 
 /* Custom scrollbar */
@@ -41,28 +60,28 @@ code, pre {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  background: var(--color-scrollbar-track);
+  border-radius: var(--radius-sm);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.3);
-  border-radius: 4px;
+  background: var(--color-scrollbar-thumb);
+  border-radius: var(--radius-sm);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.5);
+  background: var(--color-scrollbar-thumb-hover);
 }
 
 /* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+  scrollbar-color: var(--color-scrollbar-thumb) transparent;
 }
 
 /* Focus styles */
 :focus-visible {
-  outline: 2px solid var(--dl-primary);
+  outline: 2px solid var(--color-border-focus);
   outline-offset: 2px;
 }
 

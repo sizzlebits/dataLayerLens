@@ -50,7 +50,7 @@ export interface Settings {
   persistEventsMaxAge: number; // Max age in ms (0 = forever until cleared)
 
   // Display settings
-  theme: 'dark' | 'light' | 'system';
+  theme: 'system' | 'light' | 'dark';
   showTimestamps: boolean;
   showEmojis: boolean;
   compactMode: boolean;
@@ -99,7 +99,7 @@ export const DEFAULT_SETTINGS: Settings = {
   grouping: DEFAULT_GROUPING,
   persistEvents: false,
   persistEventsMaxAge: 300000, // 5 minutes default
-  theme: 'dark',
+  theme: 'system', // Default to system preference
   showTimestamps: true,
   showEmojis: true,
   compactMode: false,

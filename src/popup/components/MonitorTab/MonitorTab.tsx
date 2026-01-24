@@ -57,8 +57,8 @@ export function MonitorTab({
             <Wrench className="w-5 h-5 text-dl-primary" />
           </div>
           <div>
-            <h3 className="text-sm font-medium text-white">View Events in DevTools</h3>
-            <p className="text-xs text-slate-400">Press F12, then select the DataLayer Lens tab</p>
+            <h3 className="text-sm font-medium text-theme-text">View Events in DevTools</h3>
+            <p className="text-xs text-theme-text-secondary">Press F12, then select the DataLayer Lens tab</p>
           </div>
         </div>
       </div>
@@ -72,7 +72,7 @@ export function MonitorTab({
       />
 
       {/* Quick Info */}
-      <div className="text-center text-xs text-slate-500 py-2">
+      <div className="text-center text-xs text-theme-text-tertiary py-2">
         <p>
           {currentDomain && (
             <span className="block mb-1 text-dl-accent">{currentDomain}</span>

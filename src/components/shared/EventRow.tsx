@@ -92,7 +92,7 @@ export function EventRow({
           transition={{ duration: 0.15 }}
           aria-hidden="true"
         >
-          <ChevronRight className={compact ? 'w-3.5 h-3.5 text-slate-500' : 'w-4 h-4 text-slate-500'} />
+          <ChevronRight className={compact ? 'w-3.5 h-3.5 text-theme-text-tertiary' : 'w-4 h-4 text-theme-text-tertiary'} />
         </motion.div>
 
         {showEmojis && (
@@ -115,16 +115,18 @@ export function EventRow({
               {event.event}
             </span>
           </div>
-          <div className={`flex items-center gap-1.5 text-slate-500 ${compact ? 'text-[10px]' : 'text-xs'}`}>
+          <div className={`flex items-center gap-1.5 text-theme-text-tertiary ${compact ? 'text-[10px]' : 'text-xs'}`}>
             <span
-              className={`inline-flex items-center gap-1 px-1 py-0.5 rounded font-mono ${compact ? 'text-[9px]' : 'text-[10px]'}`}
+              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-mono border ${
+                compact ? 'text-[9px]' : 'text-[10px]'
+              } ${
+                !sourceColor ? 'bg-theme-bg-card border-theme-border-base text-theme-text-secondary' : ''
+              }`}
               style={sourceColor ? {
-                backgroundColor: `${sourceColor}20`,
+                backgroundColor: `${sourceColor}15`,
+                borderColor: `${sourceColor}40`,
                 color: sourceColor,
-              } : {
-                backgroundColor: 'rgba(51, 65, 85, 0.5)',
-                color: '#94a3b8',
-              }}
+              } : undefined}
             >
               {event.dataLayerIndex !== undefined && (
                 <span className="opacity-60">#{event.dataLayerIndex}</span>
@@ -132,20 +134,23 @@ export function EventRow({
               {cleanSource}
               {isPersisted && (
                 <span title="Persisted event">
-                  <Clock className={`${compact ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} style={{ color: sourceColor || '#94a3b8' }} />
+                  <Clock
+                    className={`${compact ? 'w-2.5 h-2.5' : 'w-3 h-3'}`}
+                    style={sourceColor ? { color: sourceColor } : undefined}
+                  />
                 </span>
               )}
             </span>
             {showTimestamps && (
               <>
-                <span className="text-slate-600">•</span>
+                <span className="text-theme-text-disabled">•</span>
                 <span title={timeWithMs} className="inline-flex items-center gap-1 cursor-default">
                   <Clock className={compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
                   {time}
                 </span>
               </>
             )}
-            <span className="text-slate-600">•</span>
+            <span className="text-theme-text-disabled">•</span>
             <Tag className={compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
             {Object.keys(event.data).length} props
           </div>
@@ -159,7 +164,7 @@ export function EventRow({
                   e.stopPropagation();
                   onToggleFilterMenu?.();
                 }}
-                className="p-1.5 hover:bg-dl-border rounded transition-all text-slate-400 hover:text-dl-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-dl-primary"
+                className="p-1.5 hover:bg-dl-border rounded transition-all text-theme-text-secondary hover:text-dl-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-dl-primary"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 aria-label="Add to filters"
@@ -184,7 +189,7 @@ export function EventRow({
                   >
                     <button
                       onClick={onAddFilterInclude}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-dl-success/20 hover:text-dl-success transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-dl-success"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-theme-text-secondary hover:bg-dl-success/20 hover:text-dl-success transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-dl-success"
                       role="menuitem"
                     >
                       <ListPlus className="w-3.5 h-3.5" aria-hidden="true" />
@@ -192,7 +197,7 @@ export function EventRow({
                     </button>
                     <button
                       onClick={onAddFilterExclude}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-dl-error/20 hover:text-dl-error transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-dl-error"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-theme-text-secondary hover:bg-dl-error/20 hover:text-dl-error transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-dl-error"
                       role="menuitem"
                     >
                       <ListMinus className="w-3.5 h-3.5" aria-hidden="true" />
@@ -218,7 +223,7 @@ export function EventRow({
               {isCopied ? (
                 <Check className={`text-dl-success ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} aria-hidden="true" />
               ) : (
-                <Copy className={`text-slate-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} aria-hidden="true" />
+                <Copy className={`text-theme-text-secondary ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} aria-hidden="true" />
               )}
             </motion.button>
           )}

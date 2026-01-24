@@ -64,8 +64,8 @@ export function FilterPanel({
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-slate-400" />
-          <span className="text-sm font-medium text-white">Active Filters</span>
+          <Filter className="w-4 h-4 text-theme-text-secondary" />
+          <span className="text-sm font-medium text-theme-text">Active Filters</span>
         </div>
 
         {/* Filter mode toggle and clear */}
@@ -75,7 +75,7 @@ export function FilterPanel({
             className={`px-2 py-1 rounded transition-colors ${
               filterMode === 'exclude'
                 ? 'bg-dl-error/20 text-dl-error'
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-theme-text-secondary hover:text-theme-text'
             }`}
           >
             Exclude
@@ -85,7 +85,7 @@ export function FilterPanel({
             className={`px-2 py-1 rounded transition-colors ${
               filterMode === 'include'
                 ? 'bg-dl-success/20 text-dl-success'
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-theme-text-secondary hover:text-theme-text'
             }`}
           >
             Include
@@ -93,7 +93,7 @@ export function FilterPanel({
           {filters.length > 0 && onClearFilters && (
             <button
               onClick={onClearFilters}
-              className="px-2 py-1 rounded text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="px-2 py-1 rounded text-theme-text-secondary hover:text-theme-text hover:bg-theme-bg-hover transition-colors"
             >
               Clear
             </button>
@@ -141,7 +141,7 @@ export function FilterPanel({
             className="space-y-2"
           >
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-tertiary" />
               <input
                 type="text"
                 value={searchValue}
@@ -155,7 +155,7 @@ export function FilterPanel({
                   }
                 }}
                 placeholder="Type event name..."
-                className="w-full bg-dl-dark border border-dl-border rounded-lg pl-10 pr-8 py-2 text-sm text-white placeholder:text-slate-500 focus:border-dl-primary focus:outline-none"
+                className="w-full bg-dl-dark border border-dl-border rounded-lg pl-10 pr-8 py-2 text-sm text-theme-text placeholder:text-theme-text-tertiary focus:border-dl-primary focus:outline-none"
                 autoFocus
               />
               <button
@@ -163,7 +163,7 @@ export function FilterPanel({
                   setIsAdding(false);
                   setSearchValue('');
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-white"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-theme-text-secondary hover:text-theme-text"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -175,7 +175,7 @@ export function FilterPanel({
                   <button
                     key={event}
                     onClick={() => handleAddFilter(event)}
-                    className="w-full flex items-center justify-between px-3 py-2 text-sm text-slate-300 hover:bg-dl-border hover:text-white transition-colors"
+                    className="w-full flex items-center justify-between px-3 py-2 text-sm text-theme-text-secondary hover:bg-dl-border hover:text-theme-text transition-colors"
                   >
                     <span>{event}</span>
                     <Plus className="w-4 h-4 text-dl-primary" />
@@ -201,7 +201,7 @@ export function FilterPanel({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsAdding(true)}
-            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-slate-400 hover:text-dl-primary transition-colors border border-dashed border-dl-border hover:border-dl-primary rounded-lg"
+            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-theme-text-secondary hover:text-dl-primary transition-colors border border-dashed border-dl-border hover:border-dl-primary rounded-lg"
           >
             <Plus className="w-4 h-4" />
             Add Filter

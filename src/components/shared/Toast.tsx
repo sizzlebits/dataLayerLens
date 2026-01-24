@@ -34,7 +34,7 @@ export function Toast({ message, type = 'error', position = 'bottom' }: ToastPro
           initial={{ opacity: 0, y: initialY }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: initialY }}
-          className={`fixed ${positionClasses} left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 ${config.bgClass} text-white text-sm rounded-lg shadow-lg z-50`}
+          className={`fixed ${positionClasses} left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 ${config.bgClass} text-theme-text text-sm rounded-lg shadow-lg z-50`}
           role="alert"
           aria-live="polite"
         >

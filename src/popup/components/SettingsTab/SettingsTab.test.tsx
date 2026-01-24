@@ -8,7 +8,9 @@ import { DEFAULT_SETTINGS } from '@/types';
 
 describe('DisplaySettings', () => {
   const defaultProps = {
+    theme: 'dark' as const,
     showTimestamps: true,
+    showEmojis: true,
     persistEvents: false,
     consoleLogging: false,
     debugLogging: false,

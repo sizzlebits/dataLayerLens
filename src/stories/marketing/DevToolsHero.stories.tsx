@@ -5,12 +5,18 @@ import {
   FloatingCard,
   Glow,
   DevToolsChrome,
+  MarketingHeading,
+  MarketingBadge,
   marketingArgTypes,
   defaultMarketingArgs,
   type MarketingArgs,
 } from './decorators';
+import { ThemeWrapper } from './ThemeWrapper';
+import { ArrowIcon } from './ArrowIcon';
+import { MockedDevToolsPanel } from './MockedDevToolsPanel';
 import { EventRow } from '@/components/shared/EventRow';
 import { SettingsDrawer } from '@/components/shared/SettingsDrawer';
+import { GroupingSettings } from '@/components/shared/settings/GroupingSettings';
 import { AppIcon } from '@/components/shared/AppIcon';
 import type { DataLayerEvent, Settings } from '@/types';
 
@@ -291,193 +297,100 @@ const comparisonEvents: DataLayerEvent[] = [
   { id: 'cmp-6', timestamp: Date.now() - 500, event: 'purchase', data: { event: 'purchase', value: 29.99 }, source: 'dataLayer', raw: {}, dataLayerIndex: 5 },
 ];
 
+// Settings for ungrouped view
+const ungroupedSettings: Settings = {
+  ...defaultSettings,
+  grouping: {
+    enabled: false,
+    mode: 'time',
+    timeWindowMs: 500,
+    triggerEvents: [],
+  },
+};
+
+// Settings for grouped view
+const groupedSettings: Settings = {
+  ...defaultSettings,
+  grouping: {
+    enabled: true,
+    mode: 'event',
+    timeWindowMs: 500,
+    triggerEvents: ['gtm.js', 'page_view', 'add_to_cart'],
+  },
+};
+
 function GroupingComparisonWrapper({ args }: { args: MarketingArgs }) {
   const panelWidth = 520;
-  const panelHeight = 560;
+  const panelHeight = 680; // Increased to allow clipping
 
   return (
-    <ScreenshotFrame gradient={args.gradient} padding={40}>
+    <ScreenshotFrame gradient={args.gradient} padding={40} style={{ overflow: 'hidden' }}>
       {args.showGlow && <Glow color={args.glowColor} blur={120} opacity={0.4} offsetY={40} />}
-      <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-        {/* Left panel - Ungrouped view */}
-        <FloatingCard shadow="xl" rotate={{ y: 6, x: 2 }}>
-          <DevToolsChrome activeTab="DataLayer Lens" width={panelWidth} height={panelHeight}>
-            <div
-              style={{
-                height: '100%',
-                background: '#020617',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              {/* Mini header */}
-              <div
-                style={{
-                  padding: '10px 12px',
-                  borderBottom: '1px solid #334155',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  background: '#0f172a',
-                }}
-              >
-                <AppIcon size="sm" variant="indented" />
-                <span style={{ color: 'white', fontWeight: 600, fontSize: 13 }}>Ungrouped</span>
-                <span style={{ color: '#64748b', fontSize: 11 }}>{comparisonEvents.length} events</span>
-              </div>
-              {/* Flat event list using real EventRow */}
-              <div style={{ flex: 1, overflow: 'hidden' }}>
-                {comparisonEvents.map((event) => (
-                  <EventRow
-                    key={event.id}
-                    event={event}
-                    isExpanded={false}
-                    showTimestamps={true}
-                    sourceColor="#22d3ee"
-                    onToggle={() => {}}
-                  />
-                ))}
-              </div>
-            </div>
-          </DevToolsChrome>
-        </FloatingCard>
 
-        {/* Right panel - Grouped view */}
+      {/* Title and Badge */}
+      <div style={{ position: 'absolute', top: 40, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, zIndex: 10 }}>
+        <MarketingHeading>Event Grouping</MarketingHeading>
+        <MarketingBadge color="secondary">Based on time or event markers</MarketingBadge>
+      </div>
+
+      <div style={{ display: 'flex', gap: 24, alignItems: 'center', position: 'relative', marginTop: 260 }}>
+        {/* Left panel - Ungrouped view using real DevToolsPanel with mocked browser API */}
+        <div style={{ position: 'relative' }}>
+          <FloatingCard shadow="xl" rotate={{ y: 6, x: 2 }}>
+            <DevToolsChrome activeTab="DataLayer Lens" width={panelWidth} height={panelHeight}>
+              <ThemeWrapper theme="dark">
+                <MockedDevToolsPanel
+                  forceTheme="dark"
+                  mockEvents={comparisonEvents}
+                  mockSettings={ungroupedSettings}
+                  mockExpandedEvents={['cmp-3']}
+                  clickGroupToggle={true}
+                />
+              </ThemeWrapper>
+            </DevToolsChrome>
+          </FloatingCard>
+
+          {/* Stylized Grouping Settings Modal - using real component */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 236,
+              left: 214,
+              width: 240,
+              background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+              border: '2px solid #6366f1',
+              borderRadius: 12,
+              padding: 16,
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(99, 102, 241, 0.2)',
+              zIndex: 30,
+              pointerEvents: 'none',
+            }}
+          >
+            <ThemeWrapper theme="dark">
+              <GroupingSettings
+                settings={groupedSettings}
+                onUpdateSettings={() => {}}
+              />
+            </ThemeWrapper>
+          </div>
+        </div>
+
+        {/* Arrow overlay - positioned at 36% from top */}
+        <div style={{ position: 'absolute', left: '50%', top: '36%', transform: 'translate(-50%, -50%)', zIndex: 5, pointerEvents: 'none' }}>
+          <ArrowIcon width={120} height={124} color="white" style={{ filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5))' }} />
+        </div>
+
+        {/* Right panel - Grouped view using real DevToolsPanel with mocked browser API */}
         <FloatingCard shadow="xl" rotate={{ y: -6, x: 2 }}>
           <DevToolsChrome activeTab="DataLayer Lens" width={panelWidth} height={panelHeight}>
-            <div
-              style={{
-                height: '100%',
-                background: '#020617',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              {/* Mini header */}
-              <div
-                style={{
-                  padding: '10px 12px',
-                  borderBottom: '1px solid #334155',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  background: '#0f172a',
-                }}
-              >
-                <AppIcon size="sm" variant="indented" />
-                <span style={{ color: 'white', fontWeight: 600, fontSize: 13 }}>Grouped</span>
-                <span
-                  style={{
-                    padding: '2px 6px',
-                    background: 'rgba(99, 102, 241, 0.2)',
-                    color: '#6366f1',
-                    borderRadius: 4,
-                    fontSize: 10,
-                  }}
-                >
-                  3 groups
-                </span>
-              </div>
-              {/* Grouped event list */}
-              <div style={{ flex: 1, overflow: 'hidden' }}>
-                {/* Group 1 */}
-                <div style={{ borderBottom: '1px solid #1e293b' }}>
-                  <div
-                    style={{
-                      padding: '8px 12px',
-                      background: 'rgba(15, 23, 42, 0.5)',
-                      borderLeft: '2px solid rgba(99, 102, 241, 0.5)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                    }}
-                  >
-                    <svg width="12" height="12" fill="none" stroke="#6366f1" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
-                    <span style={{ color: '#e2e8f0', fontSize: 11, fontWeight: 500 }}>2 events</span>
-                    <span style={{ color: '#6366f1', fontSize: 10 }}>gtm.js</span>
-                  </div>
-                  <div style={{ paddingLeft: 14, borderLeft: '2px solid rgba(99, 102, 241, 0.2)', marginLeft: 0 }}>
-                    {comparisonEvents.slice(0, 2).map((event) => (
-                      <EventRow
-                        key={event.id}
-                        event={event}
-                        isExpanded={false}
-                        compact={true}
-                        showTimestamps={false}
-                        sourceColor="#22d3ee"
-                        onToggle={() => {}}
-                      />
-                    ))}
-                  </div>
-                </div>
-                {/* Group 2 */}
-                <div style={{ borderBottom: '1px solid #1e293b' }}>
-                  <div
-                    style={{
-                      padding: '8px 12px',
-                      background: 'rgba(15, 23, 42, 0.5)',
-                      borderLeft: '2px solid rgba(99, 102, 241, 0.5)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                    }}
-                  >
-                    <svg width="12" height="12" fill="none" stroke="#6366f1" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
-                    <span style={{ color: '#e2e8f0', fontSize: 11, fontWeight: 500 }}>2 events</span>
-                    <span style={{ color: '#6366f1', fontSize: 10 }}>page_view</span>
-                  </div>
-                  <div style={{ paddingLeft: 14, borderLeft: '2px solid rgba(99, 102, 241, 0.2)', marginLeft: 0 }}>
-                    {comparisonEvents.slice(2, 4).map((event) => (
-                      <EventRow
-                        key={event.id}
-                        event={event}
-                        isExpanded={false}
-                        compact={true}
-                        showTimestamps={false}
-                        sourceColor="#22d3ee"
-                        onToggle={() => {}}
-                      />
-                    ))}
-                  </div>
-                </div>
-                {/* Group 3 */}
-                <div>
-                  <div
-                    style={{
-                      padding: '8px 12px',
-                      background: 'rgba(15, 23, 42, 0.5)',
-                      borderLeft: '2px solid rgba(99, 102, 241, 0.5)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                    }}
-                  >
-                    <svg width="12" height="12" fill="none" stroke="#6366f1" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
-                    <span style={{ color: '#e2e8f0', fontSize: 11, fontWeight: 500 }}>2 events</span>
-                    <span style={{ color: '#6366f1', fontSize: 10 }}>add_to_cart</span>
-                  </div>
-                  <div style={{ paddingLeft: 14, borderLeft: '2px solid rgba(99, 102, 241, 0.2)', marginLeft: 0 }}>
-                    {comparisonEvents.slice(4, 6).map((event) => (
-                      <EventRow
-                        key={event.id}
-                        event={event}
-                        isExpanded={false}
-                        compact={true}
-                        showTimestamps={false}
-                        sourceColor="#22d3ee"
-                        onToggle={() => {}}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ThemeWrapper theme="dark">
+              <MockedDevToolsPanel
+                forceTheme="dark"
+                mockEvents={comparisonEvents}
+                mockSettings={groupedSettings}
+                mockExpandedEvents={['cmp-3']}
+              />
+            </ThemeWrapper>
           </DevToolsChrome>
         </FloatingCard>
       </div>
@@ -511,8 +424,23 @@ const streamEventColors = ['#64748b', '#8b5cf6', '#6366f1', '#3b82f6', '#22d3ee'
 
 function EventsStreamWrapper({ args }: { args: MarketingArgs }) {
   return (
-    <ScreenshotFrame gradient={args.gradient} padding={60}>
+    <ScreenshotFrame gradient={args.gradient} padding={60} style={{ overflow: 'hidden' }}>
       {args.showGlow && <Glow color={args.glowColor} blur={150} opacity={0.4} offsetY={-60} />}
+
+      {/* Giant decorative AppIcon in background */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%) rotate(15deg)',
+          opacity: 0.08,
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      >
+        <AppIcon size="custom" customSize={900} variant="plain" />
+      </div>
 
       <div
         style={{
@@ -524,6 +452,7 @@ function EventsStreamWrapper({ args }: { args: MarketingArgs }) {
           width: 700,
           height: 650,
           position: 'relative',
+          zIndex: 1,
         }}
       >
         {/* Events stacked - bottom (index 0) = old/small/back, top (last) = new/large/front */}
@@ -585,8 +514,73 @@ function EventsStreamWrapper({ args }: { args: MarketingArgs }) {
 export const EventsStream: Story = {
   name: 'Events Stream (3D)',
   args: {
-    gradient: 'dustyDusk',
+    gradient: 'aurora',
     showGlow: false,
   },
   render: (args) => <EventsStreamWrapper args={args} />,
+};
+
+// ============================================================================
+// Light/Dark Theme Comparison (Side-by-Side)
+// ============================================================================
+
+function LightDarkComparisonWrapper({ args }: { args: MarketingArgs }) {
+  const panelWidth = 550;
+  const panelHeight = 600;
+
+  return (
+    <ScreenshotFrame gradient={args.gradient} padding={40}>
+      {args.showGlow && <Glow color={args.glowColor} blur={140} opacity={0.4} offsetY={0} />}
+      <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+        {/* Dark Mode */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+            <MarketingHeading>Dark Mode</MarketingHeading>
+            <MarketingBadge color="primary">Perfect for night owl devs</MarketingBadge>
+          </div>
+          <FloatingCard shadow="xl" rotate={{ y: 6, x: 2 }}>
+            <DevToolsChrome activeTab="DataLayer Lens" width={panelWidth} height={panelHeight}>
+              <ThemeWrapper theme="dark">
+                <Suspense fallback={<LoadingFallback />}>
+                  <DevToolsPanel forceTheme="dark" />
+                </Suspense>
+              </ThemeWrapper>
+            </DevToolsChrome>
+          </FloatingCard>
+        </div>
+
+        {/* Light Mode */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+            <MarketingHeading>Light Mode</MarketingHeading>
+            <MarketingBadge color="accent">...and everyone else 😎</MarketingBadge>
+          </div>
+          <FloatingCard shadow="xl" rotate={{ y: -6, x: 2 }}>
+            <DevToolsChrome activeTab="DataLayer Lens" width={panelWidth} height={panelHeight}>
+              <ThemeWrapper theme="light">
+                <Suspense fallback={<LoadingFallback />}>
+                  <DevToolsPanel forceTheme="light" />
+                </Suspense>
+              </ThemeWrapper>
+            </DevToolsChrome>
+          </FloatingCard>
+        </div>
+      </div>
+    </ScreenshotFrame>
+  );
+}
+
+export const LightDarkComparison: Story = {
+  name: 'Light vs Dark Theme',
+  args: {
+    gradient: 'sunset',
+    showGlow: false,
+  },
+  parameters: {
+    // Disable global theme decorator for this story since we're managing themes manually
+    themes: {
+      disable: true,
+    },
+  },
+  render: (args) => <LightDarkComparisonWrapper args={args} />,
 };

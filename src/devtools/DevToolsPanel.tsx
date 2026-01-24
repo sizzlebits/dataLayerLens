@@ -5,6 +5,11 @@
 
 import { EventPanel } from '@/components/shared/EventPanel';
 
-export function DevToolsPanel() {
-  return <EventPanel context="devtools" />;
+interface DevToolsPanelProps {
+  /** Optional: Override theme for marketing/storybook (bypasses storage) */
+  forceTheme?: 'light' | 'dark';
+}
+
+export function DevToolsPanel({ forceTheme }: DevToolsPanelProps = {}) {
+  return <EventPanel context="devtools" forceTheme={forceTheme} />;
 }

@@ -11,6 +11,7 @@ import {
   Settings as SettingsType,
   DEFAULT_SETTINGS,
 } from '@/types';
+import { useTheme } from '@/hooks/useTheme';
 
 // Browser API abstraction
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
@@ -87,6 +88,9 @@ export function useEventPanelState(_config: EventPanelConfig): EventPanelState {
 
   // Get tab ID from devtools
   const tabId = browserAPI.devtools?.inspectedWindow?.tabId ?? null;
+
+  // Apply theme based on settings
+  useTheme({ theme: settings.theme });
 
   // Load events function - defined before useEffects that depend on it
   const loadEvents = useCallback(async (loadTabId: number) => {

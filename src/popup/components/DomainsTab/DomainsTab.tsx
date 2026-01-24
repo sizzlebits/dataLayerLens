@@ -40,7 +40,7 @@ export function DomainsTab({
       <DomainList domains={domainSettings} onDeleteDomain={onDeleteDomain} />
 
       {/* Info */}
-      <div className="text-xs text-slate-500 text-center pt-2 border-t border-dl-border">
+      <div className="text-xs text-theme-text-tertiary text-center pt-2 border-t border-dl-border">
         <p>Domain settings override global settings when you visit that site</p>
       </div>
     </motion.div>

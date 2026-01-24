@@ -16,10 +16,10 @@ export function DomainList({ domains, onDeleteDomain }: DomainListProps) {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-slate-300">Saved Domain Overrides</h3>
+      <h3 className="text-sm font-medium text-theme-text-secondary">Saved Domain Overrides</h3>
 
       {domainEntries.length === 0 ? (
-        <div className="text-center py-6 text-slate-500 text-sm">
+        <div className="text-center py-6 text-theme-text-tertiary text-sm">
           <Globe className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p>No domain overrides saved</p>
           <p className="text-xs mt-1">
@@ -39,7 +39,7 @@ export function DomainList({ domains, onDeleteDomain }: DomainListProps) {
               >
                 <div>
                   <code className="text-xs text-dl-accent block">{domain}</code>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-theme-text-tertiary">
                     Updated {new Date(ds.updatedAt).toLocaleDateString()}
                   </span>
                 </div>

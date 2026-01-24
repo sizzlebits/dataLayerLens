@@ -5,7 +5,9 @@
 
 interface AppIconProps {
   /** Size of the icon */
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'custom';
+  /** Custom size in pixels (only used when size is 'custom') */
+  customSize?: number;
   /** Apply an indented container with shadow */
   variant?: 'plain' | 'indented';
   /** Custom className for the icon itself */
@@ -19,8 +21,9 @@ const sizeClasses = {
   xl: { icon: 'w-12 h-12', container: 'w-16 h-16 p-2 rounded-xl' },
 };
 
-export function AppIcon({ size = 'md', variant = 'plain', className }: AppIconProps) {
-  const iconClasses = className || `${sizeClasses[size].icon} text-dl-primary`;
+export function AppIcon({ size = 'md', customSize, variant = 'plain', className }: AppIconProps) {
+  const iconClasses = className || (size === 'custom' ? 'text-white' : `${sizeClasses[size].icon} text-dl-primary`);
+  const customStyle = size === 'custom' && customSize ? { width: customSize, height: customSize } : undefined;
 
   const icon = (
     <svg
@@ -30,6 +33,7 @@ export function AppIcon({ size = 'md', variant = 'plain', className }: AppIconPr
       fill="none"
       viewBox="0 0 24 24"
       className={iconClasses}
+      style={customStyle}
     >
       <path
         fill="currentColor"
@@ -46,7 +50,7 @@ export function AppIcon({ size = 'md', variant = 'plain', className }: AppIconPr
     </svg>
   );
 
-  if (variant === 'indented') {
+  if (variant === 'indented' && size !== 'custom') {
     return (
       <div
         className={`${sizeClasses[size].container} flex items-center justify-center`}
