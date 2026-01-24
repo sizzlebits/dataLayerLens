@@ -81,14 +81,14 @@ export function GroupingSettings({
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-slate-300 flex items-center gap-2">
+      <h3 className="text-sm font-medium text-theme-text-secondary flex items-center gap-2">
         <Layers className="w-4 h-4 text-dl-primary" />
         Event Grouping
       </h3>
 
       {/* Enable Toggle */}
       <div className="flex items-center justify-between bg-dl-card rounded-lg px-4 py-3 border border-dl-border">
-        <span className="text-sm text-white">Enable Grouping</span>
+        <span className="text-sm text-theme-text">Enable Grouping</span>
         <Toggle checked={currentGrouping.enabled} onChange={handleToggleEnabled} />
       </div>
 
@@ -106,7 +106,7 @@ export function GroupingSettings({
               className={`flex-1 py-2 px-3 text-xs rounded-lg border transition-colors ${
                 currentGrouping.mode === 'time'
                   ? 'bg-dl-primary/20 border-dl-primary text-dl-primary'
-                  : 'border-dl-border text-slate-400 hover:text-white'
+                  : 'border-dl-border text-theme-text-secondary hover:text-theme-text'
               }`}
             >
               Time Window
@@ -116,7 +116,7 @@ export function GroupingSettings({
               className={`flex-1 py-2 px-3 text-xs rounded-lg border transition-colors ${
                 currentGrouping.mode === 'event'
                   ? 'bg-dl-primary/20 border-dl-primary text-dl-primary'
-                  : 'border-dl-border text-slate-400 hover:text-white'
+                  : 'border-dl-border text-theme-text-secondary hover:text-theme-text'
               }`}
             >
               Trigger Events
@@ -133,7 +133,7 @@ export function GroupingSettings({
                   className={`flex-1 py-1.5 text-xs rounded border transition-colors ${
                     currentGrouping.timeWindowMs === ms
                       ? 'bg-dl-accent/20 border-dl-accent text-dl-accent'
-                      : 'border-dl-border text-slate-400 hover:text-white'
+                      : 'border-dl-border text-theme-text-secondary hover:text-theme-text'
                   }`}
                 >
                   {ms}ms
@@ -145,7 +145,7 @@ export function GroupingSettings({
           {/* Trigger Events Options */}
           {currentGrouping.mode === 'event' && (
             <div className="space-y-2">
-              <p className="text-xs text-slate-400">Events that start a new group:</p>
+              <p className="text-xs text-theme-text-secondary">Events that start a new group:</p>
 
               {/* Current triggers */}
               <div className="flex flex-wrap gap-1.5">
@@ -157,7 +157,7 @@ export function GroupingSettings({
                     {trigger}
                     <button
                       onClick={() => handleRemoveTrigger(trigger)}
-                      className="hover:text-white"
+                      className="hover:text-theme-text"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -175,7 +175,7 @@ export function GroupingSettings({
                     className="space-y-2"
                   >
                     <div className="relative">
-                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-theme-text-tertiary" />
                       <input
                         type="text"
                         value={triggerSearch}
@@ -189,7 +189,7 @@ export function GroupingSettings({
                           }
                         }}
                         placeholder="Event name..."
-                        className="w-full bg-dl-dark border border-dl-border rounded-lg pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-slate-500 focus:border-dl-primary focus:outline-none"
+                        className="w-full bg-dl-dark border border-dl-border rounded-lg pl-8 pr-8 py-1.5 text-xs text-theme-text placeholder:text-theme-text-tertiary focus:border-dl-primary focus:outline-none"
                         autoFocus
                       />
                       <button
@@ -197,7 +197,7 @@ export function GroupingSettings({
                           setIsAddingTrigger(false);
                           setTriggerSearch('');
                         }}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-theme-text-secondary hover:text-theme-text"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -209,7 +209,7 @@ export function GroupingSettings({
                           <button
                             key={trigger}
                             onClick={() => handleAddTrigger(trigger)}
-                            className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-slate-300 hover:bg-dl-border hover:text-white transition-colors"
+                            className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-theme-text-secondary hover:bg-dl-border hover:text-theme-text transition-colors"
                           >
                             <span>{trigger}</span>
                             <Plus className="w-3.5 h-3.5 text-dl-primary" />

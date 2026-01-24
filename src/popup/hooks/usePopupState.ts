@@ -5,6 +5,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { DomainSettings } from '@/types';
+import { useTheme } from '@/hooks/useTheme';
 
 // Browser API abstraction
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
@@ -31,6 +32,9 @@ export function usePopupState() {
   // Trigger events state
   const [isAddingTrigger, setIsAddingTrigger] = useState(false);
   const [triggerSearch, setTriggerSearch] = useState('');
+
+  // Apply theme based on settings
+  useTheme({ theme: settings.theme });
 
   // Load initial data
   useEffect(() => {

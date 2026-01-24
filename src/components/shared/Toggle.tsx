@@ -37,7 +37,7 @@ export function Toggle({
       disabled={disabled}
     >
       <motion.div
-        className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-md"
+        className="absolute top-1 w-4 h-4 bg-theme-bg-elevated rounded-full shadow-md"
         animate={{ left: checked ? 20 : 4 }}
         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
         aria-hidden="true"

@@ -19,7 +19,7 @@ export function SourceColorsSection({
 }: SourceColorsSectionProps) {
   return (
     <div className="space-y-2">
-      <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
+      <h3 className="text-xs font-medium text-theme-text-secondary uppercase tracking-wider flex items-center gap-2">
         <Palette className="w-3.5 h-3.5 text-dl-secondary" />
         Source Colors
       </h3>

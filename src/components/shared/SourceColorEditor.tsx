@@ -19,7 +19,7 @@ export function SourceColorEditor({
 
   if (sources.length === 0) {
     return (
-      <div className="text-sm text-slate-500 text-center py-4">
+      <div className="text-sm text-theme-text-tertiary text-center py-4">
         No dataLayer sources detected yet.
         <br />
         <span className="text-xs">Sources will appear as events are captured.</span>
@@ -40,17 +40,17 @@ export function SourceColorEditor({
               className="w-full flex items-center gap-3 p-3 hover:bg-dl-card/50 transition-colors"
             >
               <div
-                className="w-4 h-4 rounded-full flex-shrink-0 border border-white/20"
+                className="w-4 h-4 rounded-full flex-shrink-0 border border-theme-border-base/20"
                 style={{ backgroundColor: color }}
               />
-              <span className="flex-1 text-left text-sm font-mono text-white truncate">
+              <span className="flex-1 text-left text-sm font-mono text-theme-text truncate">
                 {source}
               </span>
               <motion.div
                 animate={{ rotate: isExpanded ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <ChevronDown className="w-4 h-4 text-slate-400" />
+                <ChevronDown className="w-4 h-4 text-theme-text-secondary" />
               </motion.div>
             </motion.button>
 

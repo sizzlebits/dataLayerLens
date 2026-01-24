@@ -29,7 +29,7 @@ const mockSettings: Settings = {
   },
   persistEvents: false,
   persistEventsMaxAge: 300000,
-  theme: 'dark',
+  theme: 'system',
   showTimestamps: true,
   showEmojis: true,
   compactMode: false,

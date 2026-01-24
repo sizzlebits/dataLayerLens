@@ -37,7 +37,7 @@ export function DataLayerConfig({
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-medium text-slate-300 flex items-center gap-2">
+      <h3 className="text-sm font-medium text-theme-text-secondary flex items-center gap-2">
         <ChevronRight className="w-4 h-4 text-dl-primary" />
         DataLayer Arrays
       </h3>
@@ -62,11 +62,11 @@ export function DataLayerConfig({
                       className="flex items-center gap-2 flex-1 min-w-0"
                     >
                       <div
-                        className="w-4 h-4 rounded-full flex-shrink-0 border border-white/20"
+                        className="w-4 h-4 rounded-full flex-shrink-0 border border-theme-border-base/20"
                         style={{ backgroundColor: color }}
                       />
-                      <Layers className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                      <span className="text-sm font-mono text-white truncate">
+                      <Layers className="w-3 h-3 text-theme-text-secondary flex-shrink-0" />
+                      <span className="text-sm font-mono text-theme-text truncate">
                         {name}
                       </span>
                       <motion.div
@@ -74,13 +74,13 @@ export function DataLayerConfig({
                         transition={{ duration: 0.2 }}
                         className="ml-auto"
                       >
-                        <ChevronDown className="w-4 h-4 text-slate-400" />
+                        <ChevronDown className="w-4 h-4 text-theme-text-secondary" />
                       </motion.div>
                     </button>
                     {name !== 'dataLayer' && (
                       <motion.button
                         onClick={() => onRemoveDataLayer(name)}
-                        className="p-1 text-slate-400 hover:text-dl-error hover:bg-dl-error/20 rounded transition-colors"
+                        className="p-1 text-theme-text-secondary hover:text-dl-error hover:bg-dl-error/20 rounded transition-colors"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                       >
@@ -132,7 +132,7 @@ export function DataLayerConfig({
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
                 placeholder="e.g., dataLayer_v2"
-                className="flex-1 bg-dl-dark border border-dl-border rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-dl-primary focus:outline-none"
+                className="flex-1 bg-dl-dark border border-dl-border rounded-lg px-3 py-2 text-sm text-theme-text placeholder:text-theme-text-tertiary focus:border-dl-primary focus:outline-none"
                 autoFocus
               />
               <motion.button
@@ -162,7 +162,7 @@ export function DataLayerConfig({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsAdding(true)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 border-t border-dl-border text-slate-400 hover:text-dl-primary hover:bg-dl-dark/50 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 border-t border-dl-border text-theme-text-secondary hover:text-dl-primary hover:bg-dl-dark/50 transition-colors"
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
             >

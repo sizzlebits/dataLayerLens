@@ -137,7 +137,7 @@ describe('EventStats', () => {
       render(<EventStats {...defaultProps} eventCount={0} />);
 
       const clearButton = screen.getByText('Clear').closest('button');
-      expect(clearButton?.className).toContain('text-slate-500');
+      expect(clearButton?.className).toContain('text-theme-text-tertiary');
     });
 
     it('applies primary styling to Export button when enabled', () => {

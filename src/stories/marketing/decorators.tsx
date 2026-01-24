@@ -377,3 +377,71 @@ export function DevToolsChrome({
     </div>
   );
 }
+
+// ============================================================================
+// Marketing Labels - Styled text for collateral
+// ============================================================================
+
+interface MarketingHeadingProps {
+  children: ReactNode;
+  style?: CSSProperties;
+}
+
+/**
+ * Marketing heading with Caprasimo font
+ */
+export function MarketingHeading({ children, style }: MarketingHeadingProps) {
+  return (
+    <h3
+      style={{
+        fontFamily: '"Caprasimo", serif',
+        fontWeight: 400,
+        fontSize: 40,
+        color: 'white',
+        margin: 0,
+        ...style,
+      }}
+    >
+      {children}
+    </h3>
+  );
+}
+
+interface MarketingBadgeProps {
+  children: ReactNode;
+  color?: 'primary' | 'accent' | 'secondary' | 'success';
+  style?: CSSProperties;
+}
+
+const badgeColors = {
+  primary: { bg: '#6366f1', text: '#ffffff', shadow: '#6366f1' },
+  accent: { bg: '#22d3ee', text: '#0f172a', shadow: '#22d3ee' },
+  secondary: { bg: '#a855f7', text: '#ffffff', shadow: '#a855f7' },
+  success: { bg: '#10b981', text: '#ffffff', shadow: '#10b981' },
+};
+
+/**
+ * Marketing badge with solid neon background, crisp shadows and skew
+ */
+export function MarketingBadge({ children, color = 'primary', style }: MarketingBadgeProps) {
+  const colors = badgeColors[color];
+
+  return (
+    <span
+      style={{
+        display: 'inline-block',
+        padding: '8px 16px',
+        fontSize: 15,
+        fontWeight: 600,
+        color: colors.text,
+        background: colors.bg,
+        borderRadius: 6,
+        transform: 'rotate(-2deg) skewX(-4deg)',
+        boxShadow: `0 3px 0 rgba(0, 0, 0, 0.4), 0 0 0 2px ${colors.shadow}80`,
+        ...style,
+      }}
+    >
+      {children}
+    </span>
+  );
+}

@@ -74,7 +74,7 @@ describe('DEFAULT_SETTINGS', () => {
     expect(DEFAULT_SETTINGS.dataLayerNames).toEqual(['dataLayer']);
     expect(DEFAULT_SETTINGS.eventFilters).toEqual([]);
     expect(DEFAULT_SETTINGS.filterMode).toBe('exclude');
-    expect(DEFAULT_SETTINGS.theme).toBe('dark');
+    expect(DEFAULT_SETTINGS.theme).toBe('system');
     expect(DEFAULT_SETTINGS.showTimestamps).toBe(true);
     expect(DEFAULT_SETTINGS.compactMode).toBe(false);
   });

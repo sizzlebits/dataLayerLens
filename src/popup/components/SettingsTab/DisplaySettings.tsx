@@ -4,9 +4,12 @@
 
 import { LucideIcon, Clock, History, Zap, Settings as SettingsIcon, Minimize2 } from 'lucide-react';
 import { Toggle } from '../shared';
+import { ThemeSelector } from '@/components/shared/settings/ThemeSelector';
+import type { Settings } from '@/types';
+import type { FC } from 'react';
 
 interface SettingRowProps {
-  icon: LucideIcon;
+  icon: LucideIcon | FC;
   iconColor: string;
   title: string;
   description?: string;
@@ -20,8 +23,8 @@ function SettingRow({ icon: Icon, iconColor, title, description, checked, onChan
       <div className="flex items-center gap-3">
         <Icon className={`w-4 h-4 ${iconColor}`} />
         <div>
-          <span className="text-sm text-white block">{title}</span>
-          {description && <span className="text-xs text-slate-500">{description}</span>}
+          <span className="text-sm text-theme-text block">{title}</span>
+          {description && <span className="text-xs text-theme-text-tertiary">{description}</span>}
         </div>
       </div>
       <Toggle checked={checked} onChange={onChange} />
@@ -30,22 +33,20 @@ function SettingRow({ icon: Icon, iconColor, title, description, checked, onChan
 }
 
 export interface DisplaySettingsProps {
+  theme: Settings['theme'];
   showTimestamps: boolean;
+  showEmojis: boolean;
   persistEvents: boolean;
   consoleLogging: boolean;
   debugLogging: boolean;
   compactMode: boolean;
-  onUpdateSettings: (settings: Partial<{
-    showTimestamps: boolean;
-    persistEvents: boolean;
-    consoleLogging: boolean;
-    debugLogging: boolean;
-    compactMode: boolean;
-  }>) => void;
+  onUpdateSettings: (settings: Partial<Settings>) => void;
 }
 
 export function DisplaySettings({
+  theme,
   showTimestamps,
+  showEmojis,
   persistEvents,
   consoleLogging,
   debugLogging,
@@ -54,12 +55,26 @@ export function DisplaySettings({
 }: DisplaySettingsProps) {
   return (
     <div className="space-y-3">
+      {/* Theme Selector */}
+      <ThemeSelector
+        theme={theme}
+        onThemeChange={(theme) => onUpdateSettings({ theme })}
+      />
+
       <SettingRow
         icon={Clock}
         iconColor="text-dl-accent"
         title="Show Timestamps"
         checked={showTimestamps}
         onChange={(checked) => onUpdateSettings({ showTimestamps: checked })}
+      />
+
+      <SettingRow
+        icon={() => <span className="text-[14px]">😀</span>}
+        iconColor=""
+        title="Show Event Emojis"
+        checked={showEmojis}
+        onChange={(checked) => onUpdateSettings({ showEmojis: checked })}
       />
 
       <SettingRow
@@ -91,7 +106,7 @@ export function DisplaySettings({
 
       <SettingRow
         icon={SettingsIcon}
-        iconColor="text-slate-400"
+        iconColor="text-theme-text-secondary"
         title="Debug Logging"
         description="Extension debug info in console"
         checked={debugLogging}

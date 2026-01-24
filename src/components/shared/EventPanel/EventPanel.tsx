@@ -34,9 +34,11 @@ import { useEventPanelActions } from './useEventPanelActions';
 export interface EventPanelProps {
   /** Context determines UI differences - devtools is the only supported mode */
   context: 'devtools';
+  /** Optional: Override theme for marketing/storybook (bypasses storage) */
+  forceTheme?: 'light' | 'dark';
 }
 
-export function EventPanel({ context }: EventPanelProps) {
+export function EventPanel({ context, forceTheme }: EventPanelProps) {
   // Use the shared state hook
   const state = useEventPanelState({ context });
 
@@ -71,7 +73,10 @@ export function EventPanel({ context }: EventPanelProps) {
   }, [state.events]);
 
   return (
-    <div className="h-screen flex flex-col bg-dl-darker text-slate-200 overflow-hidden">
+    <div
+      className="h-screen flex flex-col bg-dl-darker text-theme-text overflow-hidden"
+      {...(forceTheme ? { 'data-theme': forceTheme } : {})}
+    >
       {/* Header */}
       <header className={`flex-shrink-0 bg-gradient-to-r from-dl-dark to-dl-darker border-b border-dl-border ${
         isCompact ? 'px-3 py-2' : 'devtools-header px-4 py-3'
@@ -80,11 +85,11 @@ export function EventPanel({ context }: EventPanelProps) {
           <div className="flex items-center gap-2">
             <AppIcon size={isCompact ? 'sm' : 'md'} variant="indented" />
             <div>
-              <h1 className={`font-semibold text-white ${isCompact ? 'text-sm' : 'font-bold'}`}>
+              <h1 className={`font-semibold text-theme-text ${isCompact ? 'text-sm' : 'font-bold'}`}>
                 DataLayer Lens
               </h1>
               {!isCompact && (
-                <p className="text-xs text-slate-500">{state.filteredEvents.length} events</p>
+                <p className="text-xs text-theme-text-tertiary">{state.filteredEvents.length} events</p>
               )}
             </div>
             {isCompact && (
@@ -102,12 +107,12 @@ export function EventPanel({ context }: EventPanelProps) {
                 ? `p-1.5 rounded-lg transition-colors ${
                     state.settings.grouping?.enabled
                       ? 'bg-dl-primary/20 text-dl-primary'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-dl-card'
+                      : 'text-theme-text-secondary hover:text-theme-text hover:bg-dl-card'
                   }`
                 : `header-btn ${
                     state.settings.grouping?.enabled
                       ? 'bg-dl-primary/20 text-dl-primary'
-                      : 'bg-dl-card text-slate-400 hover:text-slate-200'
+                      : 'bg-dl-card text-theme-text-secondary hover:text-theme-text'
                   }`
               }
               whileHover={{ scale: isCompact ? 1.05 : 1.02 }}
@@ -125,12 +130,12 @@ export function EventPanel({ context }: EventPanelProps) {
                 ? `p-1.5 rounded-lg transition-colors ${
                     state.settings.persistEvents
                       ? 'bg-dl-primary/20 text-dl-primary'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-dl-card'
+                      : 'text-theme-text-secondary hover:text-theme-text hover:bg-dl-card'
                   }`
                 : `header-btn ${
                     state.settings.persistEvents
                       ? 'bg-dl-primary/20 text-dl-primary'
-                      : 'bg-dl-card text-slate-400 hover:text-slate-200'
+                      : 'bg-dl-card text-theme-text-secondary hover:text-theme-text'
                   }`
               }
               whileHover={{ scale: isCompact ? 1.05 : 1.02 }}
@@ -145,8 +150,8 @@ export function EventPanel({ context }: EventPanelProps) {
             <motion.button
               onClick={actions.exportEvents}
               className={isCompact
-                ? 'p-1.5 text-slate-400 hover:text-slate-200 hover:bg-dl-card rounded-lg transition-colors'
-                : 'header-btn hide-md bg-dl-card hover:bg-dl-border text-slate-300'
+                ? 'p-1.5 text-theme-text-secondary hover:text-theme-text hover:bg-dl-card rounded-lg transition-colors'
+                : 'header-btn hide-md bg-dl-card hover:bg-dl-border text-theme-text-secondary'
               }
               whileHover={{ scale: isCompact ? 1.05 : 1.02 }}
               whileTap={{ scale: isCompact ? 0.95 : 0.98 }}
@@ -161,7 +166,7 @@ export function EventPanel({ context }: EventPanelProps) {
             <motion.button
               onClick={actions.clearEvents}
               className={isCompact
-                ? 'p-1.5 text-slate-400 hover:text-dl-error hover:bg-dl-error/10 rounded-lg transition-colors'
+                ? 'p-1.5 text-theme-text-secondary hover:text-dl-error hover:bg-dl-error/10 rounded-lg transition-colors'
                 : 'header-btn bg-dl-error/10 hover:bg-dl-error/20 text-dl-error'
               }
               whileHover={{ scale: isCompact ? 1.05 : 1.02 }}
@@ -176,8 +181,8 @@ export function EventPanel({ context }: EventPanelProps) {
             <motion.button
               onClick={() => state.setShowSettings(true)}
               className={isCompact
-                ? 'p-1.5 text-slate-400 hover:text-slate-200 hover:bg-dl-card rounded-lg transition-colors'
-                : 'header-btn bg-dl-card hover:bg-dl-border text-slate-300'
+                ? 'p-1.5 text-theme-text-secondary hover:text-theme-text hover:bg-dl-card rounded-lg transition-colors'
+                : 'header-btn bg-dl-card hover:bg-dl-border text-theme-text-secondary'
               }
               whileHover={{ scale: isCompact ? 1.05 : 1.02 }}
               whileTap={{ scale: isCompact ? 0.95 : 0.98 }}
@@ -196,7 +201,7 @@ export function EventPanel({ context }: EventPanelProps) {
         <div className={`flex items-center ${isCompact ? 'gap-2' : 'gap-3'}`}>
           {/* Search Input */}
           <div className="relative flex-1 min-w-0">
-            <Search className={`absolute top-1/2 -translate-y-1/2 text-slate-500 ${
+            <Search className={`absolute top-1/2 -translate-y-1/2 text-theme-text-tertiary ${
               isCompact ? 'left-2.5 w-3.5 h-3.5' : 'left-3 w-4 h-4'
             }`} />
             <input
@@ -204,14 +209,14 @@ export function EventPanel({ context }: EventPanelProps) {
               value={state.searchText}
               onChange={(e) => state.setSearchText(e.target.value)}
               placeholder="Search events..."
-              className={`w-full bg-dl-card border border-dl-border rounded-lg text-white placeholder:text-slate-500 focus:border-dl-primary focus:outline-none focus:ring-1 focus:ring-dl-primary/50 ${
+              className={`w-full bg-dl-card border border-dl-border rounded-lg text-theme-text placeholder:text-theme-text-tertiary focus:border-dl-primary focus:outline-none focus:ring-1 focus:ring-dl-primary/50 ${
                 isCompact ? 'pl-8 pr-7 py-1.5 text-xs' : 'pl-10 pr-8 py-2 text-sm'
               }`}
             />
             {state.searchText && (
               <button
                 onClick={() => state.setSearchText('')}
-                className={`absolute top-1/2 -translate-y-1/2 p-0.5 hover:bg-dl-border rounded text-slate-400 hover:text-slate-200 ${
+                className={`absolute top-1/2 -translate-y-1/2 p-0.5 hover:bg-dl-border rounded text-theme-text-secondary hover:text-theme-text ${
                   isCompact ? 'right-2' : 'right-3'
                 }`}
               >
@@ -226,7 +231,7 @@ export function EventPanel({ context }: EventPanelProps) {
             className={`rounded-lg font-medium flex items-center gap-1 transition-colors ${
               state.showFilters || state.settings.eventFilters.length > 0
                 ? 'bg-dl-primary/20 text-dl-primary'
-                : 'bg-dl-card text-slate-400 hover:text-slate-200'
+                : 'bg-dl-card text-theme-text-secondary hover:text-theme-text'
             } ${isCompact ? 'p-1.5 text-xs' : 'px-3 py-2 text-xs gap-1.5'}`}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -235,7 +240,7 @@ export function EventPanel({ context }: EventPanelProps) {
             <Filter className="w-3.5 h-3.5" />
             {!isCompact && <span className="filter-label">Filters</span>}
             {state.settings.eventFilters.length > 0 && (
-              <span className={`bg-dl-primary text-white rounded-full min-w-[16px] text-center ${
+              <span className={`bg-dl-primary text-theme-text rounded-full min-w-[16px] text-center ${
                 isCompact ? 'px-1 py-0.5 text-[10px]' : 'px-1.5 py-0.5 text-[10px]'
               }`}>
                 {state.settings.eventFilters.length}
@@ -257,7 +262,7 @@ export function EventPanel({ context }: EventPanelProps) {
               <div className={`space-y-2 ${isCompact ? 'pt-1' : 'pt-2 space-y-3'}`}>
                 {/* Filter Mode Toggle */}
                 <div className="flex items-center gap-2">
-                  <span className={`text-slate-500 uppercase tracking-wider ${
+                  <span className={`text-theme-text-tertiary uppercase tracking-wider ${
                     isCompact ? 'text-[10px]' : 'text-xs'
                   }`}>Mode:</span>
                   <button
@@ -292,7 +297,7 @@ export function EventPanel({ context }: EventPanelProps) {
                           </span>
                           <button
                             onClick={() => actions.removeFilter(filter)}
-                            className="hover:bg-white/10 rounded-full p-0.5"
+                            className="hover:bg-theme-bg-hover rounded-full p-0.5"
                           >
                             <X className={isCompact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
                           </button>
@@ -304,7 +309,7 @@ export function EventPanel({ context }: EventPanelProps) {
 
                 {/* Available Event Types */}
                 <div className={isCompact ? 'space-y-1' : 'space-y-1.5'}>
-                  <span className={`text-slate-500 uppercase tracking-wider ${
+                  <span className={`text-theme-text-tertiary uppercase tracking-wider ${
                     isCompact ? 'text-[10px]' : 'text-xs'
                   }`}>
                     Add filter from captured events:
@@ -348,7 +353,7 @@ export function EventPanel({ context }: EventPanelProps) {
       {/* Events List */}
       <div className="flex-1 overflow-y-auto">
         {state.filteredEvents.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-slate-500">
+          <div className="flex flex-col items-center justify-center h-full text-theme-text-tertiary">
             <Database className={isCompact ? 'w-10 h-10 mb-3 opacity-30' : 'w-12 h-12 mb-4 opacity-30'} />
             <p className={isCompact ? 'text-sm font-medium' : 'text-lg font-medium'}>No events captured</p>
             <p className={isCompact ? 'text-xs' : 'text-sm'}>Waiting for dataLayer pushes...</p>
@@ -364,7 +369,7 @@ export function EventPanel({ context }: EventPanelProps) {
                   {/* Group Header */}
                   <div
                     onClick={() => actions.toggleGroupCollapsed(group.id)}
-                    className={`flex items-center cursor-pointer hover:bg-dl-card/50 border-l-2 border-dl-primary/50 ${
+                    className={`flex items-center cursor-pointer hover:bg-dl-card/50 ${
                       isCompact ? 'gap-2 px-3 py-2' : 'gap-3 px-4 py-3'
                     }`}
                   >
@@ -372,7 +377,7 @@ export function EventPanel({ context }: EventPanelProps) {
                       animate={{ rotate: isCollapsed ? 0 : 90 }}
                       transition={{ duration: 0.15 }}
                     >
-                      <ChevronRight className={isCompact ? 'w-3.5 h-3.5 text-slate-500' : 'w-4 h-4 text-slate-500'} />
+                      <ChevronRight className={isCompact ? 'w-3.5 h-3.5 text-theme-text-tertiary' : 'w-4 h-4 text-theme-text-tertiary'} />
                     </motion.div>
                     {isCollapsed ? (
                       <Folder className={isCompact ? 'w-4 h-4 text-dl-primary' : 'w-5 h-5 text-dl-primary'} />
@@ -381,7 +386,7 @@ export function EventPanel({ context }: EventPanelProps) {
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className={`font-medium text-slate-300 ${isCompact ? 'text-xs' : 'text-sm'}`}>
+                        <span className={`font-medium text-theme-text-secondary ${isCompact ? 'text-xs' : 'text-sm'}`}>
                           {group.events.length} event{group.events.length !== 1 ? 's' : ''}
                         </span>
                         {group.triggerEvent && (
@@ -390,7 +395,7 @@ export function EventPanel({ context }: EventPanelProps) {
                           </span>
                         )}
                       </div>
-                      <div className={`flex items-center gap-1.5 text-slate-500 ${isCompact ? 'text-[10px]' : 'text-xs'}`}>
+                      <div className={`flex items-center gap-1.5 text-theme-text-tertiary ${isCompact ? 'text-[10px]' : 'text-xs'}`}>
                         <Clock className={isCompact ? 'w-2.5 h-2.5' : 'w-3 h-3'} />
                         {groupTime}
                       </div>
@@ -407,7 +412,7 @@ export function EventPanel({ context }: EventPanelProps) {
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <div className={`border-l-2 border-dl-primary/20 ${isCompact ? 'pl-4 ml-3' : 'pl-6 ml-4'}`}>
+                        <div className={`border-l-2 border-dl-accent/30 ${isCompact ? 'pl-3 ml-3' : 'pl-4 ml-4'}`}>
                           {group.events.map((event) => (
                             <EventRow
                               key={event.id}
@@ -440,18 +445,36 @@ export function EventPanel({ context }: EventPanelProps) {
         ) : (
           /* Flat View */
           <div className="divide-y divide-dl-border">
+            {/* Show separator at top if ALL events are persisted (paginated view) */}
+            {state.settings.persistEvents &&
+              state.paginatedEvents.length > 0 &&
+              state.paginatedEvents.every(e => e.source.includes('(persisted)')) && (
+                <div className="flex items-center gap-3 py-4 px-4 bg-dl-card/30">
+                  <div className="flex-1 h-px bg-dl-border" />
+                  <span className={`text-theme-text-tertiary font-medium uppercase tracking-wider flex items-center gap-1.5 ${
+                    isCompact ? 'text-[10px]' : 'text-xs'
+                  }`}>
+                    <Clock className="w-3 h-3" />
+                    Persisted Events
+                  </span>
+                  <div className="flex-1 h-px bg-dl-border" />
+                </div>
+              )}
+
             {state.paginatedEvents.map((event, index) => {
               const isPersisted = event.source.includes('(persisted)');
               const prevEvent = index > 0 ? state.paginatedEvents[index - 1] : null;
               const prevIsPersisted = prevEvent?.source.includes('(persisted)');
-              const showSeparator = state.settings.persistEvents && isPersisted && !prevIsPersisted && index > 0;
+              // Only show separator if not ALL events are persisted (handled above)
+              const allPersisted = state.paginatedEvents.every(e => e.source.includes('(persisted)'));
+              const showSeparator = state.settings.persistEvents && isPersisted && !prevIsPersisted && index > 0 && !allPersisted;
 
               return (
                 <div key={event.id}>
                   {showSeparator && (
-                    <div className="flex items-center gap-3 py-3 px-4 bg-dl-card/30">
+                    <div className="flex items-center gap-3 py-4 px-4 bg-dl-card/30">
                       <div className="flex-1 h-px bg-dl-border" />
-                      <span className={`text-slate-500 font-medium uppercase tracking-wider flex items-center gap-1.5 ${
+                      <span className={`text-theme-text-tertiary font-medium uppercase tracking-wider flex items-center gap-1.5 ${
                         isCompact ? 'text-[10px]' : 'text-xs'
                       }`}>
                         <Clock className="w-3 h-3" />
@@ -493,13 +516,13 @@ export function EventPanel({ context }: EventPanelProps) {
           <button
             onClick={() => state.setCurrentPage((p) => Math.max(0, p - 1))}
             disabled={state.currentPage === 0}
-            className={`bg-dl-card hover:bg-dl-border disabled:opacity-30 disabled:cursor-not-allowed rounded text-slate-300 transition-colors ${
+            className={`bg-dl-card hover:bg-dl-border disabled:opacity-30 disabled:cursor-not-allowed rounded text-theme-text-secondary transition-colors ${
               isCompact ? 'px-2 py-1 text-xs' : 'px-3 py-1.5 rounded-lg text-xs'
             }`}
           >
             ← Prev
           </button>
-          <span className={`text-slate-400 ${isCompact ? 'text-xs' : 'text-sm'}`}>
+          <span className={`text-theme-text-secondary ${isCompact ? 'text-xs' : 'text-sm'}`}>
             {state.settings.grouping?.enabled ? (
               <>
                 {state.currentPage * PAGE_SIZE + 1}-{Math.min((state.currentPage + 1) * PAGE_SIZE, state.eventGroups.length)} of{' '}
@@ -515,7 +538,7 @@ export function EventPanel({ context }: EventPanelProps) {
           <button
             onClick={() => state.setCurrentPage((p) => Math.min(state.totalPages - 1, p + 1))}
             disabled={state.currentPage >= state.totalPages - 1}
-            className={`bg-dl-card hover:bg-dl-border disabled:opacity-30 disabled:cursor-not-allowed rounded text-slate-300 transition-colors ${
+            className={`bg-dl-card hover:bg-dl-border disabled:opacity-30 disabled:cursor-not-allowed rounded text-theme-text-secondary transition-colors ${
               isCompact ? 'px-2 py-1 text-xs' : 'px-3 py-1.5 rounded-lg text-xs'
             }`}
           >

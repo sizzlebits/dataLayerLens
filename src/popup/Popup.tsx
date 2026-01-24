@@ -13,7 +13,12 @@ import { DomainsTab } from './components/DomainsTab';
 import { SupportLink } from '@/components/shared/SupportLink';
 import { AppIcon } from '@/components/shared/AppIcon';
 
-export function Popup() {
+interface PopupProps {
+  /** Optional: Override theme for marketing/storybook (bypasses storage) */
+  forceTheme?: 'light' | 'dark';
+}
+
+export function Popup({ forceTheme }: PopupProps = {}) {
   const state = usePopupState();
   const actions = usePopupActions({
     settings: state.settings,
@@ -54,7 +59,10 @@ export function Popup() {
   ];
 
   return (
-    <div className="w-80 h-[28rem] flex flex-col bg-gradient-to-br from-dl-dark to-dl-darker">
+    <div
+      className="w-80 h-[28rem] flex flex-col bg-gradient-to-br from-dl-dark to-dl-darker"
+      {...(forceTheme ? { 'data-theme': forceTheme } : {})}
+    >
       {/* Header */}
       <motion.header
         initial={{ y: -20, opacity: 0 }}
@@ -64,8 +72,8 @@ export function Popup() {
         <div className="flex items-center gap-3">
           <AppIcon size="lg" variant="indented" />
           <div>
-            <h1 className="font-bold text-lg text-white tracking-tight">DataLayer Lens</h1>
-            <p className="text-xs text-slate-400">Track your GTM events with clarity</p>
+            <h1 className="font-bold text-lg text-theme-text tracking-tight">DataLayer Lens</h1>
+            <p className="text-xs text-theme-text-secondary">Track your GTM events with clarity</p>
           </div>
         </div>
       </motion.header>
@@ -79,7 +87,7 @@ export function Popup() {
             className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors relative ${
               state.activeTab === tab.id
                 ? 'text-dl-accent'
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-theme-text-secondary hover:text-theme-text'
             }`}
             whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
             whileTap={{ scale: 0.98 }}

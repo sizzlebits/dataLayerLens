@@ -34,10 +34,10 @@ export function EventList({
 
   if (filteredEvents.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+      <div className="flex flex-col items-center justify-center py-12 text-theme-text-tertiary">
         <Database className="w-10 h-10 mb-3 opacity-30" />
         <p className="text-sm font-medium">No events captured</p>
-        <p className="text-xs text-slate-600">Waiting for dataLayer pushes...</p>
+        <p className="text-xs text-theme-text-disabled">Waiting for dataLayer pushes...</p>
       </div>
     );
   }
@@ -89,7 +89,7 @@ function EventRow({ event, isNew, isExpanded, isCopied, onToggle, onCopy }: Even
           className="p-1 hover:bg-dl-border rounded transition-colors"
           animate={{ rotate: isExpanded ? 90 : 0 }}
         >
-          <ChevronRight className="w-4 h-4 text-slate-500" />
+          <ChevronRight className="w-4 h-4 text-theme-text-tertiary" />
         </motion.button>
 
         <div
@@ -104,14 +104,14 @@ function EventRow({ event, isNew, isExpanded, isCopied, onToggle, onCopy }: Even
             <span className="font-semibold truncate" style={{ color: category.color }}>
               {event.event}
             </span>
-            <span className="px-1.5 py-0.5 bg-dl-border rounded text-[10px] text-slate-400 font-mono flex-shrink-0">
+            <span className="px-1.5 py-0.5 bg-dl-border rounded text-[10px] text-theme-text-secondary font-mono flex-shrink-0">
               {event.source}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center gap-2 text-xs text-theme-text-tertiary">
             <Clock className="w-3 h-3 flex-shrink-0" />
             {time}
-            <span className="text-slate-600">•</span>
+            <span className="text-theme-text-disabled">•</span>
             <Tag className="w-3 h-3 flex-shrink-0" />
             {Object.keys(event.data).length} properties
           </div>
@@ -129,7 +129,7 @@ function EventRow({ event, isNew, isExpanded, isCopied, onToggle, onCopy }: Even
           {isCopied ? (
             <Check className="w-4 h-4 text-dl-success" />
           ) : (
-            <Copy className="w-4 h-4 text-slate-400" />
+            <Copy className="w-4 h-4 text-theme-text-secondary" />
           )}
         </motion.button>
       </div>
@@ -158,63 +158,63 @@ function EventRow({ event, isNew, isExpanded, isCopied, onToggle, onCopy }: Even
 function JsonHighlight({ data }: { data: unknown }) {
   const renderValue = (value: unknown, depth = 0): ReactNode => {
     if (value === null) {
-      return <span className="text-slate-500">null</span>;
+      return <span className="text-theme-text-tertiary">null</span>;
     }
 
     if (typeof value === 'boolean') {
-      return <span className="text-purple-400">{value.toString()}</span>;
+      return <span className="text-json-boolean">{value.toString()}</span>;
     }
 
     if (typeof value === 'number') {
-      return <span className="text-amber-400">{value}</span>;
+      return <span className="text-json-number">{value}</span>;
     }
 
     if (typeof value === 'string') {
-      return <span className="text-cyan-400">"{value}"</span>;
+      return <span className="text-json-string">"{value}"</span>;
     }
 
     if (Array.isArray(value)) {
-      if (value.length === 0) return <span className="text-slate-400">[]</span>;
+      if (value.length === 0) return <span className="text-theme-text-secondary">[]</span>;
 
       return (
         <>
-          <span className="text-slate-400">[</span>
+          <span className="text-theme-text-secondary">[</span>
           <div className="ml-4">
             {value.map((item, i) => (
               <div key={i}>
                 {renderValue(item, depth + 1)}
-                {i < value.length - 1 && <span className="text-slate-400">,</span>}
+                {i < value.length - 1 && <span className="text-theme-text-secondary">,</span>}
               </div>
             ))}
           </div>
-          <span className="text-slate-400">]</span>
+          <span className="text-theme-text-secondary">]</span>
         </>
       );
     }
 
     if (typeof value === 'object') {
       const entries = Object.entries(value as Record<string, unknown>);
-      if (entries.length === 0) return <span className="text-slate-400">{'{}'}</span>;
+      if (entries.length === 0) return <span className="text-theme-text-secondary">{'{}'}</span>;
 
       return (
         <>
-          <span className="text-slate-400">{'{'}</span>
+          <span className="text-theme-text-secondary">{'{'}</span>
           <div className="ml-4">
             {entries.map(([key, val], i) => (
               <div key={key}>
-                <span className="text-pink-400">"{key}"</span>
-                <span className="text-slate-400">: </span>
+                <span className="text-json-key">"{key}"</span>
+                <span className="text-theme-text-secondary">: </span>
                 {renderValue(val, depth + 1)}
-                {i < entries.length - 1 && <span className="text-slate-400">,</span>}
+                {i < entries.length - 1 && <span className="text-theme-text-secondary">,</span>}
               </div>
             ))}
           </div>
-          <span className="text-slate-400">{'}'}</span>
+          <span className="text-theme-text-secondary">{'}'}</span>
         </>
       );
     }
 
-    return <span className="text-slate-400">{String(value)}</span>;
+    return <span className="text-theme-text-secondary">{String(value)}</span>;
   };
 
   return renderValue(data);

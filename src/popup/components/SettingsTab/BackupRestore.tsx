@@ -29,12 +29,12 @@ export function BackupRestore({ onExport, onImport, importStatus }: BackupRestor
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-slate-300">Backup & Restore Settings</h3>
+      <h3 className="text-sm font-medium text-theme-text-secondary">Backup & Restore Settings</h3>
 
       <div className="flex gap-2">
         <motion.button
           onClick={onExport}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-dl-card border border-dl-border hover:border-dl-primary text-slate-300 hover:text-white rounded-lg transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-dl-card border border-dl-border hover:border-dl-primary text-theme-text-secondary hover:text-theme-text rounded-lg transition-colors"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
@@ -44,7 +44,7 @@ export function BackupRestore({ onExport, onImport, importStatus }: BackupRestor
 
         <motion.button
           onClick={handleImportClick}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-dl-card border border-dl-border hover:border-dl-primary text-slate-300 hover:text-white rounded-lg transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-dl-card border border-dl-border hover:border-dl-primary text-theme-text-secondary hover:text-theme-text rounded-lg transition-colors"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >

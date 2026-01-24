@@ -63,6 +63,6 @@ describe('ColorSwatch', () => {
     render(<ColorSwatch {...defaultProps} />);
 
     const selectedButton = screen.getAllByRole('button')[0];
-    expect(selectedButton.className).toContain('border-white');
+    expect(selectedButton.className).toContain('border-theme-text');
   });
 });

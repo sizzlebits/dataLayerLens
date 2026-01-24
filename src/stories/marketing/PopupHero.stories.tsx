@@ -1,22 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { lazy, Suspense } from 'react';
+import { Suspense } from 'react';
 import {
   ScreenshotFrame,
   FloatingCard,
   Glow,
+  MarketingHeading,
+  MarketingBadge,
   marketingArgTypes,
   defaultMarketingArgs,
   type MarketingArgs,
 } from './decorators';
+import { ThemeWrapper } from './ThemeWrapper';
+import { Popup } from '@/popup/Popup';
 import { MonitorTab } from '@/popup/components/MonitorTab';
 import { SettingsTab } from '@/popup/components/SettingsTab';
 import { DomainsTab } from '@/popup/components/DomainsTab';
 import { AppIcon } from '@/components/shared/AppIcon';
 import type { Settings, DataLayerEvent, DomainSettings } from '@/types';
-
-const Popup = lazy(() =>
-  import('@/popup/Popup').then((m) => ({ default: m.Popup }))
-);
 
 const LoadingFallback = () => (
   <div
@@ -188,48 +188,54 @@ function ThreeTabsShowcase({ args }: { args: MarketingArgs }) {
   return (
     <ScreenshotFrame gradient={args.gradient} padding={40}>
       {args.showGlow && <Glow color={args.glowColor} blur={120} opacity={0.4} offsetY={20} />}
-      <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-        {/* Monitor Tab */}
-        <FloatingCard shadow="xl" rotate={{ y: 12, x: 5 }}>
-          <PopupFrame activeTab="Monitor">
-            <MonitorTab
-              settings={mockSettings}
-              events={mockEvents}
-              currentDomain="example.com"
-              onClearEvents={() => {}}
-              onExportEvents={() => {}}
-              onAddFilter={() => {}}
-              onRemoveFilter={() => {}}
-              onClearFilters={() => {}}
-              onSetFilterMode={() => {}}
-            />
-          </PopupFrame>
-        </FloatingCard>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, alignItems: 'center' }}>
+        {/* Title */}
+        <MarketingHeading>Fully Customisable</MarketingHeading>
 
-        {/* Settings Tab */}
-        <FloatingCard shadow="xl">
-          <PopupFrame activeTab="Settings">
-            <SettingsTab
-              settings={mockSettings}
-              onUpdateSettings={() => {}}
-              onExportSettings={() => {}}
-              onImportSettings={() => {}}
-              importStatus={null}
-            />
-          </PopupFrame>
-        </FloatingCard>
+        {/* Three Tabs */}
+        <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+          {/* Monitor Tab */}
+          <FloatingCard shadow="xl" rotate={{ y: 12, x: 5 }}>
+            <PopupFrame activeTab="Monitor">
+              <MonitorTab
+                settings={mockSettings}
+                events={mockEvents}
+                currentDomain="example.com"
+                onClearEvents={() => {}}
+                onExportEvents={() => {}}
+                onAddFilter={() => {}}
+                onRemoveFilter={() => {}}
+                onClearFilters={() => {}}
+                onSetFilterMode={() => {}}
+              />
+            </PopupFrame>
+          </FloatingCard>
 
-        {/* Domains Tab */}
-        <FloatingCard shadow="xl" rotate={{ y: -12, x: 5 }}>
-          <PopupFrame activeTab="Domains">
-            <DomainsTab
-              currentDomain="example.com"
-              domainSettings={mockDomainSettings}
-              onSaveCurrentDomain={() => {}}
-              onDeleteDomain={() => {}}
-            />
-          </PopupFrame>
-        </FloatingCard>
+          {/* Settings Tab */}
+          <FloatingCard shadow="xl">
+            <PopupFrame activeTab="Settings">
+              <SettingsTab
+                settings={mockSettings}
+                onUpdateSettings={() => {}}
+                onExportSettings={() => {}}
+                onImportSettings={() => {}}
+                importStatus={null}
+              />
+            </PopupFrame>
+          </FloatingCard>
+
+          {/* Domains Tab */}
+          <FloatingCard shadow="xl" rotate={{ y: -12, x: 5 }}>
+            <PopupFrame activeTab="Domains">
+              <DomainsTab
+                currentDomain="example.com"
+                domainSettings={mockDomainSettings}
+                onSaveCurrentDomain={() => {}}
+                onDeleteDomain={() => {}}
+              />
+            </PopupFrame>
+          </FloatingCard>
+        </div>
       </div>
     </ScreenshotFrame>
   );
@@ -242,4 +248,58 @@ export const ThreeTabs: Story = {
     showGlow: false,
   },
   render: (args) => <ThreeTabsShowcase args={args} />,
+};
+
+// ============================================================================
+// Light/Dark Theme Comparison (Side-by-Side)
+// ============================================================================
+
+function LightDarkComparisonWrapper({ args }: { args: MarketingArgs }) {
+  return (
+    <ScreenshotFrame gradient={args.gradient} padding={60}>
+      {args.showGlow && <Glow color={args.glowColor} blur={120} opacity={0.4} offsetY={20} />}
+      <div style={{ display: 'flex', gap: 32, alignItems: 'center', justifyContent: 'center' }}>
+        {/* Dark Mode */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
+          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <MarketingHeading>Dark Mode</MarketingHeading>
+            <MarketingBadge color="primary">Classic DataLayer Lens experience</MarketingBadge>
+          </div>
+          <FloatingCard shadow="2xl" rotate={{ y: 8, x: 4 }} scale={1.05}>
+            <ThemeWrapper theme="dark">
+              <Popup forceTheme="dark" />
+            </ThemeWrapper>
+          </FloatingCard>
+        </div>
+
+        {/* Light Mode */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
+          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <MarketingHeading>Light Mode</MarketingHeading>
+            <MarketingBadge color="accent">Clean for any environment</MarketingBadge>
+          </div>
+          <FloatingCard shadow="2xl" rotate={{ y: -8, x: 4 }} scale={1.05}>
+            <ThemeWrapper theme="light">
+              <Popup forceTheme="light" />
+            </ThemeWrapper>
+          </FloatingCard>
+        </div>
+      </div>
+    </ScreenshotFrame>
+  );
+}
+
+export const LightDarkComparison: Story = {
+  name: 'Light vs Dark Theme',
+  args: {
+    gradient: 'sunset',
+    showGlow: false,
+  },
+  parameters: {
+    // Disable global theme decorator for this story since we're managing themes manually
+    themes: {
+      disable: true,
+    },
+  },
+  render: (args) => <LightDarkComparisonWrapper args={args} />,
 };
