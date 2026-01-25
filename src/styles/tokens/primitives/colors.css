@@ -5,36 +5,87 @@
  */
 
 :root {
-  /* Indigo/Purple Scale - Primary Brand */
+  /* Indigo Scale - Primary Brand */
   --color-indigo-400: #818cf8;
   --color-indigo-500: #6366f1;
   --color-indigo-600: #4f46e5;
   --color-indigo-700: #4338ca;
+  --color-indigo-800: #3730a3;
 
   --color-purple-400: #a78bfa;
   --color-purple-500: #8b5cf6;
   --color-purple-600: #7c3aed;
+  --color-purple-700: #7e22ce;
+  --color-purple-800: #6b21a8;
+
+  /* Violet Scale - Similar to purple but more blue-shifted */
+  --color-violet-400: #a78bfa;
+  --color-violet-500: #8b5cf6;
+  --color-violet-600: #7c3aed;
+  --color-violet-700: #6d28d9;
+  --color-violet-800: #5b21b6;
+
+  /* Pink Scale - For highlights */
+  --color-pink-400: #f472b6;
+  --color-pink-600: #db2777;
+  --color-pink-700: #be185d;
+  --color-pink-800: #9d174d;
+
+  /* Yellow Scale - For null values */
+  --color-yellow-400: #facc15;
+  --color-yellow-600: #ca8a04;
+  --color-yellow-700: #a16207;
+  --color-yellow-800: #854d0e;
 
   /* Cyan Scale - Accent */
   --color-cyan-300: #67e8f9;
   --color-cyan-400: #22d3ee;
   --color-cyan-500: #06b6d4;
   --color-cyan-600: #0891b2;
+  --color-cyan-700: #0e7490;
+  --color-cyan-800: #155e75;
+
+  /* Teal Scale - Between cyan and green */
+  --color-teal-400: #2dd4bf;
+  --color-teal-500: #14b8a6;
+  --color-teal-600: #0d9488;
+  --color-teal-700: #0f766e;
+  --color-teal-800: #115e59;
 
   /* Emerald Scale - Success */
   --color-emerald-400: #34d399;
   --color-emerald-500: #10b981;
   --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+  --color-emerald-800: #065f46;
+
+  /* Green Scale */
+  --color-green-400: #4ade80;
+  --color-green-500: #22c55e;
+  --color-green-600: #16a34a;
+  --color-green-700: #15803d;
+  --color-green-800: #166534;
+
+  /* Blue Scale */
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
+  --color-blue-800: #1e40af;
 
   /* Amber Scale - Warning */
   --color-amber-400: #fbbf24;
   --color-amber-500: #f59e0b;
   --color-amber-600: #d97706;
+  --color-amber-700: #b45309;
+  --color-amber-800: #92400e;
 
   /* Red Scale - Error */
   --color-red-400: #f87171;
   --color-red-500: #ef4444;
   --color-red-600: #dc2626;
+  --color-red-700: #b91c1c;
+  --color-red-800: #991b1b;
 
   /* Gray Scale - Neutral Dark Theme */
   --color-gray-50: #f9fafb;

@@ -50,31 +50,42 @@ describe('AppIcon', () => {
   });
 
   describe('indented variant', () => {
-    it('renders with container wrapper', () => {
+    it('renders both light mode SVG and dark mode container', () => {
       const { container } = render(<AppIcon variant="indented" />);
-      const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper.tagName).toBe('DIV');
-      expect(wrapper).toHaveClass('flex', 'items-center', 'justify-center');
+      // Light mode: plain SVG with app-icon-light class
+      const lightSvg = container.querySelector('svg.app-icon-light');
+      expect(lightSvg).toBeInTheDocument();
+      // Dark mode: container div with app-icon-container class
+      const darkContainer = container.querySelector('.app-icon-container');
+      expect(darkContainer).toBeInTheDocument();
     });
 
-    it('applies box shadow to container', () => {
+    it('applies box shadow to dark mode container', () => {
       const { container } = render(<AppIcon variant="indented" />);
-      const wrapper = container.firstChild as HTMLElement;
+      const wrapper = container.querySelector('.app-icon-container') as HTMLElement;
       expect(wrapper).toHaveStyle({
         boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 -1px 2px rgba(255, 255, 255, 0.05)',
       });
     });
 
-    it('contains SVG inside wrapper', () => {
+    it('contains SVG inside dark mode container', () => {
       const { container } = render(<AppIcon variant="indented" />);
-      const svg = container.querySelector('svg');
+      const wrapper = container.querySelector('.app-icon-container');
+      const svg = wrapper?.querySelector('svg');
       expect(svg).toBeInTheDocument();
     });
 
     it('applies correct container size for different sizes', () => {
       const { container } = render(<AppIcon size="lg" variant="indented" />);
-      const wrapper = container.firstChild as HTMLElement;
+      const wrapper = container.querySelector('.app-icon-container') as HTMLElement;
       expect(wrapper).toHaveClass('w-10', 'h-10');
+    });
+
+    it('light mode SVG uses larger size', () => {
+      const { container } = render(<AppIcon size="md" variant="indented" />);
+      const lightSvg = container.querySelector('svg.app-icon-light');
+      // Light mode uses iconLight size (w-8 h-8 for md)
+      expect(lightSvg).toHaveClass('w-8', 'h-8');
     });
   });
 });

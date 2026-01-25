@@ -83,9 +83,87 @@
   --color-scrollbar-thumb: rgba(99, 102, 241, 0.3);
   --color-scrollbar-thumb-hover: rgba(99, 102, 241, 0.5);
 
+  /* Event category colors - brighter variants for dark mode */
+  --color-event-gtm-js: var(--color-cyan-400);
+  --color-event-gtm-dom: var(--color-emerald-500);
+  --color-event-gtm-load: var(--color-violet-500);
+  --color-event-gtm-click: var(--color-amber-500);
+  --color-event-gtm-form: var(--color-red-500);
+  --color-event-gtm-history: var(--color-pink-400);
+  --color-event-gtm-scroll: var(--color-teal-500);
+  --color-event-gtm-timer: var(--color-indigo-500);
+  --color-event-gtm-video: var(--color-red-600);
+  --color-event-page-view: var(--color-blue-500);
+  --color-event-view-item: var(--color-violet-500);
+  --color-event-add-to-cart: var(--color-emerald-500);
+  --color-event-purchase: var(--color-green-500);
+  --color-event-begin-checkout: var(--color-amber-500);
+  --color-event-sign-up: var(--color-cyan-500);
+  --color-event-login: var(--color-indigo-500);
+  --color-event-search: var(--color-purple-500);
+  --color-event-data: var(--color-slate-500);
+  --color-event-default: var(--color-slate-400);
+
   /* Dark theme specific shadows (more pronounced) */
   --shadow-dark-sm: 0 2px 4px 0 rgba(0, 0, 0, 0.3);
   --shadow-dark-md: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
   --shadow-dark-lg: 0 8px 16px 0 rgba(0, 0, 0, 0.5);
   --shadow-dark-xl: 0 16px 32px 0 rgba(0, 0, 0, 0.6);
+}
+
+/**
+ * High Contrast Mode - Dark Theme
+ * Enhanced contrast for users who prefer more contrast (accessibility).
+ */
+@media (prefers-contrast: more) {
+  :root,
+  [data-theme="dark"] {
+    /* Brighter text colors */
+    --color-text-primary: var(--color-white);
+    --color-text-secondary: var(--color-slate-200);
+    --color-text-tertiary: var(--color-slate-300);
+    --color-text-disabled: var(--color-slate-400);
+
+    /* Higher contrast backgrounds */
+    --color-bg-base: var(--color-black);
+    --color-bg-elevated: #0a0a14;
+    --color-bg-card: #141428;
+    --color-bg-hover: rgba(255, 255, 255, 0.1);
+    --color-bg-active: rgba(255, 255, 255, 0.15);
+
+    /* Stronger borders */
+    --color-border-base: var(--color-slate-500);
+    --color-border-hover: var(--color-slate-400);
+
+    /* Brighter status colors for better contrast */
+    --color-success: var(--color-emerald-400);
+    --color-warning: var(--color-amber-400);
+    --color-error: var(--color-red-400);
+
+    /* Brighter brand colors */
+    --color-primary: var(--color-indigo-400);
+    --color-secondary: var(--color-purple-400);
+    --color-accent: var(--color-cyan-300);
+
+    /* Brighter event category colors for high contrast */
+    --color-event-gtm-js: var(--color-cyan-300);
+    --color-event-gtm-dom: var(--color-emerald-400);
+    --color-event-gtm-load: var(--color-violet-400);
+    --color-event-gtm-click: var(--color-amber-400);
+    --color-event-gtm-form: var(--color-red-400);
+    --color-event-gtm-history: var(--color-pink-400);
+    --color-event-gtm-scroll: var(--color-teal-400);
+    --color-event-gtm-timer: var(--color-indigo-400);
+    --color-event-gtm-video: var(--color-red-400);
+    --color-event-page-view: var(--color-blue-400);
+    --color-event-view-item: var(--color-violet-400);
+    --color-event-add-to-cart: var(--color-emerald-400);
+    --color-event-purchase: var(--color-green-400);
+    --color-event-begin-checkout: var(--color-amber-400);
+    --color-event-sign-up: var(--color-cyan-400);
+    --color-event-login: var(--color-indigo-400);
+    --color-event-search: var(--color-purple-400);
+    --color-event-data: var(--color-slate-400);
+    --color-event-default: var(--color-slate-300);
+  }
 }

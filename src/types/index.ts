@@ -191,27 +191,28 @@ export function autoAssignSourceColors(
 export const DATA_UPDATE_EVENT = '(data)';
 
 // Event categories for colorful display
+// Colors use CSS variables for theme-aware contrast (defined in light.css and dark.css)
 export const EVENT_CATEGORIES: Record<string, { color: string; icon: string }> = {
-  'gtm.js': { color: '#22d3ee', icon: '🚀' },
-  'gtm.dom': { color: '#10b981', icon: '📄' },
-  'gtm.load': { color: '#8b5cf6', icon: '✅' },
-  'gtm.click': { color: '#f59e0b', icon: '👆' },
-  'gtm.linkClick': { color: '#f59e0b', icon: '🔗' },
-  'gtm.formSubmit': { color: '#ef4444', icon: '📝' },
-  'gtm.historyChange': { color: '#ec4899', icon: '🔄' },
-  'gtm.scrollDepth': { color: '#14b8a6', icon: '📜' },
-  'gtm.timer': { color: '#6366f1', icon: '⏱️' },
-  'gtm.video': { color: '#dc2626', icon: '🎬' },
-  page_view: { color: '#3b82f6', icon: '👁️' },
-  view_item: { color: '#8b5cf6', icon: '🛍️' },
-  add_to_cart: { color: '#10b981', icon: '🛒' },
-  purchase: { color: '#22c55e', icon: '💰' },
-  begin_checkout: { color: '#f59e0b', icon: '💳' },
-  sign_up: { color: '#06b6d4', icon: '✨' },
-  login: { color: '#6366f1', icon: '🔐' },
-  search: { color: '#a855f7', icon: '🔍' },
-  [DATA_UPDATE_EVENT]: { color: '#94a3b8', icon: '📦' }, // Data-only pushes (no event property)
-  default: { color: '#64748b', icon: '📌' },
+  'gtm.js': { color: 'var(--color-event-gtm-js)', icon: '🚀' },
+  'gtm.dom': { color: 'var(--color-event-gtm-dom)', icon: '📄' },
+  'gtm.load': { color: 'var(--color-event-gtm-load)', icon: '✅' },
+  'gtm.click': { color: 'var(--color-event-gtm-click)', icon: '👆' },
+  'gtm.linkClick': { color: 'var(--color-event-gtm-click)', icon: '🔗' },
+  'gtm.formSubmit': { color: 'var(--color-event-gtm-form)', icon: '📝' },
+  'gtm.historyChange': { color: 'var(--color-event-gtm-history)', icon: '🔄' },
+  'gtm.scrollDepth': { color: 'var(--color-event-gtm-scroll)', icon: '📜' },
+  'gtm.timer': { color: 'var(--color-event-gtm-timer)', icon: '⏱️' },
+  'gtm.video': { color: 'var(--color-event-gtm-video)', icon: '🎬' },
+  page_view: { color: 'var(--color-event-page-view)', icon: '👁️' },
+  view_item: { color: 'var(--color-event-view-item)', icon: '🛍️' },
+  add_to_cart: { color: 'var(--color-event-add-to-cart)', icon: '🛒' },
+  purchase: { color: 'var(--color-event-purchase)', icon: '💰' },
+  begin_checkout: { color: 'var(--color-event-begin-checkout)', icon: '💳' },
+  sign_up: { color: 'var(--color-event-sign-up)', icon: '✨' },
+  login: { color: 'var(--color-event-login)', icon: '🔐' },
+  search: { color: 'var(--color-event-search)', icon: '🔍' },
+  [DATA_UPDATE_EVENT]: { color: 'var(--color-event-data)', icon: '📦' },
+  default: { color: 'var(--color-event-default)', icon: '📌' },
 };
 
 export function getEventCategory(eventName: string): { color: string; icon: string } {

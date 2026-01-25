@@ -240,7 +240,7 @@ export function EventPanel({ context, forceTheme }: EventPanelProps) {
             <Filter className="w-3.5 h-3.5" />
             {!isCompact && <span className="filter-label">Filters</span>}
             {state.settings.eventFilters.length > 0 && (
-              <span className={`bg-dl-primary text-theme-text rounded-full min-w-[16px] text-center ${
+              <span className={`bg-dl-primary text-white rounded-full min-w-[16px] text-center ${
                 isCompact ? 'px-1 py-0.5 text-[10px]' : 'px-1.5 py-0.5 text-[10px]'
               }`}>
                 {state.settings.eventFilters.length}
@@ -326,11 +326,12 @@ export function EventPanel({ context, forceTheme }: EventPanelProps) {
                           <button
                             key={type}
                             onClick={() => actions.addFilter(type, state.settings.filterMode)}
-                            className={`inline-flex items-center gap-1 rounded-full font-medium opacity-70 hover:opacity-100 transition-opacity ${
+                            className={`inline-flex items-center gap-1 rounded-full font-medium opacity-80 hover:opacity-100 transition-opacity border ${
                               isCompact ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'
                             }`}
                             style={{
-                              backgroundColor: `${category.color}20`,
+                              backgroundColor: `color-mix(in srgb, ${category.color} 15%, transparent)`,
+                              borderColor: `color-mix(in srgb, ${category.color} 40%, transparent)`,
                               color: category.color,
                             }}
                           >

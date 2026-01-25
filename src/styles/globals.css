@@ -218,3 +218,39 @@ button {
     display: inline;
   }
 }
+
+/* Theme-based visibility utilities */
+.light-only {
+  display: none;
+}
+
+.dark-only {
+  display: flex;
+}
+
+[data-theme="light"] .light-only {
+  display: flex;
+}
+
+[data-theme="light"] .dark-only {
+  display: none;
+}
+
+/* AppIcon indented container - hidden in light mode */
+.app-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="light"] .app-icon-container {
+  display: none;
+}
+
+[data-theme="light"] .app-icon-light {
+  display: block;
+}
+
+.app-icon-light {
+  display: none;
+}
