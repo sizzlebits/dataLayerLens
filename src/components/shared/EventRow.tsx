@@ -100,7 +100,7 @@ export function EventRow({
             className={`rounded flex items-center justify-center flex-shrink-0 ${
               compact ? 'w-6 h-6 text-sm' : 'w-8 h-8 text-lg'
             }`}
-            style={{ backgroundColor: `${category.color}20` }}
+            style={{ backgroundColor: `color-mix(in srgb, ${category.color} 20%, transparent)` }}
           >
             {category.icon}
           </div>

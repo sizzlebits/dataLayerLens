@@ -43,7 +43,7 @@ describe('EventRenderer', () => {
     it('should return default category for unknown events', () => {
       const result = getEventCategory('custom_unknown_event');
       expect(result.icon).toBe('📌');
-      expect(result.color).toBe('#64748b');
+      expect(result.color).toBe('var(--color-event-default)'); // CSS variable for theme-aware colors
     });
   });
 
