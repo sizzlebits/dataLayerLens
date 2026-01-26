@@ -12,6 +12,16 @@ function getPackageVersion(): string {
   return packageJson.version;
 }
 
+// Plugin to remove crossorigin attribute from HTML (breaks Firefox extensions)
+function removeCrossOrigin(): Plugin {
+  return {
+    name: 'remove-crossorigin',
+    transformIndexHtml(html) {
+      return html.replace(/ crossorigin/g, '');
+    },
+  };
+}
+
 // Plugin to copy manifest and icons, then build standalone scripts
 function copyExtensionFiles(): Plugin {
   return {
@@ -104,6 +114,7 @@ export default defineConfig(async () => {
   // Only include extension-specific plugins when NOT building Storybook
   const plugins: PluginOption[] = [react()];
   if (!isStorybook) {
+    plugins.push(removeCrossOrigin());
     plugins.push(copyExtensionFiles());
     plugins.push(await buildStandaloneScripts());
   }

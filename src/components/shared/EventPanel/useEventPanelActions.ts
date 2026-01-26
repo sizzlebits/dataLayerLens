@@ -74,7 +74,8 @@ export function useEventPanelActions(config: EventPanelActionsConfig): EventPane
     setCurrentPage(0);
 
     try {
-      await browserAPI.tabs.sendMessage(tabId, { type: 'CLEAR_EVENTS' });
+      // tabs.sendMessage may not be available in Firefox devtools panels
+      await browserAPI.tabs?.sendMessage?.(tabId, { type: 'CLEAR_EVENTS' });
     } catch (error) {
       console.error('Failed to clear events:', error);
     }
@@ -116,7 +117,7 @@ export function useEventPanelActions(config: EventPanelActionsConfig): EventPane
     const newValue = !settings.persistEvents;
     setSettings((prev) => ({ ...prev, persistEvents: newValue }));
     if (tabId) {
-      browserAPI.tabs.sendMessage(tabId, {
+      browserAPI.tabs?.sendMessage?.(tabId, {
         type: 'UPDATE_SETTINGS',
         payload: { persistEvents: newValue },
       }).catch(() => {});
@@ -130,7 +131,7 @@ export function useEventPanelActions(config: EventPanelActionsConfig): EventPane
       grouping: { ...prev.grouping, enabled: newValue },
     }));
     if (tabId) {
-      browserAPI.tabs.sendMessage(tabId, {
+      browserAPI.tabs?.sendMessage?.(tabId, {
         type: 'UPDATE_SETTINGS',
         payload: { grouping: { ...settings.grouping, enabled: newValue } },
       }).catch(() => {});
@@ -141,7 +142,7 @@ export function useEventPanelActions(config: EventPanelActionsConfig): EventPane
     const newValue = !settings.consoleLogging;
     setSettings((prev) => ({ ...prev, consoleLogging: newValue }));
     if (tabId) {
-      browserAPI.tabs.sendMessage(tabId, {
+      browserAPI.tabs?.sendMessage?.(tabId, {
         type: 'UPDATE_SETTINGS',
         payload: { consoleLogging: newValue },
       }).catch(() => {});
@@ -154,7 +155,7 @@ export function useEventPanelActions(config: EventPanelActionsConfig): EventPane
     const updates = { eventFilters: newFilters, filterMode: mode };
     setSettings((prev) => ({ ...prev, ...updates }));
     if (tabId) {
-      browserAPI.tabs.sendMessage(tabId, {
+      browserAPI.tabs?.sendMessage?.(tabId, {
         type: 'UPDATE_SETTINGS',
         payload: updates,
       }).catch(() => {});
@@ -166,7 +167,7 @@ export function useEventPanelActions(config: EventPanelActionsConfig): EventPane
     const newFilters = settings.eventFilters.filter((f) => f !== filter);
     setSettings((prev) => ({ ...prev, eventFilters: newFilters }));
     if (tabId) {
-      browserAPI.tabs.sendMessage(tabId, {
+      browserAPI.tabs?.sendMessage?.(tabId, {
         type: 'UPDATE_SETTINGS',
         payload: { eventFilters: newFilters },
       }).catch(() => {});
@@ -177,7 +178,7 @@ export function useEventPanelActions(config: EventPanelActionsConfig): EventPane
     const newMode = settings.filterMode === 'include' ? 'exclude' : 'include';
     setSettings((prev) => ({ ...prev, filterMode: newMode }));
     if (tabId) {
-      browserAPI.tabs.sendMessage(tabId, {
+      browserAPI.tabs?.sendMessage?.(tabId, {
         type: 'UPDATE_SETTINGS',
         payload: { filterMode: newMode },
       }).catch(() => {});

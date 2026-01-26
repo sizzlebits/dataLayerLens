@@ -95,6 +95,8 @@ export function useEventPanelState(_config: EventPanelConfig): EventPanelState {
   // Load events function - defined before useEffects that depend on it
   const loadEvents = useCallback(async (loadTabId: number) => {
     try {
+      // tabs.sendMessage may not be available in Firefox devtools panels
+      if (!browserAPI.tabs?.sendMessage) return;
       const response = await browserAPI.tabs.sendMessage(loadTabId, { type: 'GET_EVENTS' });
       if (response?.events) {
         const sortedEvents = [...response.events].sort(
@@ -112,6 +114,8 @@ export function useEventPanelState(_config: EventPanelConfig): EventPanelState {
   // Listen for page navigation on the inspected tab
   useEffect(() => {
     if (!tabId) return;
+    // tabs API may not be available in Firefox devtools panels
+    if (!browserAPI.tabs?.onUpdated) return;
 
     const handleTabUpdated = (updatedTabId: number, changeInfo: { status?: string; url?: string }) => {
       // When the inspected tab navigates to a new page, clear events and reload
@@ -270,10 +274,11 @@ export function useEventPanelState(_config: EventPanelConfig): EventPanelState {
       const newColors = autoAssignSourceColors(uniqueSources, settings.sourceColors || {});
       if (newColors) {
         setSettings((prev) => ({ ...prev, sourceColors: newColors }));
-        browserAPI.tabs.sendMessage(tabId, {
+        // tabs.sendMessage may not be available in Firefox devtools panels
+        browserAPI.tabs?.sendMessage?.(tabId, {
           type: 'UPDATE_SETTINGS',
           payload: { sourceColors: newColors },
-        }).catch(() => {});
+        })?.catch?.(() => {});
       }
     }
   }, [uniqueSources, settings.sourceColors, tabId]);

@@ -4,6 +4,6 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 // Create DevTools panel
 browserAPI.devtools.panels.create(
   'DataLayer',
-  '../icons/icon-32.png',
-  'src/devtools/panel.html'
+  '/icons/icon-32.png',
+  '/src/devtools/panel.html'
 );
