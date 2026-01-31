@@ -1,6 +1,6 @@
 # DataLayer Lens
 
-Monitor GTM dataLayer events in real-time.
+Monitor, search, filter GTM dataLayer events in real-time.
 
 <p align="center">
   <img src="public/icons/datalayerlens_pop.svg" alt="DataLayer Lens" width="285" height="128">
