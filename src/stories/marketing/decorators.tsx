@@ -379,39 +379,36 @@ export function DevToolsChrome({
 }
 
 // ============================================================================
-// Marketing Labels - Styled text for collateral
+// Marketing Text System - Standardized text for collateral
 // ============================================================================
 
-interface MarketingHeadingProps {
-  children: ReactNode;
-  style?: CSSProperties;
-}
-
-/**
- * Marketing heading with Caprasimo font
- */
-export function MarketingHeading({ children, style }: MarketingHeadingProps) {
-  return (
-    <h3
-      style={{
-        fontFamily: '"Caprasimo", serif',
-        fontWeight: 400,
-        fontSize: 40,
-        color: 'white',
-        margin: 0,
-        ...style,
-      }}
-    >
-      {children}
-    </h3>
-  );
-}
-
-interface MarketingBadgeProps {
-  children: ReactNode;
-  color?: 'primary' | 'accent' | 'secondary' | 'success';
-  style?: CSSProperties;
-}
+// Fixed design tokens - no customization allowed
+const MARKETING_TEXT = {
+  heading: {
+    fontFamily: '"Caprasimo", serif',
+    fontWeight: 400,
+    fontSize: 40,
+    color: 'white',
+  },
+  badge: {
+    padding: '8px 16px',
+    fontSize: 15,
+    fontWeight: 600,
+    borderRadius: 6,
+    transform: 'rotate(-2deg) skewX(-4deg)',
+  },
+  // Standard gaps between elements
+  gap: {
+    headingToBadge: 12,
+    betweenBlocks: 80, // Wide gap for side-by-side text blocks
+  },
+  // Minimum width for text blocks to prevent wrapping
+  blockMinWidth: 320,
+  // Standard positioning from top of screenshot
+  topOffset: 40,
+  // Standard offset for content below header (accounts for header height)
+  contentOffset: 120,
+} as const;
 
 const badgeColors = {
   primary: { bg: '#6366f1', text: '#ffffff', shadow: '#6366f1' },
@@ -420,28 +417,201 @@ const badgeColors = {
   success: { bg: '#10b981', text: '#ffffff', shadow: '#10b981' },
 };
 
+type BadgeColor = keyof typeof badgeColors;
+
 /**
- * Marketing badge with solid neon background, crisp shadows and skew
+ * Marketing heading - fixed styling, no customization
+ * @internal Use MarketingText or MarketingTextRow instead
  */
-export function MarketingBadge({ children, color = 'primary', style }: MarketingBadgeProps) {
+function MarketingHeadingInternal({ children }: { children: ReactNode }) {
+  return (
+    <h3
+      style={{
+        fontFamily: MARKETING_TEXT.heading.fontFamily,
+        fontWeight: MARKETING_TEXT.heading.fontWeight,
+        fontSize: MARKETING_TEXT.heading.fontSize,
+        color: MARKETING_TEXT.heading.color,
+        margin: 0,
+        lineHeight: 1.2,
+      }}
+    >
+      {children}
+    </h3>
+  );
+}
+
+/**
+ * Marketing badge - fixed styling, no customization
+ * @internal Use MarketingText or MarketingTextRow instead
+ */
+function MarketingBadgeInternal({ children, color = 'primary' }: { children: ReactNode; color?: BadgeColor }) {
   const colors = badgeColors[color];
 
   return (
     <span
       style={{
         display: 'inline-block',
-        padding: '8px 16px',
-        fontSize: 15,
-        fontWeight: 600,
+        padding: MARKETING_TEXT.badge.padding,
+        fontSize: MARKETING_TEXT.badge.fontSize,
+        fontWeight: MARKETING_TEXT.badge.fontWeight,
         color: colors.text,
         background: colors.bg,
-        borderRadius: 6,
-        transform: 'rotate(-2deg) skewX(-4deg)',
+        borderRadius: MARKETING_TEXT.badge.borderRadius,
+        transform: MARKETING_TEXT.badge.transform,
         boxShadow: `0 3px 0 rgba(0, 0, 0, 0.4), 0 0 0 2px ${colors.shadow}80`,
-        ...style,
       }}
     >
       {children}
     </span>
   );
 }
+
+/**
+ * Single marketing text block with heading and optional badge.
+ * Always centered. Use within MarketingHeader for proper positioning.
+ */
+interface MarketingTextProps {
+  heading: string;
+  badge?: string;
+  badgeColor?: BadgeColor;
+}
+
+export function MarketingText({ heading, badge, badgeColor = 'primary' }: MarketingTextProps) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: MARKETING_TEXT.gap.headingToBadge,
+        textAlign: 'center',
+      }}
+    >
+      <MarketingHeadingInternal>{heading}</MarketingHeadingInternal>
+      {badge && <MarketingBadgeInternal color={badgeColor}>{badge}</MarketingBadgeInternal>}
+    </div>
+  );
+}
+
+/**
+ * Side-by-side marketing text blocks for comparison views.
+ * Each block has heading and optional badge.
+ */
+interface MarketingTextRowProps {
+  blocks: Array<{
+    heading: string;
+    badge?: string;
+    badgeColor?: BadgeColor;
+  }>;
+}
+
+export function MarketingTextRow({ blocks }: MarketingTextRowProps) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        gap: MARKETING_TEXT.gap.betweenBlocks,
+      }}
+    >
+      {blocks.map((block, index) => (
+        <div
+          key={index}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: MARKETING_TEXT.gap.headingToBadge,
+            textAlign: 'center',
+            minWidth: MARKETING_TEXT.blockMinWidth,
+          }}
+        >
+          <MarketingHeadingInternal>{block.heading}</MarketingHeadingInternal>
+          {block.badge && (
+            <MarketingBadgeInternal color={block.badgeColor}>{block.badge}</MarketingBadgeInternal>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Positioned header container for marketing text.
+ * Places content at standard position from top of screenshot.
+ * Use with MarketingText or MarketingTextRow.
+ */
+interface MarketingHeaderProps {
+  children: ReactNode;
+  /** Position: 'top' (absolute at top), 'above-content' (in flow, adds margin below) */
+  position?: 'top' | 'above-content';
+}
+
+export function MarketingHeader({ children, position = 'top' }: MarketingHeaderProps) {
+  if (position === 'top') {
+    return (
+      <div
+        style={{
+          position: 'absolute',
+          top: MARKETING_TEXT.topOffset,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
+        {children}
+      </div>
+    );
+  }
+
+  // above-content: in document flow with margin
+  return (
+    <div
+      style={{
+        marginBottom: 24,
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Content container that accounts for MarketingHeader offset.
+ * Use this to wrap content that appears below a MarketingHeader position="top".
+ */
+interface MarketingContentProps {
+  children: ReactNode;
+  /** Use 'comparison' for side-by-side layouts that need extra breathing room */
+  variant?: 'default' | 'comparison';
+}
+
+export function MarketingContent({ children, variant = 'default' }: MarketingContentProps) {
+  const extraOffset = variant === 'comparison' ? 100 : 0;
+
+  return (
+    <div
+      style={{
+        marginTop: MARKETING_TEXT.contentOffset + extraOffset,
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ============================================================================
+// Legacy exports - DEPRECATED, use MarketingText/MarketingTextRow instead
+// ============================================================================
+
+/** @deprecated Use MarketingText instead */
+export const MarketingHeading = MarketingHeadingInternal;
+
+/** @deprecated Use MarketingText instead */
+export const MarketingBadge = MarketingBadgeInternal;

@@ -1,6 +1,6 @@
 # DataLayer Lens
 
-A powerful, beautiful tool for monitoring GTM dataLayer events in real-time.
+Monitor GTM dataLayer events in real-time.
 
 <p align="center">
   <img src="public/icons/datalayerlens_pop.svg" alt="DataLayer Lens" width="285" height="128">

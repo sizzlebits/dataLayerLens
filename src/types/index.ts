@@ -58,6 +58,9 @@ export interface Settings {
   // Source colors (user-selected colors for dataLayer sources)
   sourceColors: Record<string, string>;
 
+  // Event highlights (event names mapped to highlight colors)
+  eventHighlights: Record<string, string>;
+
   // Developer settings
   debugLogging: boolean;
   consoleLogging: boolean; // Log dataLayer events to browser console
@@ -104,6 +107,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showEmojis: true,
   compactMode: false,
   sourceColors: {}, // User-selected colors for dataLayer sources
+  eventHighlights: {}, // Event names to highlight with colors
   debugLogging: false,
   consoleLogging: false, // Off by default
 };
@@ -137,7 +141,21 @@ export interface SettingsMessage extends Message {
   payload?: Partial<Settings>;
 }
 
+// Color keys for highlights - these map to CSS custom properties for theme-aware colors
+// Reduced to 6 distinct colors that span the color wheel well
+export const HIGHLIGHT_COLOR_KEYS = [
+  'red',
+  'amber',
+  'emerald',
+  'cyan',
+  'indigo',
+  'pink',
+] as const;
+
+export type HighlightColorKey = typeof HIGHLIGHT_COLOR_KEYS[number];
+
 // Color pool for dataLayer sources (10 colors with good contrast against dark backgrounds)
+// These are used for source colors which don't need theme adjustment
 export const SOURCE_COLOR_POOL: string[] = [
   '#6366f1', // Indigo
   '#22d3ee', // Cyan
@@ -150,6 +168,16 @@ export const SOURCE_COLOR_POOL: string[] = [
   '#f97316', // Orange
   '#3b82f6', // Blue
 ];
+
+// Map color keys to CSS variable names
+export function getHighlightCssVar(colorKey: string): string {
+  return `var(--highlight-${colorKey})`;
+}
+
+// Check if a value is a highlight color key
+export function isHighlightColorKey(value: string): value is HighlightColorKey {
+  return HIGHLIGHT_COLOR_KEYS.includes(value as HighlightColorKey);
+}
 
 // Get a color for a source from the pool
 // If the source doesn't have a persisted color, one will be auto-assigned based on index
@@ -185,6 +213,15 @@ export function autoAssignSourceColors(
   }
 
   return hasNewAssignments ? newSourceColors : null;
+}
+
+// Auto-assign a color key for a new event highlight
+// Returns the next available color key from the pool
+export function autoAssignHighlightColor(
+  currentHighlights: Record<string, string>
+): string {
+  const assignedCount = Object.keys(currentHighlights).length;
+  return HIGHLIGHT_COLOR_KEYS[assignedCount % HIGHLIGHT_COLOR_KEYS.length];
 }
 
 // Special event name for pushes without an 'event' property

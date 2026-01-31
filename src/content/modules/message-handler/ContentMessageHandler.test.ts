@@ -36,6 +36,7 @@ const mockSettings: Settings = {
   debugLogging: false,
   consoleLogging: false,
   sourceColors: {},
+  eventHighlights: {},
 };
 
 describe('ContentMessageHandler', () => {

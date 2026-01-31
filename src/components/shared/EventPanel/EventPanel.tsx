@@ -106,17 +106,17 @@ export function EventPanel({ context, forceTheme }: EventPanelProps) {
               className={isCompact
                 ? `p-1.5 rounded-lg transition-colors ${
                     state.settings.grouping?.enabled
-                      ? 'bg-dl-primary/20 text-dl-primary'
-                      : 'text-theme-text-secondary hover:text-theme-text hover:bg-dl-card'
+                      ? 'text-dl-primary'
+                      : 'text-theme-text-secondary hover:text-theme-text'
                   }`
-                : `header-btn ${
+                : `header-btn transition-colors ${
                     state.settings.grouping?.enabled
-                      ? 'bg-dl-primary/20 text-dl-primary'
-                      : 'bg-dl-card text-theme-text-secondary hover:text-theme-text'
+                      ? 'text-dl-primary'
+                      : 'text-theme-text-secondary hover:text-theme-text'
                   }`
               }
-              whileHover={{ scale: isCompact ? 1.05 : 1.02 }}
-              whileTap={{ scale: isCompact ? 0.95 : 0.98 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               title="Toggle grouping"
             >
               <Grid className={isCompact ? 'w-4 h-4' : 'btn-icon'} />
@@ -129,17 +129,17 @@ export function EventPanel({ context, forceTheme }: EventPanelProps) {
               className={isCompact
                 ? `p-1.5 rounded-lg transition-colors ${
                     state.settings.persistEvents
-                      ? 'bg-dl-primary/20 text-dl-primary'
-                      : 'text-theme-text-secondary hover:text-theme-text hover:bg-dl-card'
+                      ? 'text-dl-primary'
+                      : 'text-theme-text-secondary hover:text-theme-text'
                   }`
-                : `header-btn ${
+                : `header-btn transition-colors ${
                     state.settings.persistEvents
-                      ? 'bg-dl-primary/20 text-dl-primary'
-                      : 'bg-dl-card text-theme-text-secondary hover:text-theme-text'
+                      ? 'text-dl-primary'
+                      : 'text-theme-text-secondary hover:text-theme-text'
                   }`
               }
-              whileHover={{ scale: isCompact ? 1.05 : 1.02 }}
-              whileTap={{ scale: isCompact ? 0.95 : 0.98 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               title="Persist events on refresh"
             >
               <Clock className={isCompact ? 'w-4 h-4' : 'btn-icon'} />
@@ -150,11 +150,11 @@ export function EventPanel({ context, forceTheme }: EventPanelProps) {
             <motion.button
               onClick={actions.exportEvents}
               className={isCompact
-                ? 'p-1.5 text-theme-text-secondary hover:text-theme-text hover:bg-dl-card rounded-lg transition-colors'
-                : 'header-btn hide-md bg-dl-card hover:bg-dl-border text-theme-text-secondary'
+                ? 'p-1.5 text-theme-text-secondary hover:text-theme-text rounded-lg transition-colors'
+                : 'header-btn hide-md text-theme-text-secondary hover:text-theme-text transition-colors'
               }
-              whileHover={{ scale: isCompact ? 1.05 : 1.02 }}
-              whileTap={{ scale: isCompact ? 0.95 : 0.98 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               title="Export events"
               disabled={state.filteredEvents.length === 0}
             >
@@ -166,11 +166,11 @@ export function EventPanel({ context, forceTheme }: EventPanelProps) {
             <motion.button
               onClick={actions.clearEvents}
               className={isCompact
-                ? 'p-1.5 text-theme-text-secondary hover:text-dl-error hover:bg-dl-error/10 rounded-lg transition-colors'
-                : 'header-btn bg-dl-error/10 hover:bg-dl-error/20 text-dl-error'
+                ? 'p-1.5 text-dl-error hover:text-dl-error/80 rounded-lg transition-colors'
+                : 'header-btn text-dl-error hover:text-dl-error/80 transition-colors'
               }
-              whileHover={{ scale: isCompact ? 1.05 : 1.02 }}
-              whileTap={{ scale: isCompact ? 0.95 : 0.98 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               title="Clear all events"
             >
               <Trash2 className={isCompact ? 'w-4 h-4' : 'btn-icon'} />
@@ -181,11 +181,11 @@ export function EventPanel({ context, forceTheme }: EventPanelProps) {
             <motion.button
               onClick={() => state.setShowSettings(true)}
               className={isCompact
-                ? 'p-1.5 text-theme-text-secondary hover:text-theme-text hover:bg-dl-card rounded-lg transition-colors'
-                : 'header-btn bg-dl-card hover:bg-dl-border text-theme-text-secondary'
+                ? 'p-1.5 text-theme-text-secondary hover:text-theme-text rounded-lg transition-colors'
+                : 'header-btn text-theme-text-secondary hover:text-theme-text transition-colors'
               }
-              whileHover={{ scale: isCompact ? 1.05 : 1.02 }}
-              whileTap={{ scale: isCompact ? 0.95 : 0.98 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               title="Open settings"
             >
               <Settings className={isCompact ? 'w-4 h-4' : 'btn-icon'} />
@@ -426,6 +426,7 @@ export function EventPanel({ context, forceTheme }: EventPanelProps) {
                               showTimestamps={state.settings.showTimestamps}
                               showEmojis={state.settings.showEmojis}
                               sourceColor={actions.getSourceColorForEvent(event.source)}
+                              highlightColor={state.settings.eventHighlights?.[event.event]}
                               onToggle={() => actions.toggleExpanded(event.id)}
                               onCopy={clipboardAvailable ? () => actions.copyEvent(event) : undefined}
                               onAddFilterInclude={() => actions.addFilter(event.event, 'include')}
@@ -433,6 +434,7 @@ export function EventPanel({ context, forceTheme }: EventPanelProps) {
                               onToggleFilterMenu={() =>
                                 state.setFilterMenuEvent((prev) => (prev === event.id ? null : event.id))
                               }
+                              onToggleHighlight={() => actions.toggleEventHighlight(event.event)}
                             />
                           ))}
                         </div>
@@ -494,6 +496,7 @@ export function EventPanel({ context, forceTheme }: EventPanelProps) {
                     showTimestamps={state.settings.showTimestamps}
                     showEmojis={state.settings.showEmojis}
                     sourceColor={actions.getSourceColorForEvent(event.source)}
+                    highlightColor={state.settings.eventHighlights?.[event.event]}
                     onToggle={() => actions.toggleExpanded(event.id)}
                     onCopy={clipboardAvailable ? () => actions.copyEvent(event) : undefined}
                     onAddFilterInclude={() => actions.addFilter(event.event, 'include')}
@@ -501,6 +504,7 @@ export function EventPanel({ context, forceTheme }: EventPanelProps) {
                     onToggleFilterMenu={() =>
                       state.setFilterMenuEvent((prev) => (prev === event.id ? null : event.id))
                     }
+                    onToggleHighlight={() => actions.toggleEventHighlight(event.event)}
                   />
                 </div>
               );
@@ -557,6 +561,8 @@ export function EventPanel({ context, forceTheme }: EventPanelProps) {
         activeTabId={state.tabId}
         eventCount={state.filteredEvents.length}
         onExport={actions.exportEvents}
+        availableEventTypes={state.availableEventTypes}
+        eventTypeCounts={eventTypeCounts}
       />
 
       {/* Copy Error Toast */}

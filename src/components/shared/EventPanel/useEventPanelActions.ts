@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useRef, Dispatch, SetStateAction } from 'react';
-import { DataLayerEvent, Settings as SettingsType, getSourceColor } from '@/types';
+import { DataLayerEvent, Settings as SettingsType, getSourceColor, HIGHLIGHT_COLOR_KEYS } from '@/types';
 import { copyToClipboard } from '@/utils/clipboard';
 
 // Browser API abstraction
@@ -42,6 +42,7 @@ export interface EventPanelActions {
   exportEvents: () => void;
   toggleGroupCollapsed: (groupId: string) => void;
   getSourceColorForEvent: (source: string) => string;
+  toggleEventHighlight: (eventName: string) => void;
 }
 
 export function useEventPanelActions(config: EventPanelActionsConfig): EventPanelActions {
@@ -217,6 +218,31 @@ export function useEventPanelActions(config: EventPanelActionsConfig): EventPane
     return getSourceColor(cleanSource, settings.sourceColors || {});
   }, [settings.sourceColors]);
 
+  const toggleEventHighlight = useCallback((eventName: string) => {
+    const currentHighlights = settings.eventHighlights || {};
+    let newHighlights: Record<string, string>;
+
+    if (currentHighlights[eventName]) {
+      // Remove highlight
+      const newObj = { ...currentHighlights };
+      delete newObj[eventName];
+      newHighlights = newObj;
+    } else {
+      // Add highlight - pick next available color key from pool
+      const usedColors = new Set(Object.values(currentHighlights));
+      const availableColor = HIGHLIGHT_COLOR_KEYS.find(c => !usedColors.has(c)) || HIGHLIGHT_COLOR_KEYS[0];
+      newHighlights = { ...currentHighlights, [eventName]: availableColor };
+    }
+
+    setSettings((prev) => ({ ...prev, eventHighlights: newHighlights }));
+    if (tabId) {
+      browserAPI.tabs?.sendMessage?.(tabId, {
+        type: 'UPDATE_SETTINGS',
+        payload: { eventHighlights: newHighlights },
+      }).catch(() => {});
+    }
+  }, [settings.eventHighlights, tabId, setSettings]);
+
   return {
     clearEvents,
     toggleExpanded,
@@ -231,5 +257,6 @@ export function useEventPanelActions(config: EventPanelActionsConfig): EventPane
     exportEvents,
     toggleGroupCollapsed,
     getSourceColorForEvent,
+    toggleEventHighlight,
   };
 }

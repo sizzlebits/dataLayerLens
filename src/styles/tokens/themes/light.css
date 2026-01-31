@@ -88,6 +88,14 @@
   --shadow-light-lg: 0 4px 8px 0 rgba(0, 0, 0, 0.08);
   --shadow-light-xl: 0 8px 16px 0 rgba(0, 0, 0, 0.1);
 
+  /* Highlight colors - 6 distinct colors for light backgrounds */
+  --highlight-red: #dc2626;
+  --highlight-amber: #d97706;
+  --highlight-emerald: #059669;
+  --highlight-cyan: #0891b2;
+  --highlight-indigo: #4f46e5;
+  --highlight-pink: #db2777;
+
   /* Event category colors - darker variants for light mode contrast */
   --color-event-gtm-js: var(--color-cyan-700);
   --color-event-gtm-dom: var(--color-emerald-700);

@@ -167,6 +167,11 @@ export function useEventPanelState(_config: EventPanelConfig): EventPanelState {
       _sender: { tab?: { id?: number } }
     ) => {
       if (message.type === 'DATALAYER_EVENT' || message.type === 'EVENT_ADDED') {
+        // Filter out events from other tabs to prevent cross-tab leakage
+        // DATALAYER_EVENT comes from content script (tabId in sender.tab.id)
+        // EVENT_ADDED comes from background (tabId in message)
+        const messageTabId = message.tabId ?? _sender.tab?.id;
+        if (messageTabId !== undefined && messageTabId !== tabId) return;
         if (clearingRef.current) return;
 
         if (message.payload && !Array.isArray(message.payload)) {
@@ -191,6 +196,9 @@ export function useEventPanelState(_config: EventPanelConfig): EventPanelState {
           setSettings((prev) => ({ ...prev, ...(message.payload as Partial<SettingsType>) }));
         }
       } else if (message.type === 'EVENTS_UPDATED') {
+        // Filter by tabId from message or sender to prevent cross-tab leakage
+        const senderTabId = message.tabId ?? _sender.tab?.id;
+        if (senderTabId !== undefined && senderTabId !== tabId) return;
         // Handle events cleared/updated from popup or other sources
         if (message.payload && Array.isArray(message.payload)) {
           const sortedEvents = [...(message.payload as DataLayerEvent[])].sort(

@@ -17,6 +17,7 @@ import { Settings, SOURCE_COLOR_POOL, getSourceColor } from '@/types';
 import { SupportLink } from './SupportLink';
 import { ThemeSelector } from './settings/ThemeSelector';
 import { GroupingSettings } from './settings/GroupingSettings';
+import { HighlightsSection } from './settings/HighlightsSection';
 
 // Browser API abstraction
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
@@ -29,6 +30,8 @@ interface SettingsDrawerProps {
   activeTabId: number | null;
   eventCount?: number;
   onExport?: () => void;
+  availableEventTypes?: string[];
+  eventTypeCounts?: Record<string, number>;
 }
 
 export function SettingsDrawer({
@@ -39,6 +42,8 @@ export function SettingsDrawer({
   activeTabId,
   eventCount,
   onExport,
+  availableEventTypes = [],
+  eventTypeCounts = {},
 }: SettingsDrawerProps) {
   const [newLayerName, setNewLayerName] = useState('');
   const [isAddingLayer, setIsAddingLayer] = useState(false);
@@ -80,6 +85,32 @@ export function SettingsDrawer({
       sourceColors: {
         ...settings.sourceColors,
         [source]: color,
+      },
+    });
+  };
+
+  const handleAddHighlight = (eventName: string, color: string) => {
+    updateSettings({
+      eventHighlights: {
+        ...settings.eventHighlights,
+        [eventName]: color,
+      },
+    });
+  };
+
+  const handleRemoveHighlight = (eventName: string) => {
+    const newHighlights = { ...settings.eventHighlights };
+    delete newHighlights[eventName];
+    updateSettings({
+      eventHighlights: newHighlights,
+    });
+  };
+
+  const handleHighlightColorChange = (eventName: string, color: string) => {
+    updateSettings({
+      eventHighlights: {
+        ...settings.eventHighlights,
+        [eventName]: color,
       },
     });
   };
@@ -263,6 +294,16 @@ export function SettingsDrawer({
                 </div>
               </div>
 
+              {/* Event Highlights */}
+              <HighlightsSection
+                eventHighlights={settings.eventHighlights || {}}
+                availableEventTypes={availableEventTypes}
+                eventTypeCounts={eventTypeCounts}
+                onAdd={handleAddHighlight}
+                onRemove={handleRemoveHighlight}
+                onColorChange={handleHighlightColorChange}
+              />
+
               {/* Display Settings */}
               <div className="space-y-2">
                 <h3 className="text-xs font-medium text-theme-text-secondary uppercase tracking-wider">
@@ -274,6 +315,9 @@ export function SettingsDrawer({
                   theme={settings.theme}
                   onThemeChange={(theme) => updateSettings({ theme })}
                 />
+
+                {/* Event Grouping - moved up under theme */}
+                <GroupingSettings settings={settings} onUpdateSettings={updateSettings} />
 
                 {/* Compact Mode */}
                 <ToggleRow
@@ -292,14 +336,6 @@ export function SettingsDrawer({
                   onChange={() => updateSettings({ showTimestamps: !settings.showTimestamps })}
                 />
 
-                {/* Show Emojis */}
-                <ToggleRow
-                  icon={<span className="text-[14px]">😀</span>}
-                  label="Event Emojis"
-                  checked={settings.showEmojis}
-                  onChange={() => updateSettings({ showEmojis: !settings.showEmojis })}
-                />
-
                 {/* Persist Events */}
                 <ToggleRow
                   icon={<History className="w-3.5 h-3.5 text-json-null" />}
@@ -307,6 +343,14 @@ export function SettingsDrawer({
                   description="Keep across refreshes"
                   checked={settings.persistEvents}
                   onChange={() => updateSettings({ persistEvents: !settings.persistEvents })}
+                />
+
+                {/* Show Emojis - moved down above console toggles */}
+                <ToggleRow
+                  icon={<span className="text-[14px]">😀</span>}
+                  label="Event Emojis"
+                  checked={settings.showEmojis}
+                  onChange={() => updateSettings({ showEmojis: !settings.showEmojis })}
                 />
 
                 {/* Console Logging */}
@@ -327,9 +371,6 @@ export function SettingsDrawer({
                   onChange={() => updateSettings({ debugLogging: !settings.debugLogging })}
                 />
               </div>
-
-              {/* Event Grouping */}
-              <GroupingSettings settings={settings} onUpdateSettings={updateSettings} />
 
               {/* Max Events */}
               <div className="space-y-2">

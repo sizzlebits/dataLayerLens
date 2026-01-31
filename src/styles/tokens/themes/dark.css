@@ -109,6 +109,14 @@
   --shadow-dark-md: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
   --shadow-dark-lg: 0 8px 16px 0 rgba(0, 0, 0, 0.5);
   --shadow-dark-xl: 0 16px 32px 0 rgba(0, 0, 0, 0.6);
+
+  /* Highlight colors - 6 distinct colors for dark backgrounds */
+  --highlight-red: #f87171;
+  --highlight-amber: #fbbf24;
+  --highlight-emerald: #34d399;
+  --highlight-cyan: #22d3ee;
+  --highlight-indigo: #818cf8;
+  --highlight-pink: #f472b6;
 }
 
 /**

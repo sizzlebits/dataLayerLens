@@ -4,8 +4,10 @@ import {
   ScreenshotFrame,
   FloatingCard,
   Glow,
-  MarketingHeading,
-  MarketingBadge,
+  MarketingText,
+  MarketingTextRow,
+  MarketingHeader,
+  MarketingContent,
   marketingArgTypes,
   defaultMarketingArgs,
   type MarketingArgs,
@@ -50,6 +52,7 @@ const mockSettings: Settings = {
     dataLayer: '#22d3ee',
     adobeDataLayer: '#f59e0b',
   },
+  eventHighlights: {},
   eventFilters: ['gtm.js', 'gtm.dom'],
   filterMode: 'exclude',
   theme: 'dark',
@@ -192,7 +195,9 @@ function ThreeTabsShowcase({ args }: { args: MarketingArgs }) {
       {args.showGlow && <Glow color={args.glowColor} blur={120} opacity={0.4} offsetY={20} />}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24, alignItems: 'center' }}>
         {/* Title */}
-        <MarketingHeading>Fully Customisable</MarketingHeading>
+        <MarketingHeader position="top">
+          <MarketingText heading="Fully Customisable" />
+        </MarketingHeader>
 
         {/* Three Tabs */}
         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
@@ -264,35 +269,33 @@ export const ThreeTabs: Story = {
 
 function LightDarkComparisonWrapper({ args }: { args: MarketingArgs }) {
   return (
-    <ScreenshotFrame gradient={args.gradient} padding={60}>
-      {args.showGlow && <Glow color={args.glowColor} blur={120} opacity={0.4} offsetY={20} />}
-      <div style={{ display: 'flex', gap: 32, alignItems: 'center', justifyContent: 'center' }}>
-        {/* Dark Mode */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <MarketingHeading>Dark Mode</MarketingHeading>
-            <MarketingBadge color="primary">Classic DataLayer Lens experience</MarketingBadge>
-          </div>
-          <FloatingCard shadow="2xl" rotate={{ y: 8, x: 4 }} scale={1.05}>
+    <ScreenshotFrame gradient={args.gradient} padding={40}>
+      {args.showGlow && <Glow color={args.glowColor} blur={120} opacity={0.4} offsetY={0} />}
+      <MarketingHeader position="top">
+        <MarketingTextRow
+          blocks={[
+            { heading: 'Dark Mode', badge: 'Classic DataLayer Lens experience', badgeColor: 'primary' },
+            { heading: 'Light Mode', badge: 'Clean for any environment', badgeColor: 'accent' },
+          ]}
+        />
+      </MarketingHeader>
+      <MarketingContent>
+        <div style={{ display: 'flex', gap: 80, alignItems: 'flex-start' }}>
+          {/* Dark Mode */}
+          <FloatingCard shadow="2xl" rotate={{ y: 8, x: 4 }} scale={1.15}>
             <ThemeWrapper theme="dark">
               <Popup forceTheme="dark" />
             </ThemeWrapper>
           </FloatingCard>
-        </div>
 
-        {/* Light Mode */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <MarketingHeading>Light Mode</MarketingHeading>
-            <MarketingBadge color="accent">Clean for any environment</MarketingBadge>
-          </div>
-          <FloatingCard shadow="2xl" rotate={{ y: -8, x: 4 }} scale={1.05}>
+          {/* Light Mode */}
+          <FloatingCard shadow="2xl" rotate={{ y: -8, x: 4 }} scale={1.15}>
             <ThemeWrapper theme="light">
               <Popup forceTheme="light" />
             </ThemeWrapper>
           </FloatingCard>
         </div>
-      </div>
+      </MarketingContent>
     </ScreenshotFrame>
   );
 }

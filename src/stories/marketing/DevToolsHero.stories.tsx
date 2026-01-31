@@ -5,8 +5,10 @@ import {
   FloatingCard,
   Glow,
   DevToolsChrome,
-  MarketingHeading,
-  MarketingBadge,
+  MarketingText,
+  MarketingTextRow,
+  MarketingHeader,
+  MarketingContent,
   marketingArgTypes,
   defaultMarketingArgs,
   type MarketingArgs,
@@ -172,6 +174,7 @@ const defaultSettings: Settings = {
   consoleLogging: false,
   debugLogging: false,
   sourceColors: {},
+  eventHighlights: {},
   eventFilters: [],
   filterMode: 'exclude',
   theme: 'dark',
@@ -336,10 +339,9 @@ function GroupingComparisonWrapper({ args }: { args: MarketingArgs }) {
       {args.showGlow && <Glow color={args.glowColor} blur={120} opacity={0.4} offsetY={40} />}
 
       {/* Title and Badge */}
-      <div style={{ position: 'absolute', top: 40, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, zIndex: 10 }}>
-        <MarketingHeading>Event Grouping</MarketingHeading>
-        <MarketingBadge color="secondary">Based on time or event markers</MarketingBadge>
-      </div>
+      <MarketingHeader position="top">
+        <MarketingText heading="Event Grouping" badge="Based on time or event markers" badgeColor="secondary" />
+      </MarketingHeader>
 
       <div style={{ display: 'flex', gap: 24, alignItems: 'center', position: 'relative', marginTop: 260 }}>
         {/* Left panel - Ungrouped view using real DevToolsPanel with mocked browser API */}
@@ -541,13 +543,17 @@ function LightDarkComparisonWrapper({ args }: { args: MarketingArgs }) {
   return (
     <ScreenshotFrame gradient={args.gradient} padding={40}>
       {args.showGlow && <Glow color={args.glowColor} blur={140} opacity={0.4} offsetY={0} />}
-      <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-        {/* Dark Mode */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
-            <MarketingHeading>Dark Mode</MarketingHeading>
-            <MarketingBadge color="primary">Perfect for night owl devs</MarketingBadge>
-          </div>
+      <MarketingHeader position="top">
+        <MarketingTextRow
+          blocks={[
+            { heading: 'Dark Mode', badge: 'Perfect for night owl devs', badgeColor: 'primary' },
+            { heading: 'Light Mode', badge: '...and everyone else', badgeColor: 'accent' },
+          ]}
+        />
+      </MarketingHeader>
+      <MarketingContent variant="comparison">
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+          {/* Dark Mode */}
           <FloatingCard shadow="xl" rotate={{ y: 6, x: 2 }}>
             <DevToolsChrome activeTab="DataLayer Lens" width={panelWidth} height={panelHeight}>
               <ThemeWrapper theme="dark">
@@ -557,14 +563,8 @@ function LightDarkComparisonWrapper({ args }: { args: MarketingArgs }) {
               </ThemeWrapper>
             </DevToolsChrome>
           </FloatingCard>
-        </div>
 
-        {/* Light Mode */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
-            <MarketingHeading>Light Mode</MarketingHeading>
-            <MarketingBadge color="accent">...and everyone else 😎</MarketingBadge>
-          </div>
+          {/* Light Mode */}
           <FloatingCard shadow="xl" rotate={{ y: -6, x: 2 }}>
             <DevToolsChrome activeTab="DataLayer Lens" width={panelWidth} height={panelHeight}>
               <ThemeWrapper theme="light">
@@ -575,7 +575,7 @@ function LightDarkComparisonWrapper({ args }: { args: MarketingArgs }) {
             </DevToolsChrome>
           </FloatingCard>
         </div>
-      </div>
+      </MarketingContent>
     </ScreenshotFrame>
   );
 }

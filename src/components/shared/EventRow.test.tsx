@@ -323,9 +323,10 @@ describe('EventRow', () => {
         <EventRow event={event} isExpanded={false} onToggle={vi.fn()} compact={true} />
       );
 
-      // Check for compact-specific classes
+      // Check for compact-specific classes (px-3 and py-2 may be separate)
       const eventHeader = container.querySelector('[role="button"]');
-      expect(eventHeader?.className).toContain('px-3 py-2');
+      expect(eventHeader?.className).toContain('py-2');
+      expect(eventHeader?.className).toContain('px-3');
     });
 
     it('applies normal styling when compact is false', () => {
@@ -335,7 +336,8 @@ describe('EventRow', () => {
       );
 
       const eventHeader = container.querySelector('[role="button"]');
-      expect(eventHeader?.className).toContain('px-4 py-3');
+      expect(eventHeader?.className).toContain('py-3');
+      expect(eventHeader?.className).toContain('px-4');
     });
   });
 
@@ -371,6 +373,178 @@ describe('EventRow', () => {
       render(<EventRow event={event} isExpanded={false} onToggle={vi.fn()} />);
 
       expect(screen.getByText('purchase')).toBeInTheDocument();
+    });
+  });
+
+  describe('highlight bar', () => {
+    it('does not render highlight bar when highlightColor is undefined', () => {
+      const event = createMockEvent();
+      const { container } = render(
+        <EventRow event={event} isExpanded={false} onToggle={vi.fn()} />
+      );
+
+      const highlightBar = container.querySelector('[data-testid="highlight-bar"]');
+      expect(highlightBar).not.toBeInTheDocument();
+    });
+
+    it('renders highlight bar with correct color when highlightColor is provided', () => {
+      const event = createMockEvent();
+      const { container } = render(
+        <EventRow
+          event={event}
+          isExpanded={false}
+          onToggle={vi.fn()}
+          highlightColor="indigo"
+        />
+      );
+
+      const highlightBar = container.querySelector('[data-testid="highlight-bar"]');
+      expect(highlightBar).toBeInTheDocument();
+      expect(highlightBar).toHaveStyle({ backgroundColor: 'var(--highlight-indigo)' });
+    });
+
+    it('does not affect layout padding when highlight bar is present', () => {
+      const event = createMockEvent();
+      const { container } = render(
+        <EventRow
+          event={event}
+          isExpanded={false}
+          onToggle={vi.fn()}
+          highlightColor="indigo"
+        />
+      );
+
+      const eventHeader = container.querySelector('[role="button"]');
+      // Highlight bar should not affect padding - always use px-4
+      expect(eventHeader?.className).toContain('px-4');
+    });
+
+    it('uses consistent padding regardless of highlight', () => {
+      const event = createMockEvent();
+      const { container } = render(
+        <EventRow event={event} isExpanded={false} onToggle={vi.fn()} />
+      );
+
+      const eventHeader = container.querySelector('[role="button"]');
+      // Should use px-4 (symmetric padding)
+      expect(eventHeader?.className).toContain('px-4');
+    });
+
+    it('applies highlight-text class when highlighted (colors only in dark mode)', () => {
+      const event = createMockEvent();
+      render(
+        <EventRow
+          event={event}
+          isExpanded={false}
+          onToggle={vi.fn()}
+          highlightColor="red"
+        />
+      );
+
+      // Event name should have the highlight-text class and CSS variable
+      const eventName = screen.getByText('page_view');
+      expect(eventName.className).toContain('highlight-text');
+      expect(eventName).toHaveStyle({ '--highlight-color': 'var(--highlight-red)' });
+    });
+
+    it('uses neutral text color when not highlighted', () => {
+      const event = createMockEvent();
+      render(
+        <EventRow event={event} isExpanded={false} onToggle={vi.fn()} />
+      );
+
+      // Event name should have the theme text class
+      const eventName = screen.getByText('page_view');
+      expect(eventName.className).toContain('text-theme-text');
+    });
+  });
+
+  describe('highlight toggle', () => {
+    it('shows highlight toggle button when onToggleHighlight is provided', () => {
+      const event = createMockEvent();
+      render(
+        <EventRow
+          event={event}
+          isExpanded={false}
+          onToggle={vi.fn()}
+          onToggleHighlight={vi.fn()}
+        />
+      );
+
+      expect(screen.getByLabelText('Highlight this event type')).toBeInTheDocument();
+    });
+
+    it('does not show highlight toggle button when onToggleHighlight is not provided', () => {
+      const event = createMockEvent();
+      render(
+        <EventRow event={event} isExpanded={false} onToggle={vi.fn()} />
+      );
+
+      expect(screen.queryByLabelText('Highlight this event type')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Remove highlight')).not.toBeInTheDocument();
+    });
+
+    it('calls onToggleHighlight when sparkle button clicked', () => {
+      const onToggleHighlight = vi.fn();
+      const event = createMockEvent();
+      render(
+        <EventRow
+          event={event}
+          isExpanded={false}
+          onToggle={vi.fn()}
+          onToggleHighlight={onToggleHighlight}
+        />
+      );
+
+      fireEvent.click(screen.getByLabelText('Highlight this event type'));
+
+      expect(onToggleHighlight).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows remove highlight label when already highlighted', () => {
+      const event = createMockEvent();
+      render(
+        <EventRow
+          event={event}
+          isExpanded={false}
+          onToggle={vi.fn()}
+          onToggleHighlight={vi.fn()}
+          highlightColor="red"
+        />
+      );
+
+      expect(screen.getByLabelText('Remove highlight')).toBeInTheDocument();
+    });
+
+    it('has aria-pressed true when highlighted', () => {
+      const event = createMockEvent();
+      render(
+        <EventRow
+          event={event}
+          isExpanded={false}
+          onToggle={vi.fn()}
+          onToggleHighlight={vi.fn()}
+          highlightColor="red"
+        />
+      );
+
+      const button = screen.getByLabelText('Remove highlight');
+      expect(button).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('has aria-pressed false when not highlighted', () => {
+      const event = createMockEvent();
+      render(
+        <EventRow
+          event={event}
+          isExpanded={false}
+          onToggle={vi.fn()}
+          onToggleHighlight={vi.fn()}
+        />
+      );
+
+      const button = screen.getByLabelText('Highlight this event type');
+      expect(button).toHaveAttribute('aria-pressed', 'false');
     });
   });
 });

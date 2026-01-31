@@ -74,15 +74,17 @@ const meta: Meta<typeof EventRow> = {
     showTimestamps: { control: 'boolean' },
     showEmojis: { control: 'boolean' },
     sourceColor: { control: 'color' },
+    highlightColor: { control: 'color' },
     onToggle: { action: 'toggle' },
     onCopy: { action: 'copy' },
     onAddFilterInclude: { action: 'addFilterInclude' },
     onAddFilterExclude: { action: 'addFilterExclude' },
     onToggleFilterMenu: { action: 'toggleFilterMenu' },
+    onToggleHighlight: { action: 'toggleHighlight' },
   },
   decorators: [
     (Story) => (
-      <div style={{ backgroundColor: '#0f172a', borderRadius: '8px' }}>
+      <div className="bg-dl-darker rounded-lg">
         <Story />
       </div>
     ),
@@ -200,10 +202,10 @@ export const EmojiComparison: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <div>
-        <h3 style={{ color: '#e2e8f0', marginBottom: '8px', fontSize: '14px', fontWeight: 600 }}>
+        <h3 className="text-theme-text mb-2 text-sm font-semibold">
           With Emojis (Default)
         </h3>
-        <div style={{ backgroundColor: '#0f172a', borderRadius: '8px' }}>
+        <div className="bg-dl-darker rounded-lg">
           <EventRow
             event={mockGTMEvent}
             isExpanded={false}
@@ -231,10 +233,10 @@ export const EmojiComparison: Story = {
         </div>
       </div>
       <div>
-        <h3 style={{ color: '#e2e8f0', marginBottom: '8px', fontSize: '14px', fontWeight: 600 }}>
+        <h3 className="text-theme-text mb-2 text-sm font-semibold">
           Without Emojis
         </h3>
-        <div style={{ backgroundColor: '#0f172a', borderRadius: '8px' }}>
+        <div className="bg-dl-darker rounded-lg">
           <EventRow
             event={mockGTMEvent}
             isExpanded={false}
@@ -258,6 +260,98 @@ export const EmojiComparison: Story = {
             showEmojis={false}
             sourceColor="#10b981"
             onToggle={() => {}}
+          />
+        </div>
+      </div>
+    </div>
+  ),
+};
+
+export const WithHighlightBar: Story = {
+  args: {
+    event: mockEvent,
+    isExpanded: false,
+    showTimestamps: true,
+    sourceColor: '#6366f1',
+    highlightColor: 'red',
+  },
+};
+
+export const HighlightBarExpanded: Story = {
+  args: {
+    event: mockPurchaseEvent,
+    isExpanded: true,
+    showTimestamps: true,
+    sourceColor: '#10b981',
+    highlightColor: 'amber',
+  },
+};
+
+export const HighlightComparison: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div>
+        <h3 className="text-theme-text mb-2 text-sm font-semibold">
+          Without Highlights (neutral text, hover to see sparkle toggle)
+        </h3>
+        <div className="bg-dl-darker rounded-lg">
+          <EventRow
+            event={mockGTMEvent}
+            isExpanded={false}
+            showTimestamps={true}
+            sourceColor="#22d3ee"
+            onToggle={() => {}}
+            onToggleHighlight={() => {}}
+          />
+          <EventRow
+            event={mockEvent}
+            isExpanded={false}
+            showTimestamps={true}
+            sourceColor="#6366f1"
+            onToggle={() => {}}
+            onToggleHighlight={() => {}}
+          />
+          <EventRow
+            event={mockPurchaseEvent}
+            isExpanded={false}
+            showTimestamps={true}
+            sourceColor="#10b981"
+            onToggle={() => {}}
+            onToggleHighlight={() => {}}
+          />
+        </div>
+      </div>
+      <div>
+        <h3 className="text-theme-text mb-2 text-sm font-semibold">
+          With Highlights (colored bar + text, active sparkle button)
+        </h3>
+        <div className="bg-dl-darker rounded-lg">
+          <EventRow
+            event={mockGTMEvent}
+            isExpanded={false}
+            showTimestamps={true}
+            sourceColor="#22d3ee"
+            highlightColor="red"
+            onToggle={() => {}}
+            onToggleHighlight={() => {}}
+          />
+          <EventRow
+            event={mockEvent}
+            isExpanded={false}
+            showTimestamps={true}
+            sourceColor="#6366f1"
+            highlightColor="amber"
+            onToggle={() => {}}
+            onToggleHighlight={() => {}}
+          />
+          <EventRow
+            event={mockPurchaseEvent}
+            isExpanded={false}
+            showTimestamps={true}
+            sourceColor="#10b981"
+            highlightColor="indigo"
+            onToggle={() => {}}
+            onToggleHighlight={() => {}}
           />
         </div>
       </div>

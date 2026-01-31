@@ -4,3 +4,4 @@
 
 export { DataLayerSection } from './DataLayerSection';
 export { SourceColorsSection } from './SourceColorsSection';
+export { HighlightsSection } from './HighlightsSection';
