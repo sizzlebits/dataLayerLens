@@ -189,6 +189,10 @@ npm run build:all
 | Firefox | 109+            | V2       |
 | Brave   | 1.20+           | V3       |
 
+### Firefox Notes
+
+Due to a [long-standing Firefox limitation](https://bugzilla.mozilla.org/show_bug.cgi?id=1453343), DevTools panels cannot access the `tabs` API directly. DataLayer Lens works around this by routing messages through the background script. This is transparent to users, but developers should be aware that Firefox DevTools panels use a different communication path than Chrome.
+
 ---
 
 ## Links

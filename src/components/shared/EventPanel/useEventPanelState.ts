@@ -95,9 +95,19 @@ export function useEventPanelState(_config: EventPanelConfig): EventPanelState {
   // Load events function - defined before useEffects that depend on it
   const loadEvents = useCallback(async (loadTabId: number) => {
     try {
-      // tabs.sendMessage may not be available in Firefox devtools panels
-      if (!browserAPI.tabs?.sendMessage) return;
-      const response = await browserAPI.tabs.sendMessage(loadTabId, { type: 'GET_EVENTS' });
+      let response: { events?: DataLayerEvent[] } | undefined;
+
+      if (browserAPI.tabs?.sendMessage) {
+        // Chrome: use tabs.sendMessage directly
+        response = await browserAPI.tabs.sendMessage(loadTabId, { type: 'GET_EVENTS' });
+      } else {
+        // Firefox DevTools: relay through background script (tabs API unavailable)
+        response = await browserAPI.runtime.sendMessage({
+          type: 'GET_EVENTS_FOR_TAB',
+          payload: { tabId: loadTabId },
+        }) as { events?: DataLayerEvent[] };
+      }
+
       if (response?.events) {
         const sortedEvents = [...response.events].sort(
           (a: DataLayerEvent, b: DataLayerEvent) => b.timestamp - a.timestamp
@@ -146,13 +156,17 @@ export function useEventPanelState(_config: EventPanelConfig): EventPanelState {
         if (savedSettings) {
           setSettings((prev) => ({ ...prev, ...savedSettings }));
         }
+        // After settings are loaded, reload events to get persisted events with correct markers
+        if (tabId) {
+          loadEvents(tabId);
+        }
       } catch (err) {
         console.debug('Could not load settings from storage:', err);
       }
     };
 
     loadSettingsFromStorage();
-  }, []);
+  }, [tabId, loadEvents]);
 
   // Load events when tabId is available
   useEffect(() => {
@@ -196,12 +210,29 @@ export function useEventPanelState(_config: EventPanelConfig): EventPanelState {
           setSettings((prev) => ({ ...prev, ...(message.payload as Partial<SettingsType>) }));
         }
       } else if (message.type === 'EVENTS_UPDATED') {
-        // Filter by tabId from message or sender to prevent cross-tab leakage
+        // Filter by tabId to prevent cross-tab leakage
+        // Messages from content scripts have _sender.tab, messages from background don't
+        const isFromContentScript = _sender.tab !== undefined;
         const senderTabId = message.tabId ?? _sender.tab?.id;
-        if (senderTabId !== undefined && senderTabId !== tabId) return;
+
+        // For content script messages: trust if sender.tab.id matches OR if sender.tab.id is undefined (Firefox)
+        // For background messages: require explicit tabId match
+        if (isFromContentScript) {
+          // Content scripts are already scoped to the tab - trust them if tabId matches or is unavailable
+          if (senderTabId !== undefined && senderTabId !== tabId) {
+            return;
+          }
+        } else {
+          // Background messages must have explicit tabId
+          if (senderTabId !== tabId) {
+            return;
+          }
+        }
+
         // Handle events cleared/updated from popup or other sources
         if (message.payload && Array.isArray(message.payload)) {
-          const sortedEvents = [...(message.payload as DataLayerEvent[])].sort(
+          const eventsArray = message.payload as DataLayerEvent[];
+          const sortedEvents = [...eventsArray].sort(
             (a: DataLayerEvent, b: DataLayerEvent) => b.timestamp - a.timestamp
           );
           setEvents(sortedEvents);

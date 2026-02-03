@@ -64,6 +64,12 @@ export function SettingsTab({
         onChange={(value) => onUpdateSettings({ maxEvents: value })}
       />
 
+      {/* Event Grouping - matches DevTools order (Grouping before Persist) */}
+      <GroupingSettings
+        grouping={settings.grouping}
+        onUpdateGrouping={(grouping) => onUpdateSettings({ grouping })}
+      />
+
       {/* Display Settings */}
       <DisplaySettings
         theme={settings.theme}
@@ -74,12 +80,6 @@ export function SettingsTab({
         debugLogging={settings.debugLogging}
         compactMode={settings.compactMode}
         onUpdateSettings={onUpdateSettings}
-      />
-
-      {/* Event Grouping */}
-      <GroupingSettings
-        grouping={settings.grouping}
-        onUpdateGrouping={(grouping) => onUpdateSettings({ grouping })}
       />
 
       {/* Backup & Restore */}

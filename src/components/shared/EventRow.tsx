@@ -1,3 +1,5 @@
+import { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight,
@@ -70,6 +72,20 @@ export function EventRow({
   // Check if event is persisted and extract clean source name
   const isPersisted = event.source.includes('(persisted)');
   const cleanSource = event.source.replace(' (persisted)', '').replace('(persisted)', '');
+
+  // Filter menu portal positioning
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
+
+  useEffect(() => {
+    if (showFilterMenu && filterButtonRef.current) {
+      const rect = filterButtonRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + 4,
+        left: rect.right - 140, // menu width is min-w-[140px]
+      });
+    }
+  }, [showFilterMenu]);
 
   return (
     <motion.div
@@ -205,6 +221,7 @@ export function EventRow({
           {showFilterActions && (
             <>
               <motion.button
+                ref={filterButtonRef}
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleFilterMenu?.();
@@ -219,15 +236,16 @@ export function EventRow({
                 <Filter className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4'} aria-hidden="true" />
               </motion.button>
 
-              {/* Filter dropdown menu */}
-              <AnimatePresence>
-                {showFilterMenu && (
+              {/* Filter dropdown menu - rendered in portal to escape overflow:hidden */}
+              {showFilterMenu && menuPosition && createPortal(
+                <AnimatePresence>
                   <motion.div
                     initial={{ opacity: 0, y: -5, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -5, scale: 0.95 }}
                     transition={{ duration: 0.1 }}
-                    className="absolute right-0 top-full mt-1 z-50 bg-dl-card border border-dl-border rounded-lg shadow-xl overflow-hidden min-w-[140px]"
+                    className="fixed z-[9999] bg-theme-bg-elevated backdrop-blur-sm border border-dl-border rounded-lg shadow-xl overflow-hidden min-w-[140px]"
+                    style={{ top: menuPosition.top, left: menuPosition.left }}
                     onClick={(e) => e.stopPropagation()}
                     role="menu"
                     aria-label="Filter options"
@@ -249,8 +267,9 @@ export function EventRow({
                       <span>Blacklist</span>
                     </button>
                   </motion.div>
-                )}
-              </AnimatePresence>
+                </AnimatePresence>,
+                document.body
+              )}
             </>
           )}
 

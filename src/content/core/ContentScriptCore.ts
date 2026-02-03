@@ -87,7 +87,6 @@ export class ContentScriptCore implements IContentScriptCore {
   private async loadSettings(): Promise<void> {
     // Try to get settings from background script (includes domain-specific settings)
     const settings = await this.messageRouter.requestSettings(this.currentDomain);
-    this.logger.debug('Settings from background:', settings ? { persistEvents: settings.persistEvents } : 'null');
 
     if (settings) {
       this.currentSettings = mergeSettings(DEFAULT_SETTINGS, settings);

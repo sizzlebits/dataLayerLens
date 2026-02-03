@@ -50,3 +50,24 @@ npm run lint         # ESLint
 - Variables in one context don't exist in another - always use message passing
 - Background service workers can suspend - persist state to `chrome.storage`, not memory
 - Test with `vi.mocked()` to capture Chrome API listeners
+
+### Firefox DevTools Panel Limitations
+
+Firefox DevTools panels **cannot access `browser.tabs` API** ([Bug 1453343](https://bugzilla.mozilla.org/show_bug.cgi?id=1453343) - open since 2018). This means:
+
+- `tabs.sendMessage()` is unavailable in DevTools panels
+- `tabs.onUpdated` listeners cannot be registered
+- Must use background script as a relay for all tab communication
+
+**Solution pattern** (per [MDN recommendation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Extending_the_developer_tools)):
+1. DevTools panel sends `runtime.sendMessage()` to background with `tabId` parameter
+2. Background receives message, uses `tabs.sendMessage()` to reach content script
+3. Content script responds to background
+4. Background relays response back to DevTools panel
+
+Key message types that use this relay:
+- `GET_EVENTS_FOR_TAB` - DevTools requests events via background relay
+- `UPDATE_SETTINGS` with `tabId` - Settings changes relayed to content script
+- `EVENTS_UPDATED` - Background relays event updates to DevTools panels
+
+When modifying DevTools ↔ content script communication, always check if `browserAPI.tabs?.sendMessage` is available and fall back to the background relay pattern if not.
