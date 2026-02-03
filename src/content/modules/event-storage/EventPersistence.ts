@@ -94,6 +94,7 @@ export class EventPersistence implements IEventPersistence {
       }
 
       // Mark persisted events
+      this.logger.debug('Marking', validEvents.length, 'events as persisted');
       validEvents.forEach((e: DataLayerEvent) => {
         if (!e.source.includes('(persisted)')) {
           e.source = `${e.source} (persisted)`;

@@ -117,36 +117,102 @@ export function useEventPanelActions(config: EventPanelActionsConfig): EventPane
   const togglePersist = useCallback(async () => {
     const newValue = !settings.persistEvents;
     setSettings((prev) => ({ ...prev, persistEvents: newValue }));
+
+    // Save to storage directly (ensures persistence across sessions)
+    try {
+      const result = await browserAPI.storage.local.get('datalayer_monitor_settings');
+      const currentSettings = result.datalayer_monitor_settings || {};
+      await browserAPI.storage.local.set({
+        datalayer_monitor_settings: { ...currentSettings, persistEvents: newValue },
+      });
+    } catch (err) {
+      console.debug('Could not save settings to storage:', err);
+    }
+
+    // Notify content script of change
     if (tabId) {
-      browserAPI.tabs?.sendMessage?.(tabId, {
-        type: 'UPDATE_SETTINGS',
-        payload: { persistEvents: newValue },
-      }).catch(() => {});
+      if (browserAPI.tabs?.sendMessage) {
+        // Chrome: direct message to content script
+        browserAPI.tabs.sendMessage(tabId, {
+          type: 'UPDATE_SETTINGS',
+          payload: { persistEvents: newValue },
+        }).catch(() => {});
+      } else {
+        // Firefox DevTools: relay through background
+        browserAPI.runtime.sendMessage({
+          type: 'UPDATE_SETTINGS',
+          payload: { persistEvents: newValue },
+          tabId,
+        }).catch(() => {});
+      }
     }
   }, [settings.persistEvents, tabId, setSettings]);
 
   const toggleGrouping = useCallback(async () => {
     const newValue = !settings.grouping?.enabled;
+    const newGrouping = { ...settings.grouping, enabled: newValue };
     setSettings((prev) => ({
       ...prev,
       grouping: { ...prev.grouping, enabled: newValue },
     }));
+
+    // Save to storage directly
+    try {
+      const result = await browserAPI.storage.local.get('datalayer_monitor_settings');
+      const currentSettings = result.datalayer_monitor_settings || {};
+      await browserAPI.storage.local.set({
+        datalayer_monitor_settings: { ...currentSettings, grouping: newGrouping },
+      });
+    } catch (err) {
+      console.debug('Could not save settings to storage:', err);
+    }
+
+    // Notify content script
     if (tabId) {
-      browserAPI.tabs?.sendMessage?.(tabId, {
-        type: 'UPDATE_SETTINGS',
-        payload: { grouping: { ...settings.grouping, enabled: newValue } },
-      }).catch(() => {});
+      if (browserAPI.tabs?.sendMessage) {
+        browserAPI.tabs.sendMessage(tabId, {
+          type: 'UPDATE_SETTINGS',
+          payload: { grouping: newGrouping },
+        }).catch(() => {});
+      } else {
+        browserAPI.runtime.sendMessage({
+          type: 'UPDATE_SETTINGS',
+          payload: { grouping: newGrouping },
+          tabId,
+        }).catch(() => {});
+      }
     }
   }, [settings.grouping, tabId, setSettings]);
 
   const toggleConsoleLogging = useCallback(async () => {
     const newValue = !settings.consoleLogging;
     setSettings((prev) => ({ ...prev, consoleLogging: newValue }));
+
+    // Save to storage directly
+    try {
+      const result = await browserAPI.storage.local.get('datalayer_monitor_settings');
+      const currentSettings = result.datalayer_monitor_settings || {};
+      await browserAPI.storage.local.set({
+        datalayer_monitor_settings: { ...currentSettings, consoleLogging: newValue },
+      });
+    } catch (err) {
+      console.debug('Could not save settings to storage:', err);
+    }
+
+    // Notify content script
     if (tabId) {
-      browserAPI.tabs?.sendMessage?.(tabId, {
-        type: 'UPDATE_SETTINGS',
-        payload: { consoleLogging: newValue },
-      }).catch(() => {});
+      if (browserAPI.tabs?.sendMessage) {
+        browserAPI.tabs.sendMessage(tabId, {
+          type: 'UPDATE_SETTINGS',
+          payload: { consoleLogging: newValue },
+        }).catch(() => {});
+      } else {
+        browserAPI.runtime.sendMessage({
+          type: 'UPDATE_SETTINGS',
+          payload: { consoleLogging: newValue },
+          tabId,
+        }).catch(() => {});
+      }
     }
   }, [settings.consoleLogging, tabId, setSettings]);
 

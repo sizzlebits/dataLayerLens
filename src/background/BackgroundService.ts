@@ -107,6 +107,23 @@ export class BackgroundService implements IBackgroundService {
           }
           break;
 
+        case 'GET_EVENTS_FOR_TAB':
+          // Used by DevTools panels in Firefox where tabs.sendMessage isn't available
+          // DevTools panel sends tabId in message, background relays to content script
+          if (msg.payload && typeof (msg.payload as { tabId?: number }).tabId === 'number') {
+            const requestedTabId = (msg.payload as { tabId: number }).tabId;
+            this.browserAPI.tabs.sendMessage<{ events?: DataLayerEvent[] }>(requestedTabId, { type: 'GET_EVENTS' })
+              .then((response) => {
+                sendResponse({ events: response?.events || [] });
+              })
+              .catch((error) => {
+                sendResponse({ events: [], error: error.message });
+              });
+            return true; // Async response
+          }
+          sendResponse({ events: [], error: 'No tabId provided' });
+          break;
+
         case 'CLEAR_TAB_EVENTS':
           if (tabId) {
             this.eventHandler.clearEvents(tabId);
@@ -123,8 +140,17 @@ export class BackgroundService implements IBackgroundService {
           return true; // Async response
 
         case 'UPDATE_SETTINGS': {
+          const messageTabId = (msg as Message & { tabId?: number }).tabId;
           const targetDomain = msg.domain || domain;
           const saveGlobal = msg.saveGlobal !== false;
+
+          // If message includes tabId (from DevTools panel in Firefox), relay to content script
+          if (messageTabId && !tabId) {
+            this.browserAPI.tabs.sendMessage(messageTabId, {
+              type: 'UPDATE_SETTINGS',
+              payload: msg.payload,
+            }).catch(() => {});
+          }
 
           if (targetDomain && !saveGlobal) {
             this.settingsHandler
@@ -189,6 +215,18 @@ export class BackgroundService implements IBackgroundService {
           if (tabId) {
             this.browserAPI.runtime.sendMessage({
               type: 'SETTINGS_UPDATED',
+              payload: msg.payload,
+              tabId,
+            }).catch(() => {}); // Ignore if no listeners
+          }
+          break;
+
+        case 'EVENTS_UPDATED':
+          // Relay events updates to all extension views (for Firefox DevTools panels)
+          // Content scripts broadcast this, background relays with tabId attached
+          if (tabId) {
+            this.browserAPI.runtime.sendMessage({
+              type: 'EVENTS_UPDATED',
               payload: msg.payload,
               tabId,
             }).catch(() => {}); // Ignore if no listeners

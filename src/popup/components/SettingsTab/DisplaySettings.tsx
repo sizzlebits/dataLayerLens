@@ -61,20 +61,22 @@ export function DisplaySettings({
         onThemeChange={(theme) => onUpdateSettings({ theme })}
       />
 
+      {/* Order matches DevTools settings drawer */}
+      <SettingRow
+        icon={Minimize2}
+        iconColor="text-dl-primary"
+        title="Compact Mode"
+        description="Smaller UI in DevTools panel"
+        checked={compactMode}
+        onChange={(checked) => onUpdateSettings({ compactMode: checked })}
+      />
+
       <SettingRow
         icon={Clock}
         iconColor="text-dl-accent"
         title="Show Timestamps"
         checked={showTimestamps}
         onChange={(checked) => onUpdateSettings({ showTimestamps: checked })}
-      />
-
-      <SettingRow
-        icon={() => <span className="text-[14px]">😀</span>}
-        iconColor=""
-        title="Show Event Emojis"
-        checked={showEmojis}
-        onChange={(checked) => onUpdateSettings({ showEmojis: checked })}
       />
 
       <SettingRow
@@ -87,12 +89,11 @@ export function DisplaySettings({
       />
 
       <SettingRow
-        icon={Minimize2}
-        iconColor="text-dl-primary"
-        title="Compact Mode"
-        description="Smaller UI in DevTools panel"
-        checked={compactMode}
-        onChange={(checked) => onUpdateSettings({ compactMode: checked })}
+        icon={() => <span className="text-[14px]">😀</span>}
+        iconColor=""
+        title="Show Event Emojis"
+        checked={showEmojis}
+        onChange={(checked) => onUpdateSettings({ showEmojis: checked })}
       />
 
       <SettingRow

@@ -39,10 +39,11 @@ describe('DisplaySettings', () => {
     const onUpdateSettings = vi.fn();
     render(<DisplaySettings {...defaultProps} onUpdateSettings={onUpdateSettings} />);
 
+    // Find the Compact Mode toggle (first in order) and click it
     const toggles = screen.getAllByRole('switch');
-    fireEvent.click(toggles[0]); // Show Timestamps toggle
+    fireEvent.click(toggles[0]); // Compact Mode toggle
 
-    expect(onUpdateSettings).toHaveBeenCalledWith({ showTimestamps: false });
+    expect(onUpdateSettings).toHaveBeenCalledWith({ compactMode: true });
   });
 });
 

@@ -162,7 +162,6 @@ export class EventManager implements IEventManager {
    * Load persisted events from storage.
    */
   async loadPersistedEvents(): Promise<void> {
-    this.logger.debug('loadPersistedEvents called, persistEnabled:', this.persistEnabled);
     if (!this.persistEnabled) {
       this.logger.debug('Persist disabled, skipping load');
       return;
@@ -201,7 +200,7 @@ export class EventManager implements IEventManager {
     }
 
     if (settings.persistEvents !== undefined) {
-      this.logger.debug('EventManager.updateSettings persistEvents:', settings.persistEvents);
+      this.logger.debug('Updating persistEnabled from', this.persistEnabled, 'to', settings.persistEvents);
       this.persistEnabled = settings.persistEvents;
       // Don't auto-save here - events are saved automatically in addEvent() when persist is enabled
       // Auto-saving here would wipe persisted events on page load (before events are loaded)
